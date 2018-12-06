@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "pry"
 require "to_arel"
 
 RSpec.configure do |config|
