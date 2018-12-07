@@ -1,5 +1,5 @@
 RSpec.describe ToArel do
-  it "has a version number" do
+  it 'has a version number' do
     expect(ToArel::VERSION).not_to be nil
   end
 
@@ -11,7 +11,7 @@ RSpec.describe ToArel do
 
       it 'has the correct table set' do
         expect(ToArel.parse('SELECT 1 FROM posts').froms).to eq [
-          Arel::Table.new('posts'),
+          Arel::Table.new('posts')
         ]
       end
     end

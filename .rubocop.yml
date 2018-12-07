@@ -1,0 +1,13 @@
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: true
+  Max: 100
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented

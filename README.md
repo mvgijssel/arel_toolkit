@@ -1,3 +1,7 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/70ad0217d63f10aac886/maintainability)](https://codeclimate.com/github/ryandav/ruby_types/maintainability)
+
+[![Test Coverage](https://api.codeclimate.com/v1/badges/70ad0217d63f10aac886/test_coverage)](https://codeclimate.com/github/ryandav/ruby_types/test_coverage)
+
 # ToArel
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/to_arel`. To experiment with that code, run `bin/console` for an interactive prompt.
