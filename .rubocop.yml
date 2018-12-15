@@ -4,6 +4,9 @@ Style/FrozenStringLiteralComment:
 Bundler/OrderedGems:
   Enabled: false
 
+Gemspec/OrderedDependencies:
+  Enabled: false
+
 Metrics/LineLength:
   Enabled: true
   Max: 100
