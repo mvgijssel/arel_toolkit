@@ -2,7 +2,6 @@ lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'to_arel/version'
 
-# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name          = 'to_arel'
   spec.version       = ToArel::VERSION
@@ -37,5 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-nav'
   spec.add_development_dependency 'pry-stack_explorer'
+  spec.add_development_dependency 'pry-alias'
 end
-# rubocop:enable Metrics/BlockLength

@@ -23,7 +23,7 @@ And then execute:
 Or install it yourself as:
 
     $ gem install to_arel
-
+    
 ## Usage
 
 TODO: Write usage instructions here
@@ -45,3 +45,9 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the ToArel project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/to_arel/blob/master/CODE_OF_CONDUCT.md).
+
+## Useful links
+
+- [Class definitions postgres](https://doxygen.postgresql.org/)
+- [pg_query deparse visitor](https://github.com/lfittl/pg_query/blob/master/lib/pg_query/deparse.rb)
+- [Arel](https://github.com/rails/rails/tree/master/activerecord/lib/arel)

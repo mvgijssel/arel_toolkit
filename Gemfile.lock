@@ -53,6 +53,9 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pry-alias (0.0.1)
+      binding_of_caller
+      pry
     pry-nav (0.2.4)
       pry (>= 0.9.10, < 0.11.0)
     pry-stack_explorer (0.4.9.3)
@@ -104,6 +107,7 @@ DEPENDENCIES
   guard (~> 2.15.0)
   guard-rspec (~> 4.7.3)
   pry
+  pry-alias
   pry-nav
   pry-stack_explorer
   rake (~> 10.0)
