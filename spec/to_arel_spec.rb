@@ -76,6 +76,13 @@ RSpec.describe ToArel do
 
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
+
+        it 'parses a query with a where' do
+          given_sql = 'SELECT id FROM posts WHERE posts.id = 1'
+          expected_sql = 'SELECT "id" FROM "posts" WHERE "posts"."id" = 1'
+
+          expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
+        end
       end
     end
 
