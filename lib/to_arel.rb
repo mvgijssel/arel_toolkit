@@ -23,7 +23,6 @@ module ToArel
 
     def visit(klass, attributes, context = nil)
       dispatch_method = "visit_#{klass}"
-      puts "Visiting #{dispatch_method}"
       args = [klass, attributes]
       method = method(dispatch_method)
 
@@ -189,10 +188,15 @@ module ToArel
       froms, join_sources = generate_sources(attributes['fromClause'])
       limit = generate_limit(attributes['limitCount'])
       targets = generate_targets(attributes['targetList'])
+      sorts = generate_sorts(attributes['sortClause'])
 
       select_manager = Arel::SelectManager.new(froms)
       select_manager.projections = targets
       select_manager.limit = limit
+
+      sorts.each do |sort|
+        select_manager.order(sort)
+      end
 
       join_sources.each do |join_source|
         select_manager.join(join_source.left, join_source.class).on(join_source.right)
@@ -207,6 +211,18 @@ module ToArel
       visit(*klass_and_attributes(stmt))
     end
 
+    def visit_SortBy(_klass, attributes)
+      result = visit(*klass_and_attributes(attributes['node']))
+      case attributes['sortby_dir']
+      when 1
+        Arel::Nodes::Ascending.new(result)
+      when 2
+        Arel::Nodes::Descending.new(result)
+      else
+        raise 'unknown sort direction'
+      end
+    end
+
     def generate_limit(count)
       return if count.nil?
 
@@ -217,6 +233,12 @@ module ToArel
       return if list.nil?
 
       list.map { |target| visit(*klass_and_attributes(target)) }
+    end
+
+    def generate_sorts(sorts)
+      return [] if sorts.nil?
+
+      sorts.map { |sort| visit(*klass_and_attributes(sort)) }
     end
 
     def generate_sources(clause)

@@ -8,16 +8,6 @@ RSpec.describe ToArel do
 
   describe '.parse' do
     describe 'SELECT' do
-      # it 'returns an arel select manager' do
-      #   expect(ToArel.parse('SELECT 1 FROM posts').class).to eq Arel::SelectManager
-      # end
-
-      # it 'has the correct table set' do
-      #   expect(ToArel.parse('SELECT 1 FROM posts').froms).to eq [
-      #     Arel::Table.new('posts')
-      #   ]
-      # end
-
       describe 'to arel and back' do
         it 'parses a simple query' do
           given_sql = 'SELECT id FROM users'
@@ -76,6 +66,13 @@ RSpec.describe ToArel do
             'INNER JOIN "photos" ON "photos"."user_id" = "users"."id" ' \
             'RIGHT OUTER JOIN "locations" ON "locations"."photo_id" = "photos"."id" ' \
             'LEFT OUTER JOIN "users" "l_users" ON "l_users"."id" = "location"."user_id"'
+
+          expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
+        end
+
+        it 'parses a query with multiple order statements' do
+          given_sql = 'SELECT id FROM posts ORDER BY posts.name ASC, posts.id DESC'
+          expected_sql = 'SELECT "id" FROM "posts" ORDER BY "posts"."name" ASC, "posts"."id" DESC'
 
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
