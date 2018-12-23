@@ -232,12 +232,12 @@ module ToArel
       end
     end
 
-    def visit_BoolExpr(klass, attributes)
+    def visit_BoolExpr(klass, attributes, context = false)
       args = attributes['args'].map do |arg|
-        visit *klass_and_attributes(arg)
+        visit(*klass_and_attributes(arg), context || true)
       end
 
-      case attributes['boolop']
+      result = case attributes['boolop']
       when PgQuery::BOOL_EXPR_AND
         Arel::Nodes::And.new(args)
 
@@ -249,6 +249,12 @@ module ToArel
 
       else
         raise '?'
+      end
+
+      if context
+        Arel::Nodes::Grouping.new(result)
+      else
+        result
       end
     end
 
