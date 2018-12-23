@@ -478,6 +478,20 @@ RSpec.describe ToArel do
           expect(ToArel.parse(a).to_sql).to eq b
         end
 
+        it 'parses NULLIF' do
+        end
+
+        it 'parses BETWEEN' do
+        end
+
+        it 'parses NOT BETWEEN' do
+        end
+
+        it 'parses BETWEEN SYMMETRIC' do
+        end
+
+        it 'parses NOT BETWEEN SYMMETRIC' do
+        end
       end
 
       describe 'boolean logic' do
