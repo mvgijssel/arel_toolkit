@@ -245,7 +245,7 @@ module ToArel
         generate_boolean_expression(args, Arel::Nodes::Or)
 
       when PgQuery::BOOL_EXPR_NOT
-        raise 'bool expr not not implemented'
+        Arel::Nodes::Not.new(args)
 
       else
         raise '?'

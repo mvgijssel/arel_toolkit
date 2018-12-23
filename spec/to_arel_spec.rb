@@ -440,28 +440,36 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
-        a = %Q(SELECT (1 = 1 AND 2 = 2) OR 2 = 3)
-        b = %Q(SELECT (1 = 1 AND 2 = 2) OR 2 = 3)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
+      describe 'boolean logic' do
+        it do
+          a = %Q(SELECT (1 AND 2) OR 3)
+          b = %Q(SELECT (1 AND 2) OR 3)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
 
-      it do
-        a = %Q(SELECT (1 = 1 OR 1 = 2) AND 1 = 2)
-        b = %Q(SELECT (1 = 1 OR 1 = 2) AND 1 = 2)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
+        it do
+          a = %Q(SELECT 1 OR (2 AND 3))
+          b = %Q(SELECT 1 OR (2 AND 3))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
 
-      it do
-        a = %Q(SELECT 1 = 1 OR (1 = 2 AND 1 = 2))
-        b = %Q(SELECT 1 = 1 OR (1 = 2 AND 1 = 2))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
+        it do
+          a = %Q(SELECT 1 OR 2 OR 3)
+          b = %Q(SELECT 1 OR 2 OR 3)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
 
-      it do
-        a = %Q(SELECT 1 = 1 OR 2 = 2 OR 2 = 3)
-        b = %Q(SELECT 1 = 1 OR 2 = 2 OR 2 = 3)
-        expect(ToArel.parse(a).to_sql).to eq b
+        it do
+          a = %Q(SELECT 1 OR (2 OR 3))
+          b = %Q(SELECT 1 OR (2 OR 3))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it do
+          a = %Q(SELECT 1 OR NOT 2)
+          b = %Q(SELECT 1 OR (NOT (2)))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
       end
 
       xit do
