@@ -24,7 +24,7 @@ RSpec.describe ToArel do
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
 
-        it 'parses a query with a subquery' do
+        xit 'parses a query with a subquery' do
           given_sql = 'SELECT id, (SELECT id FROM users LIMIT 1) FROM photos'
           expected_sql = 'SELECT "id", (SELECT  "id" FROM "users" LIMIT 1) FROM "photos"'
 
@@ -98,7 +98,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "a" AS b FROM "public"."x" WHERE "y" = 5 AND "z" = "y")
         b = %Q(SELECT "a" AS b FROM "public"."x" WHERE "y" = 5 AND "z" = "y")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -110,25 +110,25 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "a", "b", max("c") FROM "c" WHERE "d" = 1 GROUP BY "a", "b")
         b = %Q(SELECT "a", "b", max("c") FROM "c" WHERE "d" = 1 GROUP BY "a", "b")
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "amount" * 0.5)
         b = %Q(SELECT "amount" * 0.5)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
         b = %Q(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
         b = %Q(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -146,25 +146,25 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT (SELECT 'x'))
         b = %Q(SELECT (SELECT 'x'))
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "a" ORDER BY "x" ASC NULLS FIRST)
         b = %Q(SELECT * FROM "a" ORDER BY "x" ASC NULLS FIRST)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "a" ORDER BY "x" ASC NULLS LAST)
         b = %Q(SELECT * FROM "a" ORDER BY "x" ASC NULLS LAST)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
         b = %Q(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -176,7 +176,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" LIMIT 50)
         b = %Q(SELECT * FROM "x" LIMIT 50)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -206,7 +206,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" = ANY(?))
         b = %Q(SELECT * FROM "x" WHERE "x" = ANY(?))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -218,7 +218,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" BETWEEN SYMMETRIC 20 AND 10)
         b = %Q(SELECT * FROM "x" WHERE "x" BETWEEN SYMMETRIC 20 AND 10)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -230,7 +230,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
         b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -248,13 +248,13 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" = "z"[?])
         b = %Q(SELECT * FROM "x" WHERE "y" = "z"[?])
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" = "z"[?][?])
         b = %Q(SELECT * FROM "x" WHERE "y" = "z"[?][?])
         expect(ToArel.parse(a).to_sql).to eq b
@@ -266,7 +266,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -278,7 +278,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -314,7 +314,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM \"users\" WHERE \"name\" LIKE 'postgresql:%';)
         b = %Q(SELECT * FROM \"users\" WHERE \"name\" LIKE 'postgresql:%';)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -338,7 +338,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' ELSE \'unknown\' END FROM "accounts" a)
         b = %Q(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' ELSE \'unknown\' END FROM "accounts" a)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -368,7 +368,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT NULLIF("id", 0) AS id FROM "x")
         b = %Q(SELECT NULLIF("id", 0) AS id FROM "x")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -392,13 +392,13 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT current_timestamp)
         b = %Q(SELECT current_timestamp)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT rank(*) OVER ())
         b = %Q(SELECT rank(*) OVER ())
         expect(ToArel.parse(a).to_sql).to eq b
@@ -410,13 +410,13 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT rank(*) OVER (PARTITION BY "id"))
         b = %Q(SELECT rank(*) OVER (PARTITION BY "id"))
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
         b = %Q(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -472,7 +472,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT 2 + 2)
         b = %Q(SELECT 2 + 2)
         expect(ToArel.parse(a).to_sql).to eq b
