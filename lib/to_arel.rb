@@ -93,45 +93,37 @@ module ToArel
     end
 
     def visit_A_Expr(_klass, attributes, context = false)
-      # case node['kind']
-      # when AEXPR_OP
-      #   output = []
-      #   output << deparse_item(node['lexpr'], context || true)
-      #   output << deparse_item(node['rexpr'], context || true)
-      #   output = output.join(' ' + deparse_item(node['name'][0], :operator) + ' ')
-      #   if context
-      #     # This is a nested expression, add parentheses.
-      #     output = '(' + output + ')'
-      #   end
-      #   output
-      # when AEXPR_OP_ANY
-      #   deparse_aexpr_any(node)
-      # when AEXPR_IN
-      #   deparse_aexpr_in(node)
-      # when CONSTR_TYPE_FOREIGN
-      #   deparse_aexpr_like(node)
-      # when AEXPR_BETWEEN, AEXPR_NOT_BETWEEN, AEXPR_BETWEEN_SYM, AEXPR_NOT_BETWEEN_SYM
-      #   deparse_aexpr_between(node)
-      # when AEXPR_NULLIF
-      #   deparse_aexpr_nullif(node)
-      # else
-      #   raise format("Can't deparse: %s: %s", type, node.inspect)
-      # end
-
       case attributes['kind']
-      when 0
+      when PgQuery::AEXPR_OP
         left = visit(*klass_and_attributes(attributes['lexpr']), context || true)
         right = visit(*klass_and_attributes(attributes['rexpr']), context || true)
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
-
         case operator
         when '='
           Arel::Nodes::Equality.new(left, right)
+        when '<>'
+          Arel::Nodes::NotEqual.new(left, right)
+        when '>'
+          Arel::Nodes::GreaterThan.new(left, right)
+        when '>='
+          Arel::Nodes::GreaterThanOrEqual.new(left, right)
+        when '<'
+          Arel::Nodes::LessThan.new(left, right)
+        when '<='
+          Arel::Nodes::LessThanOrEqual.new(left, right)
         else
-          raise 'dunno operator'
+          raise "Dunno operator `#{operator}`"
         end
+      when PgQuery::AEXPR_OP_ANY
+      when PgQuery::AEXPR_IN
+      when PgQuery::CONSTR_TYPE_FOREIGN
+        deparse_aexpr_like(node)
+      when PgQuery::AEXPR_BETWEEN, PgQuery::AEXPR_NOT_BETWEEN, PgQuery::AEXPR_BETWEEN_SYM, PgQuery::AEXPR_NOT_BETWEEN_SYM
+        deparse_aexpr_between(node)
+      when PgQuery::AEXPR_NULLIF
+        deparse_aexpr_nullif(node)
       else
-        raise 'dunno kind'
+        raise format("Can't deparse: %s: %s", type, node.inspect)
       end
     end
 
@@ -247,10 +239,10 @@ module ToArel
 
       case attributes['boolop']
       when PgQuery::BOOL_EXPR_AND
-        Arel::Nodes::And *args
+        Arel::Nodes::And.new(args)
 
       when PgQuery::BOOL_EXPR_OR
-        raise 'bool expr and not implemented'
+        generate_boolean_expression(args, Arel::Nodes::Or)
 
       when PgQuery::BOOL_EXPR_NOT
         raise 'bool expr not not implemented'
@@ -258,6 +250,23 @@ module ToArel
       else
         raise '?'
       end
+    end
+
+    def generate_boolean_expression(args, boolean_class)
+      chain = boolean_class.new(nil, nil)
+
+      args.each_with_index.reduce(chain) do |c, (arg, index)|
+        if args.length - 1 == index
+          c.right = arg
+          c
+        else
+          new_chain = boolean_class.new(arg, nil)
+          c.right = new_chain
+          new_chain
+        end
+      end
+
+      chain.right
     end
 
     def generate_wheres(where)
@@ -301,7 +310,11 @@ module ToArel
         end
       end
 
-      [froms, join_sources]
+      if froms.empty?
+        [nil, join_sources]
+      else
+        [froms, join_sources]
+      end
     end
   end
 
