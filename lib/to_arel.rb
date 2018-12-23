@@ -205,6 +205,10 @@ module ToArel
       select_manager
     end
 
+    def visit_A_Star(_klass, _attributes)
+      Arel.star
+    end
+
     def visit_RawStmt(_klass, attributes)
       return unless (stmt = attributes['stmt'])
 
