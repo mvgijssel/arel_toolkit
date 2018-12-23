@@ -2,6 +2,10 @@ version: "2"
 plugins:
   rubocop:
     enabled: true
+  flog:
+    enabled: true
+    config:
+      score_threshold: 30.0
 checks:
   method-count:
     config:

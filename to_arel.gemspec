@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard', '~> 2.15.0'
   spec.add_development_dependency 'guard-rspec', '~> 4.7.3'
   spec.add_development_dependency 'rubocop', '~> 0.61.1'
+  spec.add_development_dependency 'flog', '~> 4.6.2'
   spec.add_development_dependency 'simplecov', '~> 0.16.1'
 
   spec.add_development_dependency 'pry'
