@@ -146,6 +146,76 @@ module ToArel
       visit(*klass_and_attributes(attributes['val']), :const)
     end
 
+    def visit_RangeSubselect(_klass, attributes)
+      visit(*klass_and_attributes(attributes['subquery']))
+      raise 'aint work'
+    end
+
+    def visit_BooleanTest(_klass, attributes)
+      arg = visit(*klass_and_attributes(attributes['arg']))
+
+
+      case attributes['booltesttype']
+      when PgQuery::BOOLEAN_TEST_TRUE
+        Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
+
+      when PgQuery::BOOLEAN_TEST_NOT_TRUE
+        Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
+
+      when PgQuery::BOOLEAN_TEST_FALSE
+        Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
+
+      when PgQuery::BOOLEAN_TEST_NOT_FALSE
+        Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
+
+      when PgQuery::BOOLEAN_TEST_UNKNOWN
+        raise '?'
+
+      when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
+        raise '?'
+
+      else
+        raise '?'
+      end
+    end
+
+    def visit_CaseExpr(_klass, attributes)
+      binding.pry
+      raise '?'
+    end
+
+    def visit_SQLValueFunction(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_A_Indirection(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_Null(_klass, attributes)
+      Arel.sql 'NULL'
+    end
+
+    def visit_RangeFunction(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_ParamRef(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_Float(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_CoalesceExpr(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_TypeCast(_klass, attributes)
+      raise '?'
+    end
+
     def visit_JoinExpr(_klass, attributes)
       # case node['jointype']
       # when 0
@@ -163,7 +233,11 @@ module ToArel
       # end
       join_class = case attributes['jointype']
                    when 0
-                     Arel::Nodes::InnerJoin
+                     if attributes['isNatural']
+                       raise 'do not know to natural join'
+                     else
+                       Arel::Nodes::InnerJoin
+                     end
                    when 1
                      Arel::Nodes::OuterJoin
                    when 2
@@ -174,7 +248,10 @@ module ToArel
 
       larg = visit(*klass_and_attributes(attributes['larg']))
       rarg = visit(*klass_and_attributes(attributes['rarg']))
-      quals = visit(*klass_and_attributes(attributes['quals']))
+
+      quals = if attributes['quals']
+                visit(*klass_and_attributes(attributes['quals']))
+              end
 
       join = join_class.new(rarg, quals)
 
@@ -197,6 +274,8 @@ module ToArel
         Arel::Nodes::Sum.new args
       when 'count'
         Arel::Nodes::Count.new args
+      when 'generate_series'
+        Arel::Nodes::NamedFunction.new('GENERATE_SERIES', args)
       else
         raise "? -> #{func_name}"
       end
@@ -266,18 +345,18 @@ module ToArel
       end
 
       result = case attributes['boolop']
-      when PgQuery::BOOL_EXPR_AND
-        Arel::Nodes::And.new(args)
+               when PgQuery::BOOL_EXPR_AND
+                 Arel::Nodes::And.new(args)
 
-      when PgQuery::BOOL_EXPR_OR
-        generate_boolean_expression(args, Arel::Nodes::Or)
+               when PgQuery::BOOL_EXPR_OR
+                 generate_boolean_expression(args, Arel::Nodes::Or)
 
-      when PgQuery::BOOL_EXPR_NOT
-        Arel::Nodes::Not.new(args)
+               when PgQuery::BOOL_EXPR_NOT
+                 Arel::Nodes::Not.new(args)
 
-      else
-        raise '?'
-      end
+               else
+                 raise '?'
+               end
 
       if context
         Arel::Nodes::Grouping.new(result)
@@ -358,7 +437,7 @@ module ToArel
 
       if (from_clauses = clause)
         results = from_clauses.map { |from_clause| visit(*klass_and_attributes(from_clause)) }
-          .flatten
+                    .flatten
 
         results.each do |result|
           if result.is_a?(Arel::Table)
