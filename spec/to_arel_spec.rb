@@ -117,18 +117,6 @@ RSpec.describe ToArel do
       end
 
       xit do
-        a = %Q(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
-        b = %Q(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %Q(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
-        b = %Q(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
         a = %Q(SELECT "x", "y" FROM "a" NATURAL JOIN "b")
         b = %Q(SELECT "x", "y" FROM "a" NATURAL JOIN "b")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -263,12 +251,6 @@ RSpec.describe ToArel do
       xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -438,6 +420,44 @@ RSpec.describe ToArel do
         a = %Q(SELECT $5)
         b = %Q(SELECT $5)
         expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      describe 'expressions' do
+        it 'parses equal' do
+          a = %Q(SELECT 1 = 1)
+          b = %Q(SELECT 1 = 1)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses not equal' do
+          a = %Q(SELECT 1 <> 0 OR 1 != 0)
+          b = %Q(SELECT 1 != 0 OR 1 != 0)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses greater than' do
+          a = %Q(SELECT 1 > 0)
+          b = %Q(SELECT 1 > 0)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses greater than or equal' do
+          a = %Q(SELECT 1 >= 0)
+          b = %Q(SELECT 1 >= 0)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses smaller than' do
+          a = %Q(SELECT 1 < 0)
+          b = %Q(SELECT 1 < 0)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses smaller than or equal' do
+          a = %Q(SELECT 1 <= 0)
+          b = %Q(SELECT 1 <= 0)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
       end
 
       describe 'boolean logic' do
