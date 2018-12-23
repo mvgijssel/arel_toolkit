@@ -232,6 +232,17 @@ module ToArel
       end
     end
 
+    def visit_NullTest(klass, attributes)
+      arg = visit(*klass_and_attributes(attributes['arg']))
+
+      case attributes['nulltesttype']
+      when 0
+        Arel::Nodes::Equality.new(arg, nil)
+      when 1
+        Arel::Nodes::NotEqual.new(arg, nil)
+      end
+    end
+
     def visit_BoolExpr(klass, attributes, context = false)
       args = attributes['args'].map do |arg|
         visit(*klass_and_attributes(arg), context || true)

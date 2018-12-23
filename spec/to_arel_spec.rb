@@ -86,6 +86,18 @@ RSpec.describe ToArel do
         end
       end
 
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
+        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
+        b = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
       xit do
         a = %Q(SELECT "a" AS b FROM "public"."x" WHERE "y" = 5 AND "z" = "y")
         b = %Q(SELECT "a" AS b FROM "public"."x" WHERE "y" = 5 AND "z" = "y")
@@ -267,12 +279,6 @@ RSpec.describe ToArel do
       end
 
       xit do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -281,12 +287,6 @@ RSpec.describe ToArel do
       xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
