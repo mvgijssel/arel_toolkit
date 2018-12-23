@@ -189,10 +189,12 @@ module ToArel
       limit = generate_limit(attributes['limitCount'])
       targets = generate_targets(attributes['targetList'])
       sorts = generate_sorts(attributes['sortClause'])
+      wheres = generate_wheres(attributes['whereClause'])
 
       select_manager = Arel::SelectManager.new(froms)
       select_manager.projections = targets
       select_manager.limit = limit
+      select_manager.where wheres
 
       sorts.each do |sort|
         select_manager.order(sort)
@@ -225,6 +227,12 @@ module ToArel
       else
         raise 'unknown sort direction'
       end
+    end
+
+    def generate_wheres(where)
+      return if where.nil?
+
+      visit(*klass_and_attributes(where))
     end
 
     def generate_limit(count)
