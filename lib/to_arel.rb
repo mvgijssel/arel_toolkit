@@ -194,7 +194,7 @@ module ToArel
       select_manager = Arel::SelectManager.new(froms)
       select_manager.projections = targets
       select_manager.limit = limit
-      select_manager.where wheres
+      select_manager.where(wheres) if wheres
 
       sorts.each do |sort|
         select_manager.order(sort)
