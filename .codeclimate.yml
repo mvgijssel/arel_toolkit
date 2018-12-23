@@ -1,0 +1,8 @@
+version: "2"
+plugins:
+  rubocop:
+    enabled: true
+checks:
+  method-count:
+    config:
+      threshold: 30
