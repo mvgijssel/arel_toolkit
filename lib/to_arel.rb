@@ -50,6 +50,8 @@ module ToArel
       case context
       when :operator
         attributes['str']
+      when :const
+        "'#{attributes['str']}'"
       else
         "\"#{attributes['str']}\""
       end
@@ -101,12 +103,27 @@ module ToArel
         generate_comparison(left, right, operator)
       when PgQuery::AEXPR_OP_ANY
         left = visit(*klass_and_attributes(attributes['lexpr']))
-        right = visit(*klass_and_attributes(attributes['rexpr']), :operator)
-        right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql("'#{right}'")])
+        right = visit(*klass_and_attributes(attributes['rexpr']))
+        right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql(right)])
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
         generate_comparison(left, right, operator)
 
       when PgQuery::AEXPR_IN
+        left = visit(*klass_and_attributes(attributes['lexpr']))
+        left = left.is_a?(String) ? Arel.sql(left) : left
+
+        right = attributes['rexpr'].map do |expr|
+          result = visit(*klass_and_attributes(expr))
+          result.is_a?(String) ? Arel.sql(result) : result
+        end
+
+        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        if operator == '<>'
+          Arel::Nodes::NotIn.new(left, right)
+        else
+          Arel::Nodes::In.new(left, right)
+        end
+
       when PgQuery::CONSTR_TYPE_FOREIGN
         deparse_aexpr_like(node)
       when PgQuery::AEXPR_BETWEEN, PgQuery::AEXPR_NOT_BETWEEN, PgQuery::AEXPR_BETWEEN_SYM, PgQuery::AEXPR_NOT_BETWEEN_SYM
@@ -118,8 +135,8 @@ module ToArel
       end
     end
 
-    def visit_A_Const(_klass, attributes, context = nil)
-      visit(*klass_and_attributes(attributes['val']), context)
+    def visit_A_Const(_klass, attributes)
+      visit(*klass_and_attributes(attributes['val']), :const)
     end
 
     def visit_JoinExpr(_klass, attributes)

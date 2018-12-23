@@ -465,6 +465,19 @@ RSpec.describe ToArel do
           expect(ToArel.parse(a).to_sql).to eq b
         end
 
+        it 'parses IN' do
+          a = %Q(SELECT 1 IN (1, 2))
+          b = %Q(SELECT 1 IN (1, 2))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses NOT IN' do
+          a = %Q(SELECT 'yes' NOT IN ('yes', 'no'))
+          b = %Q(SELECT 'yes' NOT IN ('yes', 'no'))
+
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
       end
 
       describe 'boolean logic' do
