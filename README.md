@@ -4,9 +4,48 @@
 
 # ToArel
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/to_arel`. To experiment with that code, run `bin/console` for an interactive prompt.
+```ruby
+[1] > sql = 'SELECT id FROM users;'
+=> "SELECT id FROM users;"
+[2] > arel = ToArel.parse(sql)
+=> #<Arel::SelectManager:0x00007fe4e39823d8
+ @ast=
+  #<Arel::Nodes::SelectStatement:0x00007fe4e39823b0
+   @cores=
+    [#<Arel::Nodes::SelectCore:0x00007fe4e3982388
+      @groups=[],
+      @havings=[],
+      @projections=["\"id\""],
+      @set_quantifier=nil,
+      @source=
+       #<Arel::Nodes::JoinSource:0x00007fe4e3982360
+        @left=[#<Arel::Table:0x00007fe4e3982950 @name="users", @table_alias=nil, @type_caster=nil>],
+        @right=[]>,
+      @top=nil,
+      @wheres=[],
+      @windows=[]>],
+   @limit=nil,
+   @lock=nil,
+   @offset=nil,
+   @orders=[],
+   @with=nil>,
+ @ctx=
+  #<Arel::Nodes::SelectCore:0x00007fe4e3982388
+   @groups=[],
+   @havings=[],
+   @projections=["\"id\""],
+   @set_quantifier=nil,
+   @source=
+    #<Arel::Nodes::JoinSource:0x00007fe4e3982360
+     @left=[#<Arel::Table:0x00007fe4e3982950 @name="users", @table_alias=nil, @type_caster=nil>],
+     @right=[]>,
+   @top=nil,
+   @wheres=[],
+   @windows=[]>>
+[3] > arel.to_sql
+=> "SELECT \"id\" FROM \"users\""
+```
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
