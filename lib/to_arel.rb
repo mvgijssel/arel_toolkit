@@ -299,10 +299,10 @@ module ToArel
     end
 
     def visit_FuncCall(_klass, attributes)
-      args = attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
-      # funcname"=>[{"String"=>{"str"=>"sum"}}
+      args = if attributes['args']
+               attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+             end
 
-      # TODO
       func_name = attributes['funcname'][0]['String']['str']
 
       case func_name
