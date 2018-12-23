@@ -486,7 +486,7 @@ RSpec.describe ToArel do
 
       it do
         a = %Q(SELECT CASE WHEN EXISTS(SELECT 1) THEN 1 ELSE 2 END)
-        b = %Q(SELECT CASE WHEN EXISTS(SELECT 1) THEN 1 ELSE 2 END)
+        b = %Q(SELECT CASE WHEN EXISTS ((SELECT 1)) THEN 1 ELSE 2 END)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 

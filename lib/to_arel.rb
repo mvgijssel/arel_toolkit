@@ -75,10 +75,29 @@ module ToArel
     end
 
     def visit_SubLink(_klass, attributes)
+      # SUBLINK_TYPE_EXISTS = 0     # EXISTS(SELECT ...)
+      # SUBLINK_TYPE_ALL = 1        # (lefthand) op ALL (SELECT ...)
+      # SUBLINK_TYPE_ANY = 2        # (lefthand) op ANY (SELECT ...)
+      # SUBLINK_TYPE_ROWCOMPARE = 3 # (lefthand) op (SELECT ...)
+      # SUBLINK_TYPE_EXPR = 4       # (SELECT with single targetlist item ...)
+      # SUBLINK_TYPE_MULTIEXPR = 5  # (SELECT with multiple targetlist items ...)
+      # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
+      # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression), for SubPlans only
+
+      subselect = if attributes['subselect']
+                    visit(*klass_and_attributes(attributes['subselect']))
+                  end
+
       type = attributes['subLinkType']
+
       case type
-      when 4
-        visit(*klass_and_attributes(attributes['subselect']))
+      when PgQuery::SUBLINK_TYPE_EXPR
+        visit(*klass_and_attributes(subselect))
+      when PgQuery::SUBLINK_TYPE_ANY
+        raise '2'
+      when PgQuery::SUBLINK_TYPE_EXISTS
+        Arel::Nodes::Exists.new subselect
+
       else
         raise "Unknown sublinktype: #{type}"
       end
@@ -179,9 +198,26 @@ module ToArel
       end
     end
 
+    def visit_CaseWhen(_klass, attributes)
+      expr = visit(*klass_and_attributes(attributes['expr']))
+      result = visit(*klass_and_attributes(attributes['result']))
+
+      Arel::Nodes::When.new(expr, result)
+    end
+
     def visit_CaseExpr(_klass, attributes)
-      binding.pry
-      raise '?'
+      default_result = visit(*klass_and_attributes(attributes['defresult']))
+
+      args = attributes['args'].map do |arg|
+        visit(*klass_and_attributes(arg))
+      end
+
+      kees = Arel::Nodes::Case.new
+      # kees.case = ??
+      kees.conditions = args
+      kees.default = Arel::Nodes::Else.new default_result
+
+      kees
     end
 
     def visit_SQLValueFunction(_klass, attributes)
