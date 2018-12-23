@@ -101,6 +101,7 @@ module ToArel
         right = visit(*klass_and_attributes(attributes['rexpr']))
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
         generate_comparison(left, right, operator)
+
       when PgQuery::AEXPR_OP_ANY
         left = visit(*klass_and_attributes(attributes['lexpr']))
         right = visit(*klass_and_attributes(attributes['rexpr']))
@@ -125,13 +126,19 @@ module ToArel
         end
 
       when PgQuery::CONSTR_TYPE_FOREIGN
-        deparse_aexpr_like(node)
-      when PgQuery::AEXPR_BETWEEN, PgQuery::AEXPR_NOT_BETWEEN, PgQuery::AEXPR_BETWEEN_SYM, PgQuery::AEXPR_NOT_BETWEEN_SYM
-        deparse_aexpr_between(node)
+        raise '?'
+
+      when PgQuery::AEXPR_BETWEEN,
+           PgQuery::AEXPR_NOT_BETWEEN,
+           PgQuery::AEXPR_BETWEEN_SYM,
+           PgQuery::AEXPR_NOT_BETWEEN_SYM
+        raise '?'
+
       when PgQuery::AEXPR_NULLIF
-        deparse_aexpr_nullif(node)
+        raise '?'
+
       else
-        raise format("Can't deparse: %s: %s", type, node.inspect)
+        raise '?'
       end
     end
 
@@ -201,10 +208,12 @@ module ToArel
       targets = generate_targets(attributes['targetList'])
       sorts = generate_sorts(attributes['sortClause'])
       wheres = generate_wheres(attributes['whereClause'])
+      offset = generate_offset(attributes['limitOffset'])
 
       select_manager = Arel::SelectManager.new(froms)
       select_manager.projections = targets
       select_manager.limit = limit
+      select_manager.offset = offset
       select_manager.where(wheres) if wheres
 
       sorts.each do |sort|
@@ -311,6 +320,12 @@ module ToArel
       end
 
       chain.right
+    end
+
+    def generate_offset(limit_offset)
+      return if limit_offset.nil?
+
+      visit(*klass_and_attributes(limit_offset))
     end
 
     def generate_wheres(where)
