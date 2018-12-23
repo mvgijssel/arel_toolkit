@@ -189,12 +189,6 @@ RSpec.describe ToArel do
       end
 
       xit do
-        a = %Q(SELECT * FROM "x" WHERE "x" = ANY(?))
-        b = %Q(SELECT * FROM "x" WHERE "x" = ANY(?))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
         b = %Q(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -458,6 +452,19 @@ RSpec.describe ToArel do
           b = %Q(SELECT 1 <= 0)
           expect(ToArel.parse(a).to_sql).to eq b
         end
+
+        it 'parses ANY' do
+          a = %Q(SELECT 1 = ANY('{1,2}'))
+          b = %Q(SELECT 1 = ANY('{1,2}'))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it 'parses NOT ANY' do
+          a = %Q(SELECT 1 != ANY('{1,2}'))
+          b = %Q(SELECT 1 != ANY('{1,2}'))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
       end
 
       describe 'boolean logic' do
