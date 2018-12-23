@@ -56,6 +56,7 @@ module ToArel
     end
 
     def visit_Integer(_klass, attributes)
+      # Arel::Attributes::Integer.new attributes['ival']
       attributes['ival']
     end
 
@@ -125,7 +126,7 @@ module ToArel
 
         case operator
         when '='
-          left.eq(right)
+          Arel::Nodes::Equality.new(left, right)
         else
           raise 'dunno operator'
         end
@@ -179,9 +180,19 @@ module ToArel
 
     def visit_FuncCall(_klass, attributes)
       args = attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+      # funcname"=>[{"String"=>{"str"=>"sum"}}
 
-      # TODO: Everything is a count :)
-      Arel::Nodes::Count.new args
+      # TODO
+      func_name = attributes['funcname'][0]['String']['str']
+
+      case func_name
+      when 'sum'
+        Arel::Nodes::Sum.new args
+      when 'count'
+        Arel::Nodes::Count.new args
+      else
+        raise "? -> #{func_name}"
+      end
     end
 
     def visit_SelectStmt(_klass, attributes)
@@ -226,6 +237,26 @@ module ToArel
         Arel::Nodes::Descending.new(result)
       else
         raise 'unknown sort direction'
+      end
+    end
+
+    def visit_BoolExpr(klass, attributes)
+      args = attributes['args'].map do |arg|
+        visit *klass_and_attributes(arg)
+      end
+
+      case attributes['boolop']
+      when PgQuery::BOOL_EXPR_AND
+        Arel::Nodes::And *args
+
+      when PgQuery::BOOL_EXPR_OR
+        raise 'bool expr and not implemented'
+
+      when PgQuery::BOOL_EXPR_NOT
+        raise 'bool expr not not implemented'
+
+      else
+        raise '?'
       end
     end
 
