@@ -104,7 +104,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "a" AS b FROM "x" WHERE "y" = 5 AND "z" = "y")
         b = %Q(SELECT "a" AS b FROM "x" WHERE "y" = 5 AND "z" = "y")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -134,7 +134,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
         b = %Q(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -170,7 +170,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" JOIN (SELECT "n" FROM "z") b ON "a"."id" = "b"."id")
         b = %Q(SELECT * FROM "x" JOIN (SELECT "n" FROM "z") b ON "a"."id" = "b"."id")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -194,7 +194,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "id" IN (SELECT "id" FROM "account"))
         b = %Q(SELECT * FROM "x" WHERE "id" IN (SELECT "id" FROM "account"))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -212,7 +212,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
         b = %Q(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -224,7 +224,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         b = %Q(SELECT * FROM "x" WHERE "x" BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         expect(ToArel.parse(a).to_sql).to eq b
@@ -236,7 +236,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         expect(ToArel.parse(a).to_sql).to eq b
@@ -260,7 +260,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -272,7 +272,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -284,31 +284,31 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
         b = %Q(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM "x" WHERE NOT "y")
         b = %Q(SELECT * FROM "x" WHERE NOT "y")
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM (SELECT generate_series(0, 100)) a)
         b = %Q(SELECT * FROM (SELECT generate_series(0, 100)) a)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM (VALUES ('anne', 'smith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
         b = %Q(SELECT * FROM (VALUES ('anne', 'smith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -320,19 +320,19 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT * FROM \"users\" WHERE \"name\" NOT LIKE 'postgresql:%';)
         b = %Q(SELECT * FROM \"users\" WHERE \"name\" NOT LIKE 'postgresql:%';)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT ?::regclass)
         b = %Q(SELECT ?::regclass)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT CASE 1 > 0 WHEN true THEN \'ok\' ELSE NULL END)
         b = %Q(SELECT CASE 1 > 0 WHEN true THEN \'ok\' ELSE NULL END)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -344,19 +344,19 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" a)
         b = %Q(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" a)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
         b = %Q(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT DISTINCT ON ("a") "a", "b" FROM "c")
         b = %Q(SELECT DISTINCT ON ("a") "a", "b" FROM "c")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -374,19 +374,19 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT count(*) FROM "x" WHERE "y" IS NOT NULL)
         b = %Q(SELECT count(*) FROM "x" WHERE "y" IS NOT NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT count(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
         b = %Q(SELECT count(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT current_time(2))
         b = %Q(SELECT current_time(2))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -404,7 +404,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT rank(*) OVER (ORDER BY "id"))
         b = %Q(SELECT rank(*) OVER (ORDER BY "id"))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -428,7 +428,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT $5)
         b = %Q(SELECT $5)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -466,7 +466,7 @@ RSpec.describe ToArel do
         end
       end
 
-      it do
+      xit do
         a = %Q(SELECT 1::int8)
         b =Q(SELECT 1::int8)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -478,7 +478,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
+      xit do
         a = %Q(SELECT ?)
         b = %Q(SELECT ?)
         expect(ToArel.parse(a).to_sql).to eq b
