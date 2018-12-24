@@ -6,6 +6,62 @@ def symbolize_keys(hash)
   Hash[hash.map { |k, v| [k.to_sym, v] }]
 end
 
+module Arel
+  module Nodes
+    class Unknown < Arel::Nodes::Node
+    end
+  end
+
+  module Visitors
+    class ToSql
+      private
+
+      def visit_Arel_Nodes_NotEqual(o, collector)
+        right = o.right
+
+        collector = visit o.left, collector
+
+        case right
+        when Arel::Nodes::Unknown
+          collector << " IS NOT "
+          visit right, collector
+
+        when NilClass
+          collector << " IS NOT NULL"
+
+        else
+          collector << " != "
+          visit right, collector
+        end
+      end
+
+      def visit_Arel_Nodes_Equality(o, collector)
+        right = o.right
+
+        collector = visit o.left, collector
+
+        case right
+        when Arel::Nodes::Unknown
+          collector << " IS "
+          visit right, collector
+
+        when NilClass
+          collector << " IS NULL"
+
+        else
+          collector << " = "
+          visit right, collector
+        end
+      end
+
+      def visit_Arel_Nodes_Unknown(o, collector)
+        collector << 'UNKNOWN'
+      end
+    end
+  end
+  Arel::Visitors::ToSql
+end
+
 # rubocop:disable Naming/MethodName
 module ToArel
   class UnboundColumnReference < ::Arel::Nodes::SqlLiteral; end
@@ -192,10 +248,10 @@ module ToArel
         Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
 
       when PgQuery::BOOLEAN_TEST_UNKNOWN
-        raise '? TEST UNKNOWN'
+        Arel::Nodes::Equality.new(arg, Arel::Nodes::Unknown.new)
 
       when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
-        raise '? TEST NOT UNKNOWN'
+        Arel::Nodes::NotEqual.new(arg, Arel::Nodes::Unknown.new)
 
       else
         raise '?'
