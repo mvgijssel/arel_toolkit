@@ -24,7 +24,7 @@ RSpec.describe ToArel do
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
 
-        it 'parses a query with a subquery' do
+        xit 'parses a query with a subquery' do
           given_sql = 'SELECT id, (SELECT id FROM users LIMIT 1) FROM photos'
           expected_sql = 'SELECT "id", (SELECT  "id" FROM "users" LIMIT 1) FROM "photos"'
 
@@ -84,6 +84,18 @@ RSpec.describe ToArel do
 
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
+      end
+
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
+        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
+        b = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
+        expect(ToArel.parse(a).to_sql).to eq b
       end
 
       xit do
@@ -170,9 +182,9 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
-        a = %Q(SELECT * FROM "x" LIMXIT 50)
-        b = %Q(SELECT * FROM "x" LIMXIT 50)
+      it do
+        a = %Q(SELECT * FROM "x" LIMIT 50)
+        b = %Q(SELECT  * FROM "x" LIMIT 50)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -182,7 +194,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "id" IN (1, 2, 3))
         b = %Q(SELECT * FROM "x" WHERE "id" IN (1, 2, 3))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -194,7 +206,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "id" NOT IN (1, 2, 3))
         b = %Q(SELECT * FROM "x" WHERE "id" NOT IN (1, 2, 3))
         expect(ToArel.parse(a).to_sql).to eq b
@@ -231,10 +243,12 @@ RSpec.describe ToArel do
       end
 
       xit do
-        a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
-        b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
+        a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN '2016-01-01' AND '2016-02-02')
+        b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN '2016-01-01' AND '2016-02-02')
+
         expect(ToArel.parse(a).to_sql).to eq b
       end
+
 
       xit do
         a = %Q(SELECT * FROM "x" WHERE "x" OR "y")
@@ -368,7 +382,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT NULL FROM "x")
         b = %Q(SELECT NULL FROM "x")
         expect(ToArel.parse(a).to_sql).to eq b
@@ -423,8 +437,14 @@ RSpec.describe ToArel do
       end
 
       xit do
-        a = %Q(SELECT rank(*) OVER (PARTXITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
-        b = %Q(SELECT rank(*) OVER (PARTXITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        a = %Q(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        b = %Q(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %Q(SELECT sum("price_cents") FROM "products")
+        b = %Q(SELECT SUM("price_cents") FROM "products")
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -438,6 +458,37 @@ RSpec.describe ToArel do
         a = %Q(SELECT $5)
         b = %Q(SELECT $5)
         expect(ToArel.parse(a).to_sql).to eq b
+      end
+      describe 'boolean logic' do
+        it do
+          a = %Q(SELECT (1 AND 2) OR 3)
+          b = %Q(SELECT (1 AND 2) OR 3)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it do
+          a = %Q(SELECT 1 OR (2 AND 3))
+          b = %Q(SELECT 1 OR (2 AND 3))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it do
+          a = %Q(SELECT 1 OR 2 OR 3)
+          b = %Q(SELECT 1 OR 2 OR 3)
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it do
+          a = %Q(SELECT 1 OR (2 OR 3))
+          b = %Q(SELECT 1 OR (2 OR 3))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
+
+        it do
+          a = %Q(SELECT 1 OR NOT 2)
+          b = %Q(SELECT 1 OR (NOT (2)))
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
       end
 
       xit do
@@ -474,6 +525,20 @@ RSpec.describe ToArel do
         a = %Q(SELECT ?)
         b = %Q(SELECT ?)
         expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %Q(SELECT CASE WHEN EXISTS(SELECT 1) THEN 1 ELSE 2 END)
+        b = %Q(SELECT CASE WHEN EXISTS ((SELECT 1)) THEN 1 ELSE 2 END)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      describe 'not supported?' do
+        xit do
+          a = %Q(SELECT "x", "y" FROM "a" NATURAL JOIN "b")
+          b = %Q(SELECT "x", "y" FROM "a" NATURAL JOIN "b")
+          expect(ToArel.parse(a).to_sql).to eq b
+        end
       end
 
       xit do

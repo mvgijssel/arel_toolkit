@@ -89,4 +89,5 @@ Everyone interacting in the ToArel project’s codebases, issue trackers, chat r
 
 - [Class definitions postgres](https://doxygen.postgresql.org/)
 - [pg_query deparse visitor](https://github.com/lfittl/pg_query/blob/master/lib/pg_query/deparse.rb)
+- [pg_query node types](https://github.com/lfittl/pg_query/blob/master/lib/pg_query/node_types.rb)
 - [Arel](https://github.com/rails/rails/tree/master/activerecord/lib/arel)

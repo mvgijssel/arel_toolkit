@@ -50,12 +50,15 @@ module ToArel
       case context
       when :operator
         attributes['str']
+      when :const
+        "'#{attributes['str']}'"
       else
         "\"#{attributes['str']}\""
       end
     end
 
     def visit_Integer(_klass, attributes)
+      # Arel::Attributes::Integer.new attributes['ival']
       attributes['ival']
     end
 
@@ -72,10 +75,31 @@ module ToArel
     end
 
     def visit_SubLink(_klass, attributes)
+      # SUBLINK_TYPE_EXISTS = 0     # EXISTS(SELECT ...)
+      # SUBLINK_TYPE_ALL = 1        # (lefthand) op ALL (SELECT ...)
+      # SUBLINK_TYPE_ANY = 2        # (lefthand) op ANY (SELECT ...)
+      # SUBLINK_TYPE_ROWCOMPARE = 3 # (lefthand) op (SELECT ...)
+      # SUBLINK_TYPE_EXPR = 4       # (SELECT with single targetlist item ...)
+      # SUBLINK_TYPE_MULTIEXPR = 5  # (SELECT with multiple targetlist items ...)
+      # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
+      # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression), for SubPlans only
+
+      subselect = if attributes['subselect']
+                    visit(*klass_and_attributes(attributes['subselect']))
+                  end
+
       type = attributes['subLinkType']
+
       case type
-      when 4
-        visit(*klass_and_attributes(attributes['subselect']))
+      when PgQuery::SUBLINK_TYPE_EXPR
+        visit(*klass_and_attributes(subselect))
+
+      when PgQuery::SUBLINK_TYPE_ANY
+        raise '2'
+
+      when PgQuery::SUBLINK_TYPE_EXISTS
+        Arel::Nodes::Exists.new subselect
+
       else
         raise "Unknown sublinktype: #{type}"
       end
@@ -91,51 +115,145 @@ module ToArel
       Arel::Table.new attributes['relname'], as: table_alias
     end
 
-    def visit_A_Expr(_klass, attributes, context = false)
-      # case node['kind']
-      # when AEXPR_OP
-      #   output = []
-      #   output << deparse_item(node['lexpr'], context || true)
-      #   output << deparse_item(node['rexpr'], context || true)
-      #   output = output.join(' ' + deparse_item(node['name'][0], :operator) + ' ')
-      #   if context
-      #     # This is a nested expression, add parentheses.
-      #     output = '(' + output + ')'
-      #   end
-      #   output
-      # when AEXPR_OP_ANY
-      #   deparse_aexpr_any(node)
-      # when AEXPR_IN
-      #   deparse_aexpr_in(node)
-      # when CONSTR_TYPE_FOREIGN
-      #   deparse_aexpr_like(node)
-      # when AEXPR_BETWEEN, AEXPR_NOT_BETWEEN, AEXPR_BETWEEN_SYM, AEXPR_NOT_BETWEEN_SYM
-      #   deparse_aexpr_between(node)
-      # when AEXPR_NULLIF
-      #   deparse_aexpr_nullif(node)
-      # else
-      #   raise format("Can't deparse: %s: %s", type, node.inspect)
-      # end
-
+    def visit_A_Expr(_klass, attributes)
       case attributes['kind']
-      when 0
-        left = visit(*klass_and_attributes(attributes['lexpr']), context || true)
-        right = visit(*klass_and_attributes(attributes['rexpr']), context || true)
+      when PgQuery::AEXPR_OP
+        left = visit(*klass_and_attributes(attributes['lexpr']))
+        right = visit(*klass_and_attributes(attributes['rexpr']))
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        generate_comparison(left, right, operator)
 
-        case operator
-        when '='
-          left.eq(right)
-        else
-          raise 'dunno operator'
+      when PgQuery::AEXPR_OP_ANY
+        left = visit(*klass_and_attributes(attributes['lexpr']))
+
+        right = visit(*klass_and_attributes(attributes['rexpr']))
+        right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql(right)])
+
+        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        generate_comparison(left, right, operator)
+
+      when PgQuery::AEXPR_IN
+        left = visit(*klass_and_attributes(attributes['lexpr']))
+        left = left.is_a?(String) ? Arel.sql(left) : left
+
+        right = attributes['rexpr'].map do |expr|
+          result = visit(*klass_and_attributes(expr))
+          result.is_a?(String) ? Arel.sql(result) : result
         end
+
+        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        if operator == '<>'
+          Arel::Nodes::NotIn.new(left, right)
+        else
+          Arel::Nodes::In.new(left, right)
+        end
+
+      when PgQuery::CONSTR_TYPE_FOREIGN
+        raise '?'
+
+      when PgQuery::AEXPR_BETWEEN,
+           PgQuery::AEXPR_NOT_BETWEEN,
+           PgQuery::AEXPR_BETWEEN_SYM,
+           PgQuery::AEXPR_NOT_BETWEEN_SYM
+        raise '?'
+
+      when PgQuery::AEXPR_NULLIF
+        raise '?'
+
       else
-        raise 'dunno kind'
+        raise '?'
       end
     end
 
     def visit_A_Const(_klass, attributes)
-      visit(*klass_and_attributes(attributes['val']))
+      visit(*klass_and_attributes(attributes['val']), :const)
+    end
+
+    def visit_RangeSubselect(_klass, attributes)
+      visit(*klass_and_attributes(attributes['subquery']))
+      raise 'aint work'
+    end
+
+    def visit_BooleanTest(_klass, attributes)
+      arg = visit(*klass_and_attributes(attributes['arg']))
+
+
+      case attributes['booltesttype']
+      when PgQuery::BOOLEAN_TEST_TRUE
+        Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
+
+      when PgQuery::BOOLEAN_TEST_NOT_TRUE
+        Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
+
+      when PgQuery::BOOLEAN_TEST_FALSE
+        Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
+
+      when PgQuery::BOOLEAN_TEST_NOT_FALSE
+        Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
+
+      when PgQuery::BOOLEAN_TEST_UNKNOWN
+        raise '? TEST UNKNOWN'
+
+      when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
+        raise '? TEST NOT UNKNOWN'
+
+      else
+        raise '?'
+      end
+    end
+
+    def visit_CaseWhen(_klass, attributes)
+      expr = visit(*klass_and_attributes(attributes['expr']))
+      result = visit(*klass_and_attributes(attributes['result']))
+
+      Arel::Nodes::When.new(expr, result)
+    end
+
+    def visit_CaseExpr(_klass, attributes)
+      default_result = visit(*klass_and_attributes(attributes['defresult']))
+
+      args = attributes['args'].map do |arg|
+        visit(*klass_and_attributes(arg))
+      end
+
+      kees = Arel::Nodes::Case.new
+      # kees.case = ??
+      kees.conditions = args
+      kees.default = Arel::Nodes::Else.new default_result
+
+      kees
+    end
+
+    def visit_SQLValueFunction(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_A_Indirection(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_Null(_klass, attributes)
+      Arel.sql 'NULL'
+    end
+
+    def visit_RangeFunction(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_ParamRef(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_Float(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_CoalesceExpr(_klass, attributes)
+      raise '?'
+    end
+
+    def visit_TypeCast(_klass, attributes)
+      raise '?'
     end
 
     def visit_JoinExpr(_klass, attributes)
@@ -155,7 +273,11 @@ module ToArel
       # end
       join_class = case attributes['jointype']
                    when 0
-                     Arel::Nodes::InnerJoin
+                     if attributes['isNatural']
+                       raise 'do not know to natural join'
+                     else
+                       Arel::Nodes::InnerJoin
+                     end
                    when 1
                      Arel::Nodes::OuterJoin
                    when 2
@@ -166,7 +288,10 @@ module ToArel
 
       larg = visit(*klass_and_attributes(attributes['larg']))
       rarg = visit(*klass_and_attributes(attributes['rarg']))
-      quals = visit(*klass_and_attributes(attributes['quals']))
+
+      quals = if attributes['quals']
+                visit(*klass_and_attributes(attributes['quals']))
+              end
 
       join = join_class.new(rarg, quals)
 
@@ -178,10 +303,22 @@ module ToArel
     end
 
     def visit_FuncCall(_klass, attributes)
-      args = attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+      args = if attributes['args']
+               attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+             end
 
-      # TODO: Everything is a count :)
-      Arel::Nodes::Count.new args
+      func_name = attributes['funcname'][0]['String']['str']
+
+      case func_name
+      when 'sum'
+        Arel::Nodes::Sum.new args
+      when 'count'
+        Arel::Nodes::Count.new args
+      when 'generate_series'
+        Arel::Nodes::NamedFunction.new('GENERATE_SERIES', args)
+      else
+        raise "? -> #{func_name}"
+      end
     end
 
     def visit_SelectStmt(_klass, attributes)
@@ -190,10 +327,12 @@ module ToArel
       targets = generate_targets(attributes['targetList'])
       sorts = generate_sorts(attributes['sortClause'])
       wheres = generate_wheres(attributes['whereClause'])
+      offset = generate_offset(attributes['limitOffset'])
 
       select_manager = Arel::SelectManager.new(froms)
       select_manager.projections = targets
       select_manager.limit = limit
+      select_manager.offset = offset
       select_manager.where(wheres) if wheres
 
       sorts.each do |sort|
@@ -229,6 +368,85 @@ module ToArel
       end
     end
 
+    def visit_NullTest(_klass, attributes)
+      arg = visit(*klass_and_attributes(attributes['arg']))
+
+      case attributes['nulltesttype']
+      when 0
+        Arel::Nodes::Equality.new(arg, nil)
+      when 1
+        Arel::Nodes::NotEqual.new(arg, nil)
+      end
+    end
+
+    def visit_BoolExpr(_klass, attributes, context = false)
+      args = attributes['args'].map do |arg|
+        visit(*klass_and_attributes(arg), context || true)
+      end
+
+      result = case attributes['boolop']
+               when PgQuery::BOOL_EXPR_AND
+                 Arel::Nodes::And.new(args)
+
+               when PgQuery::BOOL_EXPR_OR
+                 generate_boolean_expression(args, Arel::Nodes::Or)
+
+               when PgQuery::BOOL_EXPR_NOT
+                 Arel::Nodes::Not.new(args)
+
+               else
+                 raise "? Boolop -> #{attributes['boolop']}"
+               end
+
+      if context
+        Arel::Nodes::Grouping.new(result)
+      else
+        result
+      end
+    end
+
+    def generate_comparison(left, right, operator)
+      case operator
+      when '='
+        Arel::Nodes::Equality.new(left, right)
+      when '<>'
+        Arel::Nodes::NotEqual.new(left, right)
+      when '>'
+        Arel::Nodes::GreaterThan.new(left, right)
+      when '>='
+        Arel::Nodes::GreaterThanOrEqual.new(left, right)
+      when '<'
+        Arel::Nodes::LessThan.new(left, right)
+      when '<='
+        Arel::Nodes::LessThanOrEqual.new(left, right)
+      else
+        raise "Dunno operator `#{operator}`"
+      end
+    end
+
+    def generate_boolean_expression(args, boolean_class)
+      chain = boolean_class.new(nil, nil)
+
+      args.each_with_index.reduce(chain) do |c, (arg, index)|
+        if args.length - 1 == index
+          c.right = arg
+          c
+        else
+          new_chain = boolean_class.new(arg, nil)
+          c.right = new_chain
+          new_chain
+        end
+      end
+
+      chain.right
+    end
+
+    def generate_offset(limit_offset)
+      return if limit_offset.nil?
+
+      visit(*klass_and_attributes(limit_offset))
+    end
+
     def generate_wheres(where)
       return if where.nil?
 
@@ -259,7 +477,7 @@ module ToArel
 
       if (from_clauses = clause)
         results = from_clauses.map { |from_clause| visit(*klass_and_attributes(from_clause)) }
-          .flatten
+                    .flatten
 
         results.each do |result|
           if result.is_a?(Arel::Table)
@@ -270,7 +488,11 @@ module ToArel
         end
       end
 
-      [froms, join_sources]
+      if froms.empty?
+        [nil, join_sources]
+      else
+        [froms, join_sources]
+      end
     end
   end
 
