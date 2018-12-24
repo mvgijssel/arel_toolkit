@@ -402,13 +402,25 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
+        a = %(SELECT current_time)
+        b = %(SELECT current_time)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %(SELECT current_date)
+        b = %(SELECT current_date)
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
         a = %(SELECT current_time(2))
         b = %(SELECT current_time(2))
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %(SELECT current_timestamp)
         b = %(SELECT current_timestamp)
         expect(ToArel.parse(a).to_sql).to eq b

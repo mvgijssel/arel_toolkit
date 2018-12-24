@@ -10,11 +10,40 @@ module Arel
   module Nodes
     class Unknown < Arel::Nodes::Node
     end
+
+    class CurrentDate < Arel::Nodes::Node
+    end
+
+    class CurrentTimestamp < Arel::Nodes::Node
+    end
+
+    class CurrentTime < Arel::Nodes::Node
+      attr_reader :precision
+
+      def initialize(precision: nil)
+        super()
+
+        @precision = precision
+      end
+    end
   end
 
   module Visitors
     class ToSql
       private
+
+      def visit_Arel_Nodes_CurrentTime(o, collector)
+        collector << 'current_time'
+        collector << "(#{o.precision.to_i})" if o.precision
+      end
+
+      def visit_Arel_Nodes_CurrentDate(o, collector)
+        collector << 'current_date'
+      end
+
+      def visit_Arel_Nodes_CurrentTimestamp(o, collector)
+        collector << 'current_timestamp'
+      end
 
       def visit_Arel_Nodes_NotEqual(o, collector)
         right = o.right
@@ -23,14 +52,14 @@ module Arel
 
         case right
         when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
-          collector << " IS NOT "
+          collector << ' IS NOT '
           visit right, collector
 
         when NilClass
-          collector << " IS NOT NULL"
+          collector << ' IS NOT NULL'
 
         else
-          collector << " != "
+          collector << ' != '
           visit right, collector
         end
       end
@@ -42,14 +71,14 @@ module Arel
 
         case right
         when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
-          collector << " IS "
+          collector << ' IS '
           visit right, collector
 
         when NilClass
-          collector << " IS NULL"
+          collector << ' IS NULL'
 
         else
-          collector << " = "
+          collector << ' = '
           visit right, collector
         end
       end
@@ -298,7 +327,23 @@ module ToArel
     end
 
     def visit_SQLValueFunction(_klass, attributes)
-      raise '?'
+      [
+        ->(_) { Arel::Nodes::CurrentDate.new },
+        ->(_) { Arel::Nodes::CurrentTime.new },
+        ->(typmod) { Arel::Nodes::CurrentTime.new(precision: typmod) },
+        ->(_) { Arel::Nodes::CurrentTimestamp.new },
+        ->(_typmod) { raise '?' }, # current_timestamp, # with precision
+        ->(_typmod) { raise '?' }, # localtime,
+        ->(_typmod) { raise '?' }, # localtime, # with precision
+        ->(_typmod) { raise '?' }, # localtimestamp,
+        ->(_typmod) { raise '?' }, # localtimestamp, # with precision
+        ->(_typmod) { raise '?' }, # current_role,
+        ->(_typmod) { raise '?' }, # current_user,
+        ->(_typmod) { raise '?' }, # session_user,
+        ->(_typmod) { raise '?' }, # user,
+        ->(_typmod) { raise '?' }, # current_catalog,
+        ->(_typmod) { raise '?' } # current_schema
+      ][attributes['op']].call(attributes['typmod'])
     end
 
     def visit_A_Indirection(_klass, attributes)
