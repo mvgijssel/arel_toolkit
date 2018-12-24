@@ -1,8 +1,16 @@
 # ToArel
 
-[![Build Status](https://travis-ci.com/mvgijssel/to_arel.svg?branch=master)](https://travis-ci.com/mvgijssel/to_arel)
-[![Maintainability](https://api.codeclimate.com/v1/badges/0d47a7de887eca86e136/maintainability)](https://codeclimate.com/github/mvgijssel/to_arel/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/0d47a7de887eca86e136/test_coverage)](https://codeclimate.com/github/mvgijssel/to_arel/test_coverage)
+## Overview
+
+- [![Build Status](https://travis-ci.com/mvgijssel/to_arel.svg?branch=master)](https://travis-ci.com/mvgijssel/to_arel)
+- [![Maintainability](https://api.codeclimate.com/v1/badges/0d47a7de887eca86e136/maintainability)](https://codeclimate.com/github/mvgijssel/to_arel/maintainability)
+- [![Test Coverage](https://api.codeclimate.com/v1/badges/0d47a7de887eca86e136/test_coverage)](https://codeclimate.com/github/mvgijssel/to_arel/test_coverage)
+- [![Gem Version](https://badge.fury.io/rb/to_arel.svg)](https://badge.fury.io/rb/to_arel)
+- [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+- ![](http://ruby-gem-downloads-badge.herokuapp.com/to_arel?type=total)
+- ![](http://ruby-gem-downloads-badge.herokuapp.com/to_arel?label=downloads-current-version)
+
+## Usage
 
 Convert your (PostgreSQL) SQL into Arel.
 
