@@ -4,6 +4,8 @@
 
 # ToArel
 
+Convert your (PostgreSQL) SQL into Arel.
+
 ```ruby
 [1] > sql = 'SELECT id FROM users;'
 => "SELECT id FROM users;"
