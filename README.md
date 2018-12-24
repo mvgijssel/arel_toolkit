@@ -10,40 +10,7 @@ Convert your (PostgreSQL) SQL into Arel.
 [1] > sql = 'SELECT id FROM users;'
 => "SELECT id FROM users;"
 [2] > arel = ToArel.parse(sql)
-=> #<Arel::SelectManager:0x00007fe4e39823d8
- @ast=
-  #<Arel::Nodes::SelectStatement:0x00007fe4e39823b0
-   @cores=
-    [#<Arel::Nodes::SelectCore:0x00007fe4e3982388
-      @groups=[],
-      @havings=[],
-      @projections=["\"id\""],
-      @set_quantifier=nil,
-      @source=
-       #<Arel::Nodes::JoinSource:0x00007fe4e3982360
-        @left=[#<Arel::Table:0x00007fe4e3982950 @name="users", @table_alias=nil, @type_caster=nil>],
-        @right=[]>,
-      @top=nil,
-      @wheres=[],
-      @windows=[]>],
-   @limit=nil,
-   @lock=nil,
-   @offset=nil,
-   @orders=[],
-   @with=nil>,
- @ctx=
-  #<Arel::Nodes::SelectCore:0x00007fe4e3982388
-   @groups=[],
-   @havings=[],
-   @projections=["\"id\""],
-   @set_quantifier=nil,
-   @source=
-    #<Arel::Nodes::JoinSource:0x00007fe4e3982360
-     @left=[#<Arel::Table:0x00007fe4e3982950 @name="users", @table_alias=nil, @type_caster=nil>],
-     @right=[]>,
-   @top=nil,
-   @wheres=[],
-   @windows=[]>>
+=> #<Arel::SelectManager:0x00007fe4e39823d8>
 [3] > arel.to_sql
 => "SELECT \"id\" FROM \"users\""
 ```
