@@ -268,25 +268,25 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT NULL)
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
+        b = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -304,13 +304,13 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
         b = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
         b = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
