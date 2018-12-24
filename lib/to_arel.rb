@@ -93,8 +93,10 @@ module ToArel
       case type
       when PgQuery::SUBLINK_TYPE_EXPR
         visit(*klass_and_attributes(subselect))
+
       when PgQuery::SUBLINK_TYPE_ANY
         raise '2'
+
       when PgQuery::SUBLINK_TYPE_EXISTS
         Arel::Nodes::Exists.new subselect
 
@@ -123,8 +125,10 @@ module ToArel
 
       when PgQuery::AEXPR_OP_ANY
         left = visit(*klass_and_attributes(attributes['lexpr']))
+
         right = visit(*klass_and_attributes(attributes['rexpr']))
         right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql(right)])
+
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
         generate_comparison(left, right, operator)
 
@@ -188,10 +192,10 @@ module ToArel
         Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
 
       when PgQuery::BOOLEAN_TEST_UNKNOWN
-        raise '?'
+        raise '? TEST UNKNOWN'
 
       when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
-        raise '?'
+        raise '? TEST NOT UNKNOWN'
 
       else
         raise '?'
@@ -364,7 +368,7 @@ module ToArel
       end
     end
 
-    def visit_NullTest(klass, attributes)
+    def visit_NullTest(_klass, attributes)
       arg = visit(*klass_and_attributes(attributes['arg']))
 
       case attributes['nulltesttype']
@@ -375,7 +379,7 @@ module ToArel
       end
     end
 
-    def visit_BoolExpr(klass, attributes, context = false)
+    def visit_BoolExpr(_klass, attributes, context = false)
       args = attributes['args'].map do |arg|
         visit(*klass_and_attributes(arg), context || true)
       end
@@ -391,7 +395,7 @@ module ToArel
                  Arel::Nodes::Not.new(args)
 
                else
-                 raise '?'
+                 raise "? Boolop -> #{attributes['boolop']}"
                end
 
       if context

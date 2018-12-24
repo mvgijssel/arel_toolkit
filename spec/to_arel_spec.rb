@@ -236,9 +236,9 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
-        a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
-        b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN \'2016-01-01\' AND \'2016-02-02\')
+      it do
+        a = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN '2016-01-01' AND '2016-02-02')
+        b = %Q(SELECT * FROM "x" WHERE "x" NOT BETWEEN '2016-01-01' AND '2016-02-02')
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
