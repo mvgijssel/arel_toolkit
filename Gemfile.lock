@@ -48,6 +48,7 @@ GEM
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
     ice_nine (0.11.2)
+    interception (0.5)
     jaro_winkler (1.5.1)
     json (2.1.0)
     kramdown (1.17.0)
@@ -84,6 +85,9 @@ GEM
       pry
     pry-nav (0.2.4)
       pry (>= 0.9.10, < 0.11.0)
+    pry-rescue (1.4.5)
+      interception (>= 0.5)
+      pry
     pry-stack_explorer (0.4.9.3)
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
@@ -152,6 +156,7 @@ DEPENDENCIES
   pry
   pry-alias
   pry-nav
+  pry-rescue
   pry-stack_explorer
   rake (~> 10.0)
   reek (~> 5.2.0)

@@ -54,16 +54,18 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_Unknown(o, collector)
+      def visit_Arel_Nodes_Unknown(_o, collector)
         collector << 'UNKNOWN'
       end
     end
   end
-  Arel::Visitors::ToSql
 end
 
 # rubocop:disable Naming/MethodName
 module ToArel
+  PG_CATALOG = 'pg_catalog'
+  BOOLEAN = 'boolean'
+
   class UnboundColumnReference < ::Arel::Nodes::SqlLiteral; end
 
   class Visitor
@@ -233,7 +235,6 @@ module ToArel
     def visit_BooleanTest(_klass, attributes)
       arg = visit(*klass_and_attributes(attributes['arg']))
 
-
       case attributes['booltesttype']
       when PgQuery::BOOLEAN_TEST_TRUE
         Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
@@ -262,22 +263,38 @@ module ToArel
       expr = visit(*klass_and_attributes(attributes['expr']))
       result = visit(*klass_and_attributes(attributes['result']))
 
+      # TODO: Let's figure out if this is the way to go
+      result = case result
+               when Integer
+                 result
+               else
+                 Arel.sql(result)
+               end
+
       Arel::Nodes::When.new(expr, result)
     end
 
     def visit_CaseExpr(_klass, attributes)
-      default_result = visit(*klass_and_attributes(attributes['defresult']))
 
-      args = attributes['args'].map do |arg|
-        visit(*klass_and_attributes(arg))
+      Arel::Nodes::Case.new.tap do |kees|
+        if (arg = attributes['arg'])
+          kees.case = visit(*klass_and_attributes(arg))
+        end
+
+        kees.conditions = attributes['args'].map { |a| visit(*klass_and_attributes(a)) }
+
+        if attributes['defresult']
+          default_result = visit(*klass_and_attributes(attributes['defresult']))
+          default_result = case default_result
+                           when Integer
+                             default_result
+                           else
+                             Arel.sql(default_result)
+                           end
+
+          kees.default = Arel::Nodes::Else.new default_result
+        end
       end
-
-      kees = Arel::Nodes::Case.new
-      # kees.case = ??
-      kees.conditions = args
-      kees.default = Arel::Nodes::Else.new default_result
-
-      kees
     end
 
     def visit_SQLValueFunction(_klass, attributes)
@@ -308,8 +325,36 @@ module ToArel
       raise '?'
     end
 
+    def visit_TypeName(_klass, attributes)
+      names = attributes['names'].map do |name|
+        visit(*klass_and_attributes(name), :operator )
+      end
+
+      catalog, type = names
+
+      if catalog != PG_CATALOG
+        raise 'do not know how to handle non pg catalog types'
+      end
+
+      case type
+      when 'bool'
+        BOOLEAN
+      else
+        raise "do not know how to handle #{type}"
+      end
+    end
+
     def visit_TypeCast(_klass, attributes)
-      raise '?'
+      arg = visit(*klass_and_attributes(attributes['arg']))
+      type_name = visit(*klass_and_attributes(attributes['typeName']))
+
+      case type_name
+      when BOOLEAN
+        # TODO: Maybe we can do this a bit better
+        arg == '\'t\'' ? Arel::Nodes::True.new : Arel::Nodes::False.new
+      else
+        raise '?'
+      end
     end
 
     def visit_JoinExpr(_klass, attributes)

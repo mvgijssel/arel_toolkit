@@ -169,7 +169,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
         b = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
         expect(ToArel.parse(a).to_sql).to eq b
@@ -344,15 +344,19 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
-        a = %(SELECT CASE 1 > 0 WHEN true THEN \'ok\' ELSE NULL END)
-        b = %(SELECT CASE 1 > 0 WHEN true THEN \'ok\' ELSE NULL END)
+      it do
+        a = %(SELECT CASE 1 > 0 WHEN true THEN 'ok' ELSE NULL END)
+        b = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
         expect(ToArel.parse(a).to_sql).to eq b
+
+        c = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        d = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        expect(ToArel.parse(c).to_sql).to eq d
       end
 
       xit do
-        a = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' ELSE \'unknown\' END FROM "accounts" a)
-        b = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' ELSE \'unknown\' END FROM "accounts" a)
+        a = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" a)
+        b = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" a)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
