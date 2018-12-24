@@ -66,7 +66,7 @@ module ToArel
       UnboundColumnReference.new(
         attributes['fields'].map do |field|
           visit(*klass_and_attributes(field))
-        end.join('.') # TODO: Join . might be a poor assumption
+        end.join('.')
       )
     end
 

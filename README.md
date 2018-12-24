@@ -39,10 +39,6 @@ Or install it yourself as:
 gem install to_arel
 ```
 
-## Usage
-
-TODO: Write usage instructions here
-
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies.

@@ -2,6 +2,8 @@ version: "2"
 plugins:
   rubocop:
     enabled: true
+  fixme:
+    enabled: true
   markdownlint:
     enabled: true
   flog:
