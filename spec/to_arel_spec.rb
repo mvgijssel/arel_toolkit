@@ -188,7 +188,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %Q(SELECT * FROM "x" OFFSET 50)
         b = %Q(SELECT * FROM "x" OFFSET 50)
         expect(ToArel.parse(a).to_sql).to eq b
