@@ -22,7 +22,7 @@ module Arel
         collector = visit o.left, collector
 
         case right
-        when Arel::Nodes::Unknown
+        when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
           collector << " IS NOT "
           visit right, collector
 
@@ -41,7 +41,7 @@ module Arel
         collector = visit o.left, collector
 
         case right
-        when Arel::Nodes::Unknown
+        when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
           collector << " IS "
           visit right, collector
 
