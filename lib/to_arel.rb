@@ -1,6 +1,7 @@
 require 'to_arel/version'
 require 'arel'
 require 'pg_query'
+require 'arel_extensions'
 
 def symbolize_keys(hash)
   Hash[hash.map { |k, v| [k.to_sym, v] }]
@@ -367,7 +368,8 @@ module ToArel
     end
 
     def visit_CoalesceExpr(_klass, attributes)
-      raise '?'
+      args = attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+      ::ArelExtensions::Nodes::Coalesce.new args
     end
 
     def visit_TypeName(_klass, attributes)

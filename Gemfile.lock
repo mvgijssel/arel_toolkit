@@ -3,12 +3,15 @@ PATH
   specs:
     to_arel (0.1.0)
       arel (~> 9.0.0)
+      arel_extensions
       pg_query (~> 1.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     arel (9.0.0)
+    arel_extensions (1.1.1)
+      arel (>= 6.0)
     ast (2.4.0)
     axiom-types (0.1.1)
       descendants_tracker (~> 0.0.4)

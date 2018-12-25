@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'arel', '~> 9.0.0'
   spec.add_dependency 'pg_query', '~> 1.1.0'
+  spec.add_dependency 'arel_extensions'
 
   spec.add_development_dependency 'bundler', '~> 1.17'
   spec.add_development_dependency 'rake', '~> 10.0'

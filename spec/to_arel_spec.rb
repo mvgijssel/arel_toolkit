@@ -217,6 +217,12 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
+      it do
+        a = %(SELECT COALESCE(NULL, 10))
+        b = %(SELECT COALESCE(NULL, 10))
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
       xit do
         a = %(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
         b = %(SELECT * FROM "x" WHERE "x" = COALESCE("y", ?))
