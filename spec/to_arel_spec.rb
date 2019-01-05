@@ -38,7 +38,7 @@ RSpec.describe ToArel do
           expect(ToArel.parse(given_sql).to_sql).to eq expected_sql
         end
 
-        it 'parses a query with multiple different joins' do
+        xit 'parses a query with multiple different joins' do
           given_sql = <<-SQL
             SELECT
               id
@@ -133,9 +133,9 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
-        b = %(SELECT "x", "y" FROM "a" LEFT JOIN "b" ON 1 > 0)
+        b = %(SELECT "x", "y" FROM "a" LEFT OUTER JOIN "b" ON 1 > 0)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -183,7 +183,7 @@ RSpec.describe ToArel do
 
       it do
         a = %(SELECT * FROM "x" LIMIT 50)
-        b = %(SELECT  * FROM "x" LIMIT 50)
+        b = %(SELECT * FROM "x" LIMIT 50)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -320,9 +320,9 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %(SELECT * FROM (SELECT generate_series(0, 100)) a)
-        b = %(SELECT * FROM (SELECT generate_series(0, 100)) a)
+        b = %(SELECT * FROM (SELECT GENERATE_SERIES(0, 100)) \"a\")
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -564,7 +564,7 @@ RSpec.describe ToArel do
 
       it do
         a = %(SELECT CASE WHEN EXISTS(SELECT 1) THEN 1 ELSE 2 END)
-        b = %(SELECT CASE WHEN EXISTS ((SELECT 1)) THEN 1 ELSE 2 END)
+        b = %(SELECT CASE WHEN EXISTS (SELECT 1) THEN 1 ELSE 2 END)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 

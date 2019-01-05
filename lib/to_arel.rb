@@ -208,6 +208,7 @@ module ToArel
       when PgQuery::AEXPR_OP
         left = visit(*klass_and_attributes(attributes['lexpr']))
         right = visit(*klass_and_attributes(attributes['rexpr']))
+
         operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
         generate_comparison(left, right, operator)
 
@@ -239,8 +240,17 @@ module ToArel
       when PgQuery::CONSTR_TYPE_FOREIGN
         raise '?'
 
-      when PgQuery::AEXPR_BETWEEN,
-           PgQuery::AEXPR_NOT_BETWEEN,
+      when PgQuery::AEXPR_BETWEEN
+        left = visit(*klass_and_attributes(attributes['lexpr']))
+
+        right = attributes['rexpr'].map do |expr|
+          result = visit(*klass_and_attributes(expr))
+          result.is_a?(String) ? Arel.sql(result) : result
+        end
+
+        Arel::Nodes::Between.new left, Arel::Nodes::And(left, right)
+
+      when PgQuery::AEXPR_NOT_BETWEEN,
            PgQuery::AEXPR_BETWEEN_SYM,
            PgQuery::AEXPR_NOT_BETWEEN_SYM
         raise '?'
@@ -258,8 +268,10 @@ module ToArel
     end
 
     def visit_RangeSubselect(_klass, attributes)
-      visit(*klass_and_attributes(attributes['subquery']))
-      raise 'aint work'
+      aliaz = visit(*klass_and_attributes(attributes['alias']))
+      subquery = visit(*klass_and_attributes(attributes['subquery']))
+
+      Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
     end
 
     def visit_BooleanTest(_klass, attributes)
@@ -438,7 +450,7 @@ module ToArel
       rarg = visit(*klass_and_attributes(attributes['rarg']))
 
       quals = if attributes['quals']
-                visit(*klass_and_attributes(attributes['quals']))
+                Arel::Nodes::On.new visit(*klass_and_attributes(attributes['quals']))
               end
 
       join = join_class.new(rarg, quals)
@@ -477,21 +489,18 @@ module ToArel
       wheres = generate_wheres(attributes['whereClause'])
       offset = generate_offset(attributes['limitOffset'])
 
-      select_manager = Arel::SelectManager.new(froms)
-      select_manager.projections = targets
-      select_manager.limit = limit
-      select_manager.offset = offset
-      select_manager.where(wheres) if wheres
+      select_core = Arel::Nodes::SelectCore.new
+      select_core.projections = targets
+      select_core.from = froms.first if froms
+      select_core.wheres = [wheres] if wheres
+      select_core.source.right = join_sources
 
-      sorts.each do |sort|
-        select_manager.order(sort)
-      end
+      select_statement = Arel::Nodes::SelectStatement.new [select_core]
+      select_statement.limit = limit
+      select_statement.offset = offset
+      select_statement.orders = sorts if sorts
 
-      join_sources.each do |join_source|
-        select_manager.join(join_source.left, join_source.class).on(join_source.right)
-      end
-
-      select_manager
+      select_statement
     end
 
     def visit_A_Star(_klass, _attributes)
@@ -592,7 +601,7 @@ module ToArel
     def generate_offset(limit_offset)
       return if limit_offset.nil?
 
-      visit(*klass_and_attributes(limit_offset))
+      ::Arel::Nodes::Offset.new visit(*klass_and_attributes(limit_offset))
     end
 
     def generate_wheres(where)
@@ -604,7 +613,7 @@ module ToArel
     def generate_limit(count)
       return if count.nil?
 
-      visit(*klass_and_attributes(count))
+      ::Arel::Nodes::Limit.new visit(*klass_and_attributes(count))
     end
 
     def generate_targets(list)
@@ -624,11 +633,13 @@ module ToArel
       join_sources = []
 
       if (from_clauses = clause)
-        results = from_clauses.map { |from_clause| visit(*klass_and_attributes(from_clause)) }
-                    .flatten
+        results =
+          from_clauses.map { |from_clause| visit(*klass_and_attributes(from_clause)) }
+            .flatten
 
         results.each do |result|
-          if result.is_a?(Arel::Table)
+          case result
+          when Arel::Table
             froms << result
           else
             join_sources << result
