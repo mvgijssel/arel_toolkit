@@ -376,7 +376,7 @@ module ToArel
     end
 
     def visit_Float(_klass, attributes)
-      raise '?'
+      Arel::Nodes::SqlLiteral.new attributes['str']
     end
 
     def visit_CoalesceExpr(_klass, attributes)
@@ -576,6 +576,8 @@ module ToArel
         Arel::Nodes::LessThan.new(left, right)
       when '<='
         Arel::Nodes::LessThanOrEqual.new(left, right)
+      when '*'
+        Arel::Nodes::Multiplication.new(left, right)
       else
         raise "Dunno operator `#{operator}`"
       end
