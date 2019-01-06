@@ -287,7 +287,7 @@ module ToArel
       raise '?'
     end
 
-    def visit_ParamRef(**_)
+    def visit_ParamRef(number: nil)
       Arel::Nodes::BindParam.new(nil)
     end
 
@@ -362,7 +362,20 @@ module ToArel
       end
     end
 
-    def visit_FuncCall(args: nil, funcname:, agg_star: nil, agg_distinct: nil)
+    def visit_WindowDef(partitionClause: [], orderClause: [], frameOptions:)
+      Arel::Nodes::Window.new.tap do |window|
+        window.orders = orderClause.map {|x| visit x }
+        window.partitions = partitionClause.map {|x| visit x }
+      end
+    end
+
+    def visit_FuncCall(
+          args: nil,
+          funcname:,
+          agg_star: nil,
+          agg_distinct: nil,
+          over: nil
+        )
       args = if args
                args.map { |arg| visit(arg) }
              elsif agg_star
@@ -374,10 +387,19 @@ module ToArel
       case func_name
       when 'sum'
         Arel::Nodes::Sum.new args
+
+      when 'rank'
+        Arel::Nodes::Over.new(
+          Arel::Nodes::NamedFunction.new('RANK', args),
+          visit(over)
+        )
+
       when 'count'
         Arel::Nodes::Count.new args
+
       when 'generate_series'
         Arel::Nodes::NamedFunction.new('GENERATE_SERIES', args)
+
       else
         raise "? -> #{func_name}"
       end
@@ -433,7 +455,7 @@ module ToArel
       when 2
         Arel::Nodes::Descending.new(result)
       else
-        raise 'unknown sort direction'
+        result
       end
     end
 
@@ -441,9 +463,9 @@ module ToArel
       arg = visit(arg)
 
       case nulltesttype
-      when 0
+      when PgQuery::CONSTR_TYPE_NULL
         Arel::Nodes::Equality.new(arg, nil)
-      when 1
+      when PgQuery::CONSTR_TYPE_NOTNULL
         Arel::Nodes::NotEqual.new(arg, nil)
       end
     end
@@ -584,8 +606,6 @@ module ToArel
 
   def self.parse(sql)
     tree = PgQuery.parse(sql).tree
-    puts tree
-
     Visitor.new.accept(tree.first) # DUNNO Y .first
   end
 
@@ -594,7 +614,7 @@ module ToArel
     ast = statement[type]
 
     case type
-    when 'SelectStmt'
+    when PgQuery::SELECT_STMT
       create_select_manager(ast)
     else
       raise "unknown statement type `#{type}`"

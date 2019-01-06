@@ -367,6 +367,31 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
+      it do
+        a = %(SELECT rank(*) OVER ())
+        b = %(SELECT RANK(*) OVER ())
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %(SELECT rank(*) OVER (ORDER BY "id"))
+        b = %(SELECT RANK(*) OVER (ORDER BY "id"))
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %(SELECT rank(*) OVER (PARTITION BY "id"))
+        b = %(SELECT RANK(*) OVER (PARTITION BY "id"))
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+      it do
+        a = %(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        b = %(SELECT RANK(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        expect(ToArel.parse(a).to_sql).to eq b
+      end
+
+
       xit do
         a = %(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
         b = %(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
@@ -436,31 +461,7 @@ RSpec.describe ToArel do
 
       xit do
         a = %(SELECT count(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
-        b = %(SELECT count(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT rank(*) OVER ())
-        b = %(SELECT rank(*) OVER ())
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT rank(*) OVER (ORDER BY "id"))
-        b = %(SELECT rank(*) OVER (ORDER BY "id"))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT rank(*) OVER (PARTXITION BY "id"))
-        b = %(SELECT rank(*) OVER (PARTXITION BY "id"))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
-        b = %(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
+        b = %(SELECT COUNT(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
