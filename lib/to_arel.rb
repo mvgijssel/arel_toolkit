@@ -103,66 +103,67 @@ module ToArel
 
     def accept(object)
       @object = object
-      pp object
-      visit(*klass_and_attributes(object))
+      visit object
     end
 
     private
 
-    def visit(klass, attributes, context = nil)
+    def visit(attribute, context = nil)
+      klass, attributes = klass_and_attributes(attribute)
       dispatch_method = "visit_#{klass}"
-      args = [klass, attributes]
       method = method(dispatch_method)
 
-      args = case method.arity
-             when 2
-               args
-             when -3
-               if context.nil?
-                 args
-               else
-                 args.concat([context])
-               end
-             else
-               raise 'unknown arity'
+      args = if method.parameters.include?([:opt, :context]) && context
+               [context]
              end
 
-      send dispatch_method, *args
+      if attributes.empty?
+        send dispatch_method, *args
+      else
+        kwargs = symbolize_keys(attributes)
+        kwargs.delete(:location)
+
+        if (aliaz = kwargs.delete(:alias))
+          kwargs[:aliaz] = aliaz
+        end
+
+        send dispatch_method, *args, **kwargs
+      end
     end
 
     def klass_and_attributes(object)
       [object.keys.first, object.values.first]
     end
 
-    def visit_String(_klass, attributes, context = nil)
+    def visit_String(context = nil, str:)
       case context
       when :operator
-        attributes['str']
+        str
       when :const
-        "'#{attributes['str']}'"
+        "'#{str}'"
       else
-        "\"#{attributes['str']}\""
+        "\"#{str}\""
       end
     end
 
-    def visit_Integer(_klass, attributes)
-      # Arel::Attributes::Integer.new attributes['ival']
-      attributes['ival']
+    def visit_Integer(ival:)
+      # Arel::Attributes::Integer.new attributes[:ival]
+      ival
     end
 
-    def visit_ColumnRef(_klass, attributes)
+    def visit_ColumnRef(fields:)
       UnboundColumnReference.new(
-        attributes['fields'].map do |field|
-          visit(*klass_and_attributes(field))
+        fields.map do |field|
+          visit(field)
         end.join('.')
       )
     end
 
-    def visit_ResTarget(_klass, attributes)
-      visit(*klass_and_attributes(attributes['val']))
+    def visit_ResTarget(val:)
+      visit(val)
     end
 
-    def visit_SubLink(_klass, attributes)
+    def visit_SubLink(subselect:, subLinkType:)
       # SUBLINK_TYPE_EXISTS = 0     # EXISTS(SELECT ...)
       # SUBLINK_TYPE_ALL = 1        # (lefthand) op ALL (SELECT ...)
       # SUBLINK_TYPE_ANY = 2        # (lefthand) op ANY (SELECT ...)
@@ -172,15 +173,13 @@ module ToArel
       # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
       # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression), for SubPlans only
 
-      subselect = if attributes['subselect']
-                    visit(*klass_and_attributes(attributes['subselect']))
+      subselect = if subselect
+                    visit(subselect)
                   end
 
-      type = attributes['subLinkType']
-
-      case type
+      case subLinkType
       when PgQuery::SUBLINK_TYPE_EXPR
-        visit(*klass_and_attributes(subselect))
+        visit(subselect)
 
       when PgQuery::SUBLINK_TYPE_ANY
         raise '2'
@@ -193,44 +192,42 @@ module ToArel
       end
     end
 
-    def visit_Alias(_klass, attributes)
-      attributes['aliasname']
+    def visit_Alias(aliasname:)
+      aliasname
     end
 
-    def visit_RangeVar(_klass, attributes)
-      table_alias = (visit(*klass_and_attributes(attributes['alias'])) if attributes['alias'])
-
-      Arel::Table.new attributes['relname'], as: table_alias
+    def visit_RangeVar(aliaz: nil, relname:, inh:, relpersistence:)
+      Arel::Table.new relname, as: (visit(aliaz) if aliaz)
     end
 
-    def visit_A_Expr(_klass, attributes)
-      case attributes['kind']
+    def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
+      case kind
       when PgQuery::AEXPR_OP
-        left = visit(*klass_and_attributes(attributes['lexpr']))
-        right = visit(*klass_and_attributes(attributes['rexpr']))
+        left = visit(lexpr)
+        right = visit(rexpr)
 
-        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        operator = visit(name[0], :operator)
         generate_comparison(left, right, operator)
 
       when PgQuery::AEXPR_OP_ANY
-        left = visit(*klass_and_attributes(attributes['lexpr']))
+        left = visit(lexpr)
 
-        right = visit(*klass_and_attributes(attributes['rexpr']))
+        right = visit(rexpr)
         right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql(right)])
 
-        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        operator = visit(name[0], :operator)
         generate_comparison(left, right, operator)
 
       when PgQuery::AEXPR_IN
-        left = visit(*klass_and_attributes(attributes['lexpr']))
+        left = visit(lexpr)
         left = left.is_a?(String) ? Arel.sql(left) : left
 
-        right = attributes['rexpr'].map do |expr|
-          result = visit(*klass_and_attributes(expr))
+        right = rexpr.map do |expr|
+          result = visit(expr)
           result.is_a?(String) ? Arel.sql(result) : result
         end
 
-        operator = visit(*klass_and_attributes(attributes['name'][0]), :operator)
+        operator = visit(name[0], :operator)
         if operator == '<>'
           Arel::Nodes::NotIn.new(left, right)
         else
@@ -241,10 +238,10 @@ module ToArel
         raise '?'
 
       when PgQuery::AEXPR_BETWEEN
-        left = visit(*klass_and_attributes(attributes['lexpr']))
+        left = visit(lexpr)
 
-        right = attributes['rexpr'].map do |expr|
-          result = visit(*klass_and_attributes(expr))
+        right = rexpr.map do |expr|
+          result = visit(expr)
           result.is_a?(String) ? Arel.sql(result) : result
         end
 
@@ -263,21 +260,21 @@ module ToArel
       end
     end
 
-    def visit_A_Const(_klass, attributes)
-      visit(*klass_and_attributes(attributes['val']), :const)
+    def visit_A_Const(val:)
+      visit(val, :const)
     end
 
-    def visit_RangeSubselect(_klass, attributes)
-      aliaz = visit(*klass_and_attributes(attributes['alias']))
-      subquery = visit(*klass_and_attributes(attributes['subquery']))
+    def visit_RangeSubselect(aliaz:, subquery:)
+      aliaz = visit(aliaz)
+      subquery = visit(subquery)
 
       Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
     end
 
-    def visit_BooleanTest(_klass, attributes)
-      arg = visit(*klass_and_attributes(attributes['arg']))
+    def visit_BooleanTest(arg:, booltesttype:)
+      arg = visit(arg)
 
-      case attributes['booltesttype']
+      case booltesttype
       when PgQuery::BOOLEAN_TEST_TRUE
         Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
 
@@ -301,9 +298,9 @@ module ToArel
       end
     end
 
-    def visit_CaseWhen(_klass, attributes)
-      expr = visit(*klass_and_attributes(attributes['expr']))
-      result = visit(*klass_and_attributes(attributes['result']))
+    def visit_CaseWhen(expr:, result:)
+      expr = visit(expr)
+      result = visit(result)
 
       # TODO: Let's figure out if this is the way to go
       result = case result
@@ -316,17 +313,14 @@ module ToArel
       Arel::Nodes::When.new(expr, result)
     end
 
-    def visit_CaseExpr(_klass, attributes)
-
+    def visit_CaseExpr(arg: nil, args:, defresult:)
       Arel::Nodes::Case.new.tap do |kees|
-        if (arg = attributes['arg'])
-          kees.case = visit(*klass_and_attributes(arg))
-        end
+        kees.case = visit(arg) if arg
 
-        kees.conditions = attributes['args'].map { |a| visit(*klass_and_attributes(a)) }
+        kees.conditions = args.map { |a| visit(a) }
 
-        if attributes['defresult']
-          default_result = visit(*klass_and_attributes(attributes['defresult']))
+        if defresult
+          default_result = visit(defresult)
           default_result = case default_result
                            when Integer
                              default_result
@@ -339,7 +333,7 @@ module ToArel
       end
     end
 
-    def visit_SQLValueFunction(_klass, attributes)
+    def visit_SQLValueFunction(op:, typmod:)
       [
         ->(_) { Arel::Nodes::CurrentDate.new },
         ->(_) { Arel::Nodes::CurrentTime.new },
@@ -356,37 +350,37 @@ module ToArel
         ->(_typmod) { raise '?' }, # user,
         ->(_typmod) { raise '?' }, # current_catalog,
         ->(_typmod) { raise '?' } # current_schema
-      ][attributes['op']].call(attributes['typmod'])
+      ][op].call(typmod)
     end
 
-    def visit_A_Indirection(_klass, attributes)
+    def visit_A_Indirection(**attributes)
       raise '?'
     end
 
-    def visit_Null(_klass, attributes)
+    def visit_Null(**attributes)
       Arel.sql 'NULL'
     end
 
-    def visit_RangeFunction(_klass, attributes)
+    def visit_RangeFunction(**attributes)
       raise '?'
     end
 
-    def visit_ParamRef(_klass, attributes)
+    def visit_ParamRef(**attributes)
       raise '?'
     end
 
-    def visit_Float(_klass, attributes)
-      Arel::Nodes::SqlLiteral.new attributes['str']
+    def visit_Float(str:)
+      Arel::Nodes::SqlLiteral.new str
     end
 
-    def visit_CoalesceExpr(_klass, attributes)
-      args = attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+    def visit_CoalesceExpr(args:)
+      args = args.map { |arg| visit(arg) }
       ::ArelExtensions::Nodes::Coalesce.new args
     end
 
-    def visit_TypeName(_klass, attributes)
-      names = attributes['names'].map do |name|
-        visit(*klass_and_attributes(name), :operator )
+    def visit_TypeName(names:, typemod:)
+      names = names.map do |name|
+        visit(name, :operator)
       end
 
       catalog, type = names
@@ -403,9 +397,9 @@ module ToArel
       end
     end
 
-    def visit_TypeCast(_klass, attributes)
-      arg = visit(*klass_and_attributes(attributes['arg']))
-      type_name = visit(*klass_and_attributes(attributes['typeName']))
+    def visit_TypeCast(arg:, typeName:)
+      arg = visit(arg)
+      type_name = visit(typeName)
 
       case type_name
       when BOOLEAN
@@ -416,24 +410,10 @@ module ToArel
       end
     end
 
-    def visit_JoinExpr(_klass, attributes)
-      # case node['jointype']
-      # when 0
-      #   if node['isNatural']
-      #     output << 'NATURAL'
-      #   elsif node['quals'].nil? && node['usingClause'].nil?
-      #     output << 'CROSS'
-      #   end
-      # when 1
-      #   output << 'LEFT'
-      # when 2
-      #   output << 'FULL'
-      # when 3
-      #   output << 'RIGHT'
-      # end
-      join_class = case attributes['jointype']
+    def visit_JoinExpr(jointype:, isNatural: nil, larg:, rarg:, quals:)
+      join_class = case jointype
                    when 0
-                     if attributes['isNatural']
+                     if isNatural
                        raise 'do not know to natural join'
                      else
                        Arel::Nodes::InnerJoin
@@ -446,12 +426,10 @@ module ToArel
                      Arel::Nodes::RightOuterJoin
                    end
 
-      larg = visit(*klass_and_attributes(attributes['larg']))
-      rarg = visit(*klass_and_attributes(attributes['rarg']))
+      larg = visit(larg)
+      rarg = visit(rarg)
 
-      quals = if attributes['quals']
-                Arel::Nodes::On.new visit(*klass_and_attributes(attributes['quals']))
-              end
+      quals = Arel::Nodes::On.new visit(quals) if quals
 
       join = join_class.new(rarg, quals)
 
@@ -462,12 +440,12 @@ module ToArel
       end
     end
 
-    def visit_FuncCall(_klass, attributes)
-      args = if attributes['args']
-               attributes['args'].map { |arg| visit(*klass_and_attributes(arg)) }
+    def visit_FuncCall(args:, funcname:)
+      args = if args
+               args.map { |arg| visit(arg) }
              end
 
-      func_name = attributes['funcname'][0]['String']['str']
+      func_name = funcname[0]['String']['str']
 
       case func_name
       when 'sum'
@@ -481,13 +459,21 @@ module ToArel
       end
     end
 
-    def visit_SelectStmt(_klass, attributes)
-      froms, join_sources = generate_sources(attributes['fromClause'])
-      limit = generate_limit(attributes['limitCount'])
-      targets = generate_targets(attributes['targetList'])
-      sorts = generate_sorts(attributes['sortClause'])
-      wheres = generate_wheres(attributes['whereClause'])
-      offset = generate_offset(attributes['limitOffset'])
+    def visit_SelectStmt(
+          fromClause: nil,
+          limitCount: nil,
+          targetList:,
+          sortClause: nil,
+          whereClause: nil,
+          limitOffset: nil,
+          op:
+        )
+      froms, join_sources = generate_sources(fromClause)
+      limit = generate_limit(limitCount)
+      targets = generate_targets(targetList)
+      sorts = generate_sorts(sortClause)
+      wheres = generate_wheres(whereClause)
+      offset = generate_offset(limitOffset)
 
       select_core = Arel::Nodes::SelectCore.new
       select_core.projections = targets
@@ -503,19 +489,17 @@ module ToArel
       select_statement
     end
 
-    def visit_A_Star(_klass, _attributes)
+    def visit_A_Star
       Arel.star
     end
 
-    def visit_RawStmt(_klass, attributes)
-      return unless (stmt = attributes['stmt'])
-
-      visit(*klass_and_attributes(stmt))
+    def visit_RawStmt(stmt:)
+      visit(stmt) if stmt
     end
 
-    def visit_SortBy(_klass, attributes)
-      result = visit(*klass_and_attributes(attributes['node']))
-      case attributes['sortby_dir']
+    def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
+      result = visit(node)
+      case sortby_dir
       when 1
         Arel::Nodes::Ascending.new(result)
       when 2
@@ -525,10 +509,10 @@ module ToArel
       end
     end
 
-    def visit_NullTest(_klass, attributes)
-      arg = visit(*klass_and_attributes(attributes['arg']))
+    def visit_NullTest(arg:, nulltesttype:)
+      arg = visit(arg)
 
-      case attributes['nulltesttype']
+      case nulltesttype
       when 0
         Arel::Nodes::Equality.new(arg, nil)
       when 1
@@ -536,12 +520,12 @@ module ToArel
       end
     end
 
-    def visit_BoolExpr(_klass, attributes, context = false)
-      args = attributes['args'].map do |arg|
-        visit(*klass_and_attributes(arg), context || true)
+    def visit_BoolExpr(context = false, args:, boolop:)
+      args = args.map do |arg|
+        visit(arg, context || true)
       end
 
-      result = case attributes['boolop']
+      result = case boolop
                when PgQuery::BOOL_EXPR_AND
                  Arel::Nodes::And.new(args)
 
@@ -552,7 +536,7 @@ module ToArel
                  Arel::Nodes::Not.new(args)
 
                else
-                 raise "? Boolop -> #{attributes['boolop']}"
+                 raise "? Boolop -> #{boolop}"
                end
 
       if context
@@ -603,31 +587,31 @@ module ToArel
     def generate_offset(limit_offset)
       return if limit_offset.nil?
 
-      ::Arel::Nodes::Offset.new visit(*klass_and_attributes(limit_offset))
+      ::Arel::Nodes::Offset.new visit(limit_offset)
     end
 
     def generate_wheres(where)
       return if where.nil?
 
-      visit(*klass_and_attributes(where))
+      visit(where)
     end
 
     def generate_limit(count)
       return if count.nil?
 
-      ::Arel::Nodes::Limit.new visit(*klass_and_attributes(count))
+      ::Arel::Nodes::Limit.new visit(count)
     end
 
     def generate_targets(list)
       return if list.nil?
 
-      list.map { |target| visit(*klass_and_attributes(target)) }
+      list.map { |target| visit(target) }
     end
 
     def generate_sorts(sorts)
       return [] if sorts.nil?
 
-      sorts.map { |sort| visit(*klass_and_attributes(sort)) }
+      sorts.map { |sort| visit(sort) }
     end
 
     def generate_sources(clause)
@@ -636,7 +620,7 @@ module ToArel
 
       if (from_clauses = clause)
         results =
-          from_clauses.map { |from_clause| visit(*klass_and_attributes(from_clause)) }
+          from_clauses.map { |from_clause| visit(from_clause) }
             .flatten
 
         results.each do |result|
