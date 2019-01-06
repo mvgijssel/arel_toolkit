@@ -251,7 +251,7 @@ module ToArel
           result.is_a?(String) ? Arel.sql(result) : result
         end
 
-        Arel::Nodes::Between.new left, Arel::Nodes::And(left, right)
+        Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
 
       when PgQuery::AEXPR_NOT_BETWEEN,
            PgQuery::AEXPR_BETWEEN_SYM,
@@ -319,7 +319,7 @@ module ToArel
       Arel::Nodes::When.new(expr, result)
     end
 
-    def visit_CaseExpr(arg: nil, args:, defresult:)
+    def visit_CaseExpr(arg: nil, args:, defresult: nil)
       Arel::Nodes::Case.new.tap do |kees|
         kees.case = visit(arg) if arg
 
@@ -363,7 +363,7 @@ module ToArel
       raise '?'
     end
 
-    def visit_Null(**attributes)
+    def visit_Null(**_)
       Arel.sql 'NULL'
     end
 
@@ -371,8 +371,8 @@ module ToArel
       raise '?'
     end
 
-    def visit_ParamRef(**attributes)
-      raise '?'
+    def visit_ParamRef(**_)
+      Arel::Nodes::BindParam.new(nil)
     end
 
     def visit_Float(str:)
@@ -446,9 +446,11 @@ module ToArel
       end
     end
 
-    def visit_FuncCall(args:, funcname:)
+    def visit_FuncCall(args: nil, funcname:, agg_star: nil, agg_distinct: nil)
       args = if args
                args.map { |arg| visit(arg) }
+             elsif agg_star
+               [Arel.star]
              end
 
       func_name = funcname[0]['String']['str']
@@ -472,6 +474,7 @@ module ToArel
           sortClause: nil,
           whereClause: nil,
           limitOffset: nil,
+          distinctClause: nil,
           op:
         )
       froms, join_sources = generate_sources(fromClause)
@@ -486,6 +489,9 @@ module ToArel
       select_core.from = froms.first if froms
       select_core.wheres = [wheres] if wheres
       select_core.source.right = join_sources
+
+      # TODO: We have to deal with DISTINCT ON!
+      select_core.set_quantifier = Arel::Nodes::Distinct.new if distinctClause
 
       select_statement = Arel::Nodes::SelectStatement.new [select_core]
       select_statement.limit = limit
@@ -568,6 +574,10 @@ module ToArel
         Arel::Nodes::LessThanOrEqual.new(left, right)
       when '*'
         Arel::Nodes::Multiplication.new(left, right)
+      when '+'
+        Arel::Nodes::Addition.new(left, right)
+      when '-'
+        Arel::Nodes::Subtraction.new(left, right)
       else
         raise "Dunno operator `#{operator}`"
       end
@@ -588,6 +598,12 @@ module ToArel
       end
 
       chain.right
+    end
+
+    def generate_distinct(distinct)
+      return if distinct.nil?
+
+      ::Arel::Nodes::Offset.new visit(limit_offset)
     end
 
     def generate_offset(limit_offset)
