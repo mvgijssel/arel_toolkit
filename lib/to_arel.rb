@@ -159,8 +159,14 @@ module ToArel
       )
     end
 
-    def visit_ResTarget(val:)
-      visit(val)
+    def visit_ResTarget(val:, name: nil)
+      val = visit(val)
+
+      if name
+        Arel::Nodes::As.new(val, Arel.sql(name))
+      else
+        val
+      end
     end
 
     def visit_SubLink(subselect:, subLinkType:)

@@ -103,7 +103,7 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      xit do
+      it do
         a = %(SELECT "a" AS b FROM "x" WHERE "y" = 5 AND "z" = "y")
         b = %(SELECT "a" AS b FROM "x" WHERE "y" = 5 AND "z" = "y")
         expect(ToArel.parse(a).to_sql).to eq b
