@@ -2,6 +2,10 @@ require 'support/fake_record'
 Arel::Table.engine = FakeRecord::Base.new
 
 RSpec.describe ToArel do
+  def sql_arel_sql(sql)
+    ToArel.parse(sql).to_sql
+  end
+
   it 'has a version number' do
     expect(ToArel::VERSION).not_to be nil
   end
@@ -9,6 +13,107 @@ RSpec.describe ToArel do
   describe '.parse' do
     describe 'SELECT' do
       describe 'to arel and back' do
+        describe 'conditional expressions' do
+          xit do
+            # CASE
+            # sql = %(SELECT "id" FROM "salaries" GROUP BY "salary")
+            # expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT COALESCE(1, 1))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT NULLIF(1, 10))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT GREATEST(1, 10))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT LEAST(1, 10))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
+        describe 'grouping' do
+          it do
+            sql = %(SELECT "id" FROM "salaries" GROUP BY "salary")
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
+        describe 'having' do
+          it do
+            sql = %(SELECT "id" FROM "salaries" GROUP BY "salary" HAVING MIN("salary") > AVG("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
+        describe 'aggregate functions' do
+          it do
+            sql = %(SELECT AVG("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT COUNT(*))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT COUNT("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT EVERY("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT MAX("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT MIN("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT SUM("salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
+        describe 'window clause' do
+          it do
+            sql = %(SELECT SUM("salary") OVER ())
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT "salary", SUM("salary") OVER (ORDER BY "salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT "salary", SUM("salary") OVER (PARTITION BY "salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT "salary", SUM("salary") OVER (PARTITION BY "salary" ORDER BY "salary"))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
         it 'parses a simple query' do
           given_sql = 'SELECT id FROM users'
           expected_sql = 'SELECT "id" FROM "users"'
@@ -367,31 +472,6 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-      it do
-        a = %(SELECT rank(*) OVER ())
-        b = %(SELECT RANK(*) OVER ())
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT rank(*) OVER (ORDER BY "id"))
-        b = %(SELECT RANK(*) OVER (ORDER BY "id"))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT rank(*) OVER (PARTITION BY "id"))
-        b = %(SELECT RANK(*) OVER (PARTITION BY "id"))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT rank(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
-        b = %(SELECT RANK(*) OVER (PARTITION BY "id", "id2" ORDER BY "id" DESC, "id2"))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-
       xit do
         a = %(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
         b = %(SELECT * FROM "x" WHERE "x" NOT BETWEEN SYMMETRIC 20 AND 10)
@@ -456,12 +536,6 @@ RSpec.describe ToArel do
       xit do
         a = %(SELECT NULLIF("id", 0) AS id FROM "x")
         b = %(SELECT NULLIF("id", 0) AS id FROM "x")
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT count(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
-        b = %(SELECT COUNT(DISTINCT "a") FROM "x" WHERE "y" IS NOT NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 

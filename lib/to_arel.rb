@@ -12,6 +12,36 @@ module ToArel
   PG_CATALOG = 'pg_catalog'
   BOOLEAN = 'boolean'
 
+  class Least < Arel::Nodes::NamedFunction
+    def initialize(args)
+      super 'LEAST', args
+    end
+  end
+
+  class Greatest < Arel::Nodes::NamedFunction
+    def initialize(args)
+      super 'GREATEST', args
+    end
+  end
+
+  class GenerateSeries < Arel::Nodes::NamedFunction
+    def initialize(args)
+      super 'GENERATE_SERIES', args
+    end
+  end
+
+  class Rank < Arel::Nodes::NamedFunction
+    def initialize(args)
+      super 'RANK', args
+    end
+  end
+
+  class Any < Arel::Nodes::NamedFunction
+    def initialize(args)
+      super 'ANY', args
+    end
+  end
+
   class UnboundColumnReference < ::Arel::Nodes::SqlLiteral; end
 
   class Visitor
@@ -135,7 +165,7 @@ module ToArel
         left = visit(lexpr)
 
         right = visit(rexpr)
-        right = Arel::Nodes::NamedFunction.new('ANY', [Arel.sql(right)])
+        right = Any.new [Arel.sql(right)]
 
         operator = visit(name[0], :operator)
         generate_comparison(left, right, operator)
@@ -175,7 +205,7 @@ module ToArel
         raise '?'
 
       when PgQuery::AEXPR_NULLIF
-        raise '?'
+        raise 'Can not deal with NULLIF for now'
 
       else
         raise '?'
@@ -384,24 +414,36 @@ module ToArel
 
       func_name = funcname[0]['String']['str']
 
-      case func_name
-      when 'sum'
-        Arel::Nodes::Sum.new args
+      func = case func_name
+             when 'sum'
+               Arel::Nodes::Sum.new args
 
-      when 'rank'
-        Arel::Nodes::Over.new(
-          Arel::Nodes::NamedFunction.new('RANK', args),
-          visit(over)
-        )
+             when 'rank'
+               Rank.new args
 
-      when 'count'
-        Arel::Nodes::Count.new args
+             when 'count'
+               Arel::Nodes::Count.new args
 
-      when 'generate_series'
-        Arel::Nodes::NamedFunction.new('GENERATE_SERIES', args)
+             when 'generate_series'
+               GenerateSeries.new args
 
+             when 'max'
+               Arel::Nodes::Max.new args
+
+             when 'min'
+               Arel::Nodes::Min.new args
+
+             when 'avg'
+               Arel::Nodes::Avg.new args
+
+             else
+               raise "? -> #{func_name}"
+             end
+
+      if over
+        Arel::Nodes::Over.new(func, visit(over))
       else
-        raise "? -> #{func_name}"
+        func
       end
     end
 
@@ -413,6 +455,8 @@ module ToArel
           whereClause: nil,
           limitOffset: nil,
           distinctClause: nil,
+          groupClause: nil,
+          havingClause: nil,
           op:
         )
       froms, join_sources = generate_sources(fromClause)
@@ -421,12 +465,16 @@ module ToArel
       sorts = generate_sorts(sortClause)
       wheres = generate_wheres(whereClause)
       offset = generate_offset(limitOffset)
+      groups = generate_groups(groupClause)
+      having = generate_having(havingClause)
 
       select_core = Arel::Nodes::SelectCore.new
       select_core.projections = targets
       select_core.from = froms.first if froms
-      select_core.wheres = [wheres] if wheres
+      select_core.wheres = wheres if wheres
       select_core.source.right = join_sources
+      select_core.groups = groups if groups
+      select_core.havings = having if having
 
       # TODO: We have to deal with DISTINCT ON!
       select_core.set_quantifier = Arel::Nodes::Distinct.new if distinctClause
@@ -456,6 +504,17 @@ module ToArel
         Arel::Nodes::Descending.new(result)
       else
         result
+      end
+    end
+
+    def visit_MinMaxExpr(op:, args:)
+      case op
+      when 0
+        Greatest.new args.map { |a| visit(a) }
+      when 1
+        Least.new args.map { |a| visit(a) }
+      else
+        raise "Unknown Op -> #{op}"
       end
     end
 
@@ -544,6 +603,14 @@ module ToArel
       ::Arel::Nodes::Offset.new visit(limit_offset)
     end
 
+    def generate_having(having_clause)
+      [visit(having_clause)] if having_clause
+    end
+
+    def generate_groups(group_clause)
+      [visit(group_clause.first)] if group_clause
+    end
+
     def generate_offset(limit_offset)
       return if limit_offset.nil?
 
@@ -553,7 +620,7 @@ module ToArel
     def generate_wheres(where)
       return if where.nil?
 
-      visit(where)
+      [visit(where)]
     end
 
     def generate_limit(count)
