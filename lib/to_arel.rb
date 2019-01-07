@@ -3,10 +3,6 @@ require 'arel'
 require_relative './more_arel_extensions'
 require 'pg_query'
 
-def symbolize_keys(hash)
-  Hash[hash.map { |k, v| [k.to_sym, v] }]
-end
-
 # rubocop:disable Naming/MethodName
 module ToArel
   PG_CATALOG = 'pg_catalog'
@@ -66,7 +62,13 @@ module ToArel
       if attributes.empty?
         send dispatch_method, *args
       else
-        kwargs = symbolize_keys(attributes)
+        kwargs = attributes.transform_keys do |key|
+          key
+            .gsub(/([a-z\d])([A-Z])/,'\1_\2')
+            .downcase
+            .to_sym
+        end
+
         kwargs.delete(:location)
 
         if (aliaz = kwargs.delete(:alias))
@@ -115,7 +117,7 @@ module ToArel
       end
     end
 
-    def visit_SubLink(subselect:, subLinkType:)
+    def visit_SubLink(subselect:, sub_link_type:)
       # SUBLINK_TYPE_EXISTS = 0     # EXISTS(SELECT ...)
       # SUBLINK_TYPE_ALL = 1        # (lefthand) op ALL (SELECT ...)
       # SUBLINK_TYPE_ANY = 2        # (lefthand) op ANY (SELECT ...)
@@ -129,7 +131,7 @@ module ToArel
                     visit(subselect)
                   end
 
-      case subLinkType
+      case sub_link_type
       when PgQuery::SUBLINK_TYPE_EXPR
         visit(subselect)
 
@@ -349,9 +351,9 @@ module ToArel
       end
     end
 
-    def visit_TypeCast(arg:, typeName:)
+    def visit_TypeCast(arg:, type_name:)
       arg = visit(arg)
-      type_name = visit(typeName)
+      type_name = visit(type_name)
 
       case type_name
       when BOOLEAN
@@ -362,10 +364,10 @@ module ToArel
       end
     end
 
-    def visit_JoinExpr(jointype:, isNatural: nil, larg:, rarg:, quals:)
+    def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals:)
       join_class = case jointype
                    when 0
-                     if isNatural
+                     if is_natural
                        raise 'do not know to natural join'
                      else
                        Arel::Nodes::InnerJoin
@@ -392,10 +394,10 @@ module ToArel
       end
     end
 
-    def visit_WindowDef(partitionClause: [], orderClause: [], frameOptions:)
+    def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:)
       Arel::Nodes::Window.new.tap do |window|
-        window.orders = orderClause.map {|x| visit x }
-        window.partitions = partitionClause.map {|x| visit x }
+        window.orders = order_clause.map {|x| visit x }
+        window.partitions = partition_clause.map {|x| visit x }
       end
     end
 
@@ -448,25 +450,25 @@ module ToArel
     end
 
     def visit_SelectStmt(
-          fromClause: nil,
-          limitCount: nil,
-          targetList:,
-          sortClause: nil,
-          whereClause: nil,
-          limitOffset: nil,
-          distinctClause: nil,
-          groupClause: nil,
-          havingClause: nil,
+          from_clause: nil,
+          limit_count: nil,
+          target_list:,
+          sort_clause: nil,
+          where_clause: nil,
+          limit_offset: nil,
+          distinct_clause: nil,
+          group_clause: nil,
+          having_clause: nil,
           op:
         )
-      froms, join_sources = generate_sources(fromClause)
-      limit = generate_limit(limitCount)
-      targets = generate_targets(targetList)
-      sorts = generate_sorts(sortClause)
-      wheres = generate_wheres(whereClause)
-      offset = generate_offset(limitOffset)
-      groups = generate_groups(groupClause)
-      having = generate_having(havingClause)
+      froms, join_sources = generate_sources(from_clause)
+      limit = generate_limit(limit_count)
+      targets = generate_targets(target_list)
+      sorts = generate_sorts(sort_clause)
+      wheres = generate_wheres(where_clause)
+      offset = generate_offset(limit_offset)
+      groups = generate_groups(group_clause)
+      having = generate_having(having_clause)
 
       select_core = Arel::Nodes::SelectCore.new
       select_core.projections = targets
@@ -477,7 +479,7 @@ module ToArel
       select_core.havings = having if having
 
       # TODO: We have to deal with DISTINCT ON!
-      select_core.set_quantifier = Arel::Nodes::Distinct.new if distinctClause
+      select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
 
       select_statement = Arel::Nodes::SelectStatement.new [select_core]
       select_statement.limit = limit
