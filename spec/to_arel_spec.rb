@@ -13,11 +13,123 @@ RSpec.describe ToArel do
   describe '.parse' do
     describe 'SELECT' do
       describe 'to arel and back' do
+        # https://www.postgresql.org/docs/9.4/functions-datetime.html
+
+        describe 'mathematical functions and operators' do
+          it do
+            sql = %(SELECT 2 + 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 - 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 * 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 / 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 % 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 ^ 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 |/ 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 ||/ 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 ! 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 !! 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 & 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 | 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT 2 # 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 << 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 2 >> 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT @ 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            sql = %(SELECT ~ 2)
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+        end
+
+        describe 'row and array comparisons' do
+          # IN
+          it do
+            sql = %(SELECT 1 IN (1, 2))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          it do
+            sql = %(SELECT 1 NOT IN (1, 2))
+            expect(sql_arel_sql(sql)).to eq sql
+          end
+
+          xit do
+            # ANY
+          end
+
+          xit do
+            # SOME
+          end
+
+          xit do
+            # ALL
+          end
+        end
+
         describe 'conditional expressions' do
           xit do
             # CASE
-            # sql = %(SELECT "id" FROM "salaries" GROUP BY "salary")
-            # expect(sql_arel_sql(sql)).to eq sql
           end
 
           it do
@@ -334,13 +446,11 @@ RSpec.describe ToArel do
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
-
       it do
         a = %(SELECT * FROM "x" WHERE "x" BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         b = %(SELECT * FROM "x" WHERE "x" BETWEEN \'2016-01-01\' AND \'2016-02-02\')
         expect(ToArel.parse(a).to_sql).to eq b
       end
-
 
       it do
         a = %(SELECT * FROM "x" WHERE "x" OR "y")
@@ -349,44 +459,44 @@ RSpec.describe ToArel do
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS FALSE)
+        a = %(SELECT * FROM "x" WHERE "y" IS FALSE)
+        b = %(SELECT * FROM "x" WHERE "y" IS FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
+        a = %(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
+        b = %(SELECT * FROM "x" WHERE "y" IS NOT FALSE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS TRUE)
+        a = %(SELECT * FROM "x" WHERE "y" IS TRUE)
+        b = %(SELECT * FROM "x" WHERE "y" IS TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
+        a = %(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
+        b = %(SELECT * FROM "x" WHERE "y" IS NOT TRUE)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
+        a = %(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
+        b = %(SELECT * FROM "x" WHERE "y" IS UNKNOWN)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
+        a = %(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
+        b = %(SELECT * FROM "x" WHERE "y" IS NOT UNKNOWN)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
-        b = %Q(SELECT * FROM "x" WHERE "y" IS NULL)
+        a = %(SELECT * FROM "x" WHERE "y" IS NULL)
+        b = %(SELECT * FROM "x" WHERE "y" IS NULL)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -437,8 +547,8 @@ RSpec.describe ToArel do
       end
 
       it do
-        a = %Q(SELECT * FROM "x" WHERE NOT "y")
-        b = %Q(SELECT * FROM "x" WHERE NOT ("y"))
+        a = %(SELECT * FROM "x" WHERE NOT "y")
+        b = %(SELECT * FROM "x" WHERE NOT ("y"))
         expect(ToArel.parse(a).to_sql).to eq b
       end
 
@@ -618,18 +728,6 @@ RSpec.describe ToArel do
       xit do
         a = %(SELECT 1::int8)
         b = Q(SELECT(1.int8))
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT 2 + 2)
-        b = %(SELECT 2 + 2)
-        expect(ToArel.parse(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT 2 - 2)
-        b = %(SELECT 2 - 2)
         expect(ToArel.parse(a).to_sql).to eq b
       end
 

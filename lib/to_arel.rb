@@ -5,8 +5,8 @@ require 'pg_query'
 
 # rubocop:disable Naming/MethodName
 module ToArel
-  PG_CATALOG = 'pg_catalog'
-  BOOLEAN = 'boolean'
+  PG_CATALOG = 'pg_catalog'.freeze
+  BOOLEAN = 'boolean'.freeze
 
   class Least < Arel::Nodes::NamedFunction
     def initialize(args)
@@ -55,16 +55,14 @@ module ToArel
       dispatch_method = "visit_#{klass}"
       method = method(dispatch_method)
 
-      args = if method.parameters.include?([:opt, :context]) && context
-               [context]
-             end
+      args = ([context] if method.parameters.include?(%i[opt context]) && context)
 
       if attributes.empty?
         send dispatch_method, *args
       else
         kwargs = attributes.transform_keys do |key|
           key
-            .gsub(/([a-z\d])([A-Z])/,'\1_\2')
+            .gsub(/([a-z\d])([A-Z])/, '\1_\2')
             .downcase
             .to_sym
         end
@@ -127,9 +125,7 @@ module ToArel
       # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
       # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression), for SubPlans only
 
-      subselect = if subselect
-                    visit(subselect)
-                  end
+      subselect = (visit(subselect) if subselect)
 
       case sub_link_type
       when PgQuery::SUBLINK_TYPE_EXPR
@@ -307,7 +303,7 @@ module ToArel
       ][op].call(typmod)
     end
 
-    def visit_A_Indirection(**attributes)
+    def visit_A_Indirection(**_attributes)
       raise '?'
     end
 
@@ -315,7 +311,7 @@ module ToArel
       Arel.sql 'NULL'
     end
 
-    def visit_RangeFunction(**attributes)
+    def visit_RangeFunction(**_attributes)
       raise '?'
     end
 
@@ -339,9 +335,7 @@ module ToArel
 
       catalog, type = names
 
-      if catalog != PG_CATALOG
-        raise 'do not know how to handle non pg catalog types'
-      end
+      raise 'do not know how to handle non pg catalog types' if catalog != PG_CATALOG
 
       case type
       when 'bool'
@@ -396,8 +390,8 @@ module ToArel
 
     def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:)
       Arel::Nodes::Window.new.tap do |window|
-        window.orders = order_clause.map {|x| visit x }
-        window.partitions = partition_clause.map {|x| visit x }
+        window.orders = order_clause.map { |x| visit x }
+        window.partitions = partition_clause.map { |x| visit x }
       end
     end
 
@@ -577,6 +571,37 @@ module ToArel
         Arel::Nodes::Addition.new(left, right)
       when '-'
         Arel::Nodes::Subtraction.new(left, right)
+      when '/'
+        Arel::Nodes::Division.new(left, right)
+      when '!'
+        raise 'Missing factorial implementation'
+      when '!!'
+        raise 'Missing factorial (prefix) implementation'
+      when '|/'
+        raise 'Missing square root implementation'
+      when '||/'
+        raise 'Missing cube root implementation'
+      when '<<'
+        Arel::Nodes::BitwiseShiftLeft.new(left, right)
+      when '>>'
+        Arel::Nodes::BitwiseShiftRight.new(left, right)
+      when '&'
+        Arel::Nodes::BitwiseAnd.new(left, right)
+      when '^'
+
+        # TODO: `#` is bitwise xor, right? Check out:
+        # -> https://www.postgresql.org/docs/9.4/functions-math.html
+        # -> https://github.com/rails/rails/blob/master/activerecord/lib/arel/math.rb#L30
+        # Am I wrong, or is this a bug in Arel?
+
+        Arel::Nodes::BitwiseXor.new(left, right)
+      when '#'
+        raise 'Missing bitwise xor implementation'
+      when '%'
+        raise 'Missing cube root implementation'
+      when '|'
+        Arel::Nodes::BitwiseOr.new(left, right)
+
       else
         raise "Dunno operator `#{operator}`"
       end
