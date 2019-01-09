@@ -51,6 +51,8 @@ module ToArel
     private
 
     def visit(attribute, context = nil)
+      return attribute.map { |attr| visit(attr, context) } if attribute.is_a? Array
+
       klass, attributes = klass_and_attributes(attribute)
       dispatch_method = "visit_#{klass}"
       method = method(dispatch_method)
@@ -98,11 +100,7 @@ module ToArel
     end
 
     def visit_ColumnRef(fields:)
-      UnboundColumnReference.new(
-        fields.map do |field|
-          visit(field)
-        end.join('.')
-      )
+      UnboundColumnReference.new visit(fields).join('.')
     end
 
     def visit_ResTarget(val:, name: nil)
@@ -172,8 +170,7 @@ module ToArel
         left = visit(lexpr)
         left = left.is_a?(String) ? Arel.sql(left) : left
 
-        right = rexpr.map do |expr|
-          result = visit(expr)
+        right = visit(rexpr).map do |result|
           result.is_a?(String) ? Arel.sql(result) : result
         end
 
@@ -190,8 +187,7 @@ module ToArel
       when PgQuery::AEXPR_BETWEEN
         left = visit(lexpr)
 
-        right = rexpr.map do |expr|
-          result = visit(expr)
+        right = visit(rexpr).map do |result|
           result.is_a?(String) ? Arel.sql(result) : result
         end
 
@@ -267,7 +263,7 @@ module ToArel
       Arel::Nodes::Case.new.tap do |kees|
         kees.case = visit(arg) if arg
 
-        kees.conditions = args.map { |a| visit(a) }
+        kees.conditions = visit args
 
         if defresult
           default_result = visit(defresult)
@@ -324,8 +320,7 @@ module ToArel
     end
 
     def visit_CoalesceExpr(args:)
-      args = args.map { |arg| visit(arg) }
-      ::ArelExtensions::Nodes::Coalesce.new args
+      ::ArelExtensions::Nodes::Coalesce.new visit(args)
     end
 
     def visit_TypeName(names:, typemod:)
@@ -390,8 +385,8 @@ module ToArel
 
     def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:)
       Arel::Nodes::Window.new.tap do |window|
-        window.orders = order_clause.map { |x| visit x }
-        window.partitions = partition_clause.map { |x| visit x }
+        window.orders = visit order_clause
+        window.partitions = visit partition_clause
       end
     end
 
@@ -403,7 +398,7 @@ module ToArel
           over: nil
         )
       args = if args
-               args.map { |arg| visit(arg) }
+               visit args
              elsif agg_star
                [Arel.star]
              end
@@ -506,9 +501,9 @@ module ToArel
     def visit_MinMaxExpr(op:, args:)
       case op
       when 0
-        Greatest.new args.map { |a| visit(a) }
+        Greatest.new visit(args)
       when 1
-        Least.new args.map { |a| visit(a) }
+        Least.new visit(args)
       else
         raise "Unknown Op -> #{op}"
       end
@@ -526,9 +521,7 @@ module ToArel
     end
 
     def visit_BoolExpr(context = false, args:, boolop:)
-      args = args.map do |arg|
-        visit(arg, context || true)
-      end
+      args = visit(args, context || true)
 
       result = case boolop
                when PgQuery::BOOL_EXPR_AND
@@ -657,15 +650,13 @@ module ToArel
     end
 
     def generate_targets(list)
-      return if list.nil?
-
-      list.map { |target| visit(target) }
+      visit(list) unless list.nil?
     end
 
     def generate_sorts(sorts)
       return [] if sorts.nil?
 
-      sorts.map { |sort| visit(sort) }
+      visit(sorts)
     end
 
     def generate_sources(clause)
@@ -673,9 +664,7 @@ module ToArel
       join_sources = []
 
       if (from_clauses = clause)
-        results =
-          from_clauses.map { |from_clause| visit(from_clause) }
-            .flatten
+        results = visit(from_clauses).flatten
 
         results.each do |result|
           case result
