@@ -450,31 +450,25 @@ module ToArel
           having_clause: nil,
           op:
         )
-      froms, join_sources = generate_sources(from_clause)
-      limit = generate_limit(limit_count)
-      targets = generate_targets(target_list)
-      sorts = generate_sorts(sort_clause)
-      wheres = generate_wheres(where_clause)
-      offset = generate_offset(limit_offset)
-      groups = generate_groups(group_clause)
-      having = generate_having(having_clause)
 
       select_core = Arel::Nodes::SelectCore.new
-      select_core.projections = targets
+
+      froms, join_sources = generate_sources(from_clause)
       select_core.from = froms.first if froms
-      select_core.wheres = wheres if wheres
       select_core.source.right = join_sources
-      select_core.groups = groups if groups
-      select_core.havings = having if having
+
+      select_core.projections = visit(target_list) if target_list
+      select_core.wheres = [visit(where_clause)] if where_clause
+      select_core.groups = visit(group_clause) if group_clause
+      select_core.havings = [visit(having_clause)] if having_clause
 
       # TODO: We have to deal with DISTINCT ON!
       select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
 
       select_statement = Arel::Nodes::SelectStatement.new [select_core]
-      select_statement.limit = limit
-      select_statement.offset = offset
-      select_statement.orders = sorts if sorts
-
+      select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
+      select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
+      select_statement.orders = visit(sort_clause.to_a)
       select_statement
     end
 
@@ -615,48 +609,6 @@ module ToArel
       end
 
       chain.right
-    end
-
-    def generate_distinct(distinct)
-      return if distinct.nil?
-
-      ::Arel::Nodes::Offset.new visit(limit_offset)
-    end
-
-    def generate_having(having_clause)
-      [visit(having_clause)] if having_clause
-    end
-
-    def generate_groups(group_clause)
-      [visit(group_clause.first)] if group_clause
-    end
-
-    def generate_offset(limit_offset)
-      return if limit_offset.nil?
-
-      ::Arel::Nodes::Offset.new visit(limit_offset)
-    end
-
-    def generate_wheres(where)
-      return if where.nil?
-
-      [visit(where)]
-    end
-
-    def generate_limit(count)
-      return if count.nil?
-
-      ::Arel::Nodes::Limit.new visit(count)
-    end
-
-    def generate_targets(list)
-      visit(list) unless list.nil?
-    end
-
-    def generate_sorts(sorts)
-      return [] if sorts.nil?
-
-      visit(sorts)
     end
 
     def generate_sources(clause)
