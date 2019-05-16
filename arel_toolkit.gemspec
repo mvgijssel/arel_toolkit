@@ -9,7 +9,9 @@ Gem::Specification.new do |spec|
   spec.email         = ['maarten@vgijssel.nl']
 
   spec.summary       = 'Collection of tools for Arel'
-  spec.description   = 'ArelToolkit contains parsing, querying, modifying, optimisations, extensions and more for Arel.'
+  spec.description   = <<~STRING
+    ArelToolkit contains parsing, querying, modifying, optimisations, extensions and more for Arel.
+  STRING
   spec.homepage      = 'https://github.com/mvgijssel/arel_toolkit'
   spec.license       = 'MIT'
 
