@@ -20,13 +20,7 @@ Metrics/MethodLength:
 Metrics/BlockLength:
   Enabled: false
 
-Metrics/AbcSize:
-  Enabled: false
-
 Style/Documentation:
-  Enabled: false
-
-Metrics/CyclomaticComplexity:
   Enabled: false
 
 Layout/MultilineMethodCallIndentation:
