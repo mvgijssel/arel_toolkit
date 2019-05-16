@@ -1,4 +1,4 @@
-require "arel_toolkit/version"
+require 'arel_toolkit/version'
 
 module ArelToolkit
   class Error < StandardError; end
