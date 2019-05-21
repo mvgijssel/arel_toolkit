@@ -170,6 +170,26 @@ module Arel
         end
       end
 
+      def visit_CaseExpr(arg: nil, args:, defresult: nil)
+        Arel::Nodes::Case.new.tap do |kees|
+          kees.case = visit(arg) if arg
+
+          kees.conditions = visit args
+
+          if defresult
+            default_result = visit(defresult)
+            default_result = case default_result
+                             when Integer
+                               default_result
+                             else
+                               Arel.sql(default_result)
+                             end
+
+            kees.default = Arel::Nodes::Else.new default_result
+          end
+        end
+      end
+
       def visit_BooleanTest(arg:, booltesttype:)
         arg = visit(arg)
 
@@ -279,26 +299,6 @@ module Arel
                  end
 
         Arel::Nodes::When.new(expr, result)
-      end
-
-      def visit_CaseExpr(arg: nil, args:, defresult: nil)
-        Arel::Nodes::Case.new.tap do |kees|
-          kees.case = visit(arg) if arg
-
-          kees.conditions = visit args
-
-          if defresult
-            default_result = visit(defresult)
-            default_result = case default_result
-                             when Integer
-                               default_result
-                             else
-                               Arel.sql(default_result)
-                             end
-
-            kees.default = Arel::Nodes::Else.new default_result
-          end
-        end
       end
 
       def visit_SQLValueFunction(op:, typmod:)
