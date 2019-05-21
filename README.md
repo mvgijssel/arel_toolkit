@@ -10,10 +10,6 @@
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?type=total)
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?label=downloads-current-version)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/arel_toolkit`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -42,10 +38,6 @@ Or install it yourself as:
 ## Extensions
 
 Adds some missing Arel nodes and extends the existing visitors.
-
-## Overview
-
-- [![Build Sta
 
 ## Development
 
