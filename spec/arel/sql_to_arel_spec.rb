@@ -62,6 +62,7 @@ describe 'Arel.sql_to_arel' do
   it_behaves_like 'a visited node', 'SELECT *', 'PgQuery::A_STAR'
   # it_behaves_like 'a visited node', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
   it_behaves_like 'a visited node', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
+  # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
 
   # # NOTE: should run at the end
   # children.each do |child|
