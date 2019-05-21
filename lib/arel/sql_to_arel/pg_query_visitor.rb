@@ -146,6 +146,30 @@ module Arel
         Arel::Nodes::BitString.new(str)
       end
 
+      def visit_BoolExpr(context = false, args:, boolop:)
+        args = visit(args, context || true)
+
+        result = case boolop
+                 when PgQuery::BOOL_EXPR_AND
+                   Arel::Nodes::And.new(args)
+
+                 when PgQuery::BOOL_EXPR_OR
+                   generate_boolean_expression(args, Arel::Nodes::Or)
+
+                 when PgQuery::BOOL_EXPR_NOT
+                   Arel::Nodes::Not.new(args)
+
+                 else
+                   raise "? Boolop -> #{boolop}"
+                 end
+
+        if context
+          Arel::Nodes::Grouping.new(result)
+        else
+          result
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -499,30 +523,6 @@ module Arel
           Arel::Nodes::Equality.new(arg, nil)
         when PgQuery::CONSTR_TYPE_NOTNULL
           Arel::Nodes::NotEqual.new(arg, nil)
-        end
-      end
-
-      def visit_BoolExpr(context = false, args:, boolop:)
-        args = visit(args, context || true)
-
-        result = case boolop
-                 when PgQuery::BOOL_EXPR_AND
-                   Arel::Nodes::And.new(args)
-
-                 when PgQuery::BOOL_EXPR_OR
-                   generate_boolean_expression(args, Arel::Nodes::Or)
-
-                 when PgQuery::BOOL_EXPR_NOT
-                   Arel::Nodes::Not.new(args)
-
-                 else
-                   raise "? Boolop -> #{boolop}"
-                 end
-
-        if context
-          Arel::Nodes::Grouping.new(result)
-        else
-          result
         end
       end
 

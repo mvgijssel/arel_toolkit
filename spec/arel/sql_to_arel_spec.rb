@@ -65,6 +65,7 @@ describe 'Arel.sql_to_arel' do
   # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
   # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   it_behaves_like 'a visited node', "SELECT B'0101'", 'PgQuery::BIT_STRING'
+  it_behaves_like 'a visited node', "SELECT 1 WHERE t AND t", 'PgQuery::BOOL_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|
