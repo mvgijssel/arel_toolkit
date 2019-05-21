@@ -1,3 +1,10 @@
+# rubocop:disable Metrics/PerceivedComplexity
+# rubocop:disable Naming/MethodName
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Naming/UncommunicativeMethodParamName
+# rubocop:disable Metrics/ParameterLists
+
 require 'pg_query'
 
 module Arel
@@ -87,7 +94,8 @@ module Arel
         # SUBLINK_TYPE_EXPR = 4       # (SELECT with single targetlist item ...)
         # SUBLINK_TYPE_MULTIEXPR = 5  # (SELECT with multiple targetlist items ...)
         # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
-        # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression), for SubPlans only
+        # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression),
+        #                             # for SubPlans only
 
         subselect = (visit(subselect) if subselect)
 
@@ -247,22 +255,22 @@ module Arel
 
       def visit_SQLValueFunction(op:, typmod:)
         [
-          ->(_) { Arel::Nodes::CurrentDate.new },
-          ->(_) { Arel::Nodes::CurrentTime.new },
-          ->(typmod) { Arel::Nodes::CurrentTime.new(precision: typmod) },
-          ->(_) { Arel::Nodes::CurrentTimestamp.new },
-          ->(_typmod) { raise '?' }, # current_timestamp, # with precision
-          ->(_typmod) { raise '?' }, # localtime,
-          ->(_typmod) { raise '?' }, # localtime, # with precision
-          ->(_typmod) { raise '?' }, # localtimestamp,
-          ->(_typmod) { raise '?' }, # localtimestamp, # with precision
-          ->(_typmod) { raise '?' }, # current_role,
-          ->(_typmod) { raise '?' }, # current_user,
-          ->(_typmod) { raise '?' }, # session_user,
-          ->(_typmod) { raise '?' }, # user,
-          ->(_typmod) { raise '?' }, # current_catalog,
-          ->(_typmod) { raise '?' } # current_schema
-        ][op].call(typmod)
+          -> { Arel::Nodes::CurrentDate.new },
+          -> { Arel::Nodes::CurrentTime.new },
+          -> { Arel::Nodes::CurrentTime.new(precision: typmod) },
+          -> { Arel::Nodes::CurrentTimestamp.new },
+          -> { raise '?' }, # current_timestamp, # with precision
+          -> { raise '?' }, # localtime,
+          -> { raise '?' }, # localtime, # with precision
+          -> { raise '?' }, # localtimestamp,
+          -> { raise '?' }, # localtimestamp, # with precision
+          -> { raise '?' }, # current_role,
+          -> { raise '?' }, # current_user,
+          -> { raise '?' }, # session_user,
+          -> { raise '?' }, # user,
+          -> { raise '?' }, # current_catalog,
+          -> { raise '?' } # current_schema
+        ][op].call
       end
 
       def visit_A_Indirection(**_attributes)
@@ -322,11 +330,9 @@ module Arel
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals:)
         join_class = case jointype
                      when 0
-                       if is_natural
-                         raise 'do not know to natural join'
-                       else
-                         Arel::Nodes::InnerJoin
-                       end
+                       raise 'do not know to natural join' if is_natural
+
+                       Arel::Nodes::InnerJoin
                      when 1
                        Arel::Nodes::OuterJoin
                      when 2
@@ -603,3 +609,10 @@ module Arel
     end
   end
 end
+
+# rubocop:enable Metrics/PerceivedComplexity
+# rubocop:enable Naming/MethodName
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/AbcSize
+# rubocop:enable Naming/UncommunicativeMethodParamName
+# rubocop:enable Metrics/ParameterLists

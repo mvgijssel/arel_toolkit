@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/CyclomaticComplexity
+
 module FakeRecord
   class Column
     attr_reader :name, :type
@@ -144,3 +146,5 @@ module FakeRecord
     end
   end
 end
+
+# rubocop:enable Metrics/CyclomaticComplexity

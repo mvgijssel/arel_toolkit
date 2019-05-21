@@ -245,26 +245,26 @@ describe 'Arel.sql_to_arel' do
 
   xit 'parses a query with multiple different joins' do
     given_sql = <<-SQL
-            SELECT
-              id
-            FROM
-              users, teams
+      SELECT
+        id
+      FROM
+        users, teams
 
-            INNER JOIN
-              photos
-            ON
-              photos.user_id = users.id
+      INNER JOIN
+        photos
+      ON
+        photos.user_id = users.id
 
-            RIGHT JOIN
-              locations
-            ON
-              locations.photo_id = photos.id
+      RIGHT JOIN
+        locations
+      ON
+        locations.photo_id = photos.id
 
-            LEFT JOIN
-              users AS l_users
-            ON
-              l_users.id = location.user_id
-          SQL
+      LEFT JOIN
+        users AS l_users
+      ON
+        l_users.id = location.user_id
+    SQL
 
     expected_sql =
       'SELECT "id" FROM "users", "teams" ' \
@@ -326,12 +326,6 @@ describe 'Arel.sql_to_arel' do
   end
 
   xit do
-    a = %(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
-    b = %(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
-    expect(Arel.sql_to_arel(a).to_sql).to eq b
-  end
-
-  xit do
     a = %(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
     b = %(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
     expect(Arel.sql_to_arel(a).to_sql).to eq b
@@ -374,8 +368,8 @@ describe 'Arel.sql_to_arel' do
   end
 
   it do
-    a = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
-    b = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
+    a = %(SELECT * FROM "a" WHERE "stat" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
+    b = %(SELECT * FROM "a" WHERE "stat" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
     expect(Arel.sql_to_arel(a).to_sql).to eq b
   end
 
@@ -540,12 +534,6 @@ describe 'Arel.sql_to_arel' do
   end
 
   it do
-    a = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" a)
-    b = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" "a")
-    expect(Arel.sql_to_arel(a).to_sql).to eq b
-  end
-
-  it do
     a = %(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
     b = %(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
     expect(Arel.sql_to_arel(a).to_sql).to eq b
@@ -560,12 +548,6 @@ describe 'Arel.sql_to_arel' do
   it do
     a = %(SELECT sum("price_cents") FROM "products")
     b = %(SELECT SUM("price_cents") FROM "products")
-    expect(Arel.sql_to_arel(a).to_sql).to eq b
-  end
-
-  it do
-    a = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" a)
-    b = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" "a")
     expect(Arel.sql_to_arel(a).to_sql).to eq b
   end
 
@@ -601,8 +583,8 @@ describe 'Arel.sql_to_arel' do
   end
 
   xit do
-    a = %(SELECT * FROM (VALUES ('anne', 'smxith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
-    b = %(SELECT * FROM (VALUES ('anne', 'smxith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
+    a = %(SELECT * FROM (VALUES ('anne', 'smxith')) names(\"first\", \"last\"))
+    b = %(SELECT * FROM (VALUES ('anne', 'smxith')) names(\"first\", \"last\"))
     expect(Arel.sql_to_arel(a).to_sql).to eq b
   end
 
