@@ -1,4 +1,6 @@
 require 'arel_toolkit/version'
+require 'arel'
+require 'arel/sql_to_arel'
 
 module ArelToolkit
   class Error < StandardError; end
