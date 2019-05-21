@@ -52,6 +52,7 @@ describe 'Arel.sql_to_arel' do
 
   it_behaves_like 'a visited node', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
   it_behaves_like 'a visited node', 'SELECT 1', 'PgQuery::A_CONST'
+  it_behaves_like 'a visited node', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|

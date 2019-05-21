@@ -60,6 +60,72 @@ module Arel
         Arel::Nodes::Array.new visit(elements)
       end
 
+      def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
+        case kind
+        when PgQuery::AEXPR_OP
+          left = visit(lexpr)
+          right = visit(rexpr)
+
+          operator = visit(name[0], :operator)
+          generate_comparison(left, right, operator)
+
+        when PgQuery::AEXPR_OP_ANY
+          left = visit(lexpr)
+
+          right = visit(rexpr)
+          right = Arel::Nodes::Any.new [Arel.sql(right)]
+
+          operator = visit(name[0], :operator)
+          generate_comparison(left, right, operator)
+
+        when PgQuery::AEXPR_IN
+          left = visit(lexpr)
+          left = left.is_a?(String) ? Arel.sql(left) : left
+
+          right = visit(rexpr).map do |result|
+            result.is_a?(String) ? Arel.sql(result) : result
+          end
+
+          operator = visit(name[0], :operator)
+          if operator == '<>'
+            Arel::Nodes::NotIn.new(left, right)
+          else
+            Arel::Nodes::In.new(left, right)
+          end
+
+        when PgQuery::CONSTR_TYPE_FOREIGN
+          raise '?'
+
+        when PgQuery::AEXPR_BETWEEN
+          left = visit(lexpr)
+
+          right = visit(rexpr).map do |result|
+            result.is_a?(String) ? Arel.sql(result) : result
+          end
+
+          Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
+
+        when PgQuery::AEXPR_NOT_BETWEEN,
+             PgQuery::AEXPR_BETWEEN_SYM,
+             PgQuery::AEXPR_NOT_BETWEEN_SYM
+          raise '?'
+
+        when PgQuery::AEXPR_NULLIF
+          raise 'Can not deal with NULLIF for now'
+
+        else
+          raise '?'
+        end
+      end
+
+      def visit_A_Indices(context, uidx:)
+        visit uidx, context
+      end
+
+      def visit_A_Indirection(arg:, indirection:)
+        Arel::Nodes::Indirection.new(visit(arg, :operator), visit(indirection, :operator))
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -124,68 +190,6 @@ module Arel
 
       def visit_RangeVar(aliaz: nil, relname:, inh:, relpersistence:)
         Arel::Table.new relname, as: (visit(aliaz) if aliaz)
-      end
-
-      def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
-        case kind
-        when PgQuery::AEXPR_OP
-          left = visit(lexpr)
-          right = visit(rexpr)
-
-          operator = visit(name[0], :operator)
-          generate_comparison(left, right, operator)
-
-        when PgQuery::AEXPR_OP_ANY
-          left = visit(lexpr)
-
-          right = visit(rexpr)
-          right = Arel::Nodes::Any.new [Arel.sql(right)]
-
-          operator = visit(name[0], :operator)
-          generate_comparison(left, right, operator)
-
-        when PgQuery::AEXPR_IN
-          left = visit(lexpr)
-          left = left.is_a?(String) ? Arel.sql(left) : left
-
-          right = visit(rexpr).map do |result|
-            result.is_a?(String) ? Arel.sql(result) : result
-          end
-
-          operator = visit(name[0], :operator)
-          if operator == '<>'
-            Arel::Nodes::NotIn.new(left, right)
-          else
-            Arel::Nodes::In.new(left, right)
-          end
-
-        when PgQuery::CONSTR_TYPE_FOREIGN
-          raise '?'
-
-        when PgQuery::AEXPR_BETWEEN
-          left = visit(lexpr)
-
-          right = visit(rexpr).map do |result|
-            result.is_a?(String) ? Arel.sql(result) : result
-          end
-
-          Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
-
-        when PgQuery::AEXPR_NOT_BETWEEN,
-             PgQuery::AEXPR_BETWEEN_SYM,
-             PgQuery::AEXPR_NOT_BETWEEN_SYM
-          raise '?'
-
-        when PgQuery::AEXPR_NULLIF
-          raise 'Can not deal with NULLIF for now'
-
-        else
-          raise '?'
-        end
-      end
-
-      def visit_A_Const(val:)
-        visit(val, :const)
       end
 
       def visit_RangeSubselect(aliaz:, subquery:)
