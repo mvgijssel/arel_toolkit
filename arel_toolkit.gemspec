@@ -29,4 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.8'
 
   spec.add_development_dependency 'rubocop', '~> 0.69'
+  spec.add_development_dependency 'guard', '~> 2.15'
+  spec.add_development_dependency 'guard-rspec', '~> 4.7'
 end
