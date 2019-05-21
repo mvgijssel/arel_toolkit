@@ -10,10 +10,6 @@
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?type=total)
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?label=downloads-current-version)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/arel_toolkit`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -30,9 +26,22 @@ Or install it yourself as:
 
     $ gem install arel_toolkit
 
-## Usage
+## sql_to_arel
 
-TODO: Write usage instructions here
+Convert your (PostgreSQL) SQL into Arel.
+
+```ruby
+[1] > sql = 'SELECT id FROM users;'
+=> "SELECT id FROM users;"
+[2] > arel = ToArel.parse(sql)
+=> #<Arel::SelectManager:0x00007fe4e39823d8>
+[3] > arel.to_sql
+=> "SELECT \"id\" FROM \"users\""
+```
+
+## Extensions
+
+Adds some missing Arel nodes and extends the existing visitors.
 
 ## Development
 
