@@ -170,6 +170,33 @@ module Arel
         end
       end
 
+      def visit_BooleanTest(arg:, booltesttype:)
+        arg = visit(arg)
+
+        case booltesttype
+        when PgQuery::BOOLEAN_TEST_TRUE
+          Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
+
+        when PgQuery::BOOLEAN_TEST_NOT_TRUE
+          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
+
+        when PgQuery::BOOLEAN_TEST_FALSE
+          Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
+
+        when PgQuery::BOOLEAN_TEST_NOT_FALSE
+          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
+
+        when PgQuery::BOOLEAN_TEST_UNKNOWN
+          Arel::Nodes::Equality.new(arg, Arel::Nodes::Unknown.new)
+
+        when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
+          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::Unknown.new)
+
+        else
+          raise '?'
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -237,33 +264,6 @@ module Arel
         subquery = visit(subquery)
 
         Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
-      end
-
-      def visit_BooleanTest(arg:, booltesttype:)
-        arg = visit(arg)
-
-        case booltesttype
-        when PgQuery::BOOLEAN_TEST_TRUE
-          Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
-
-        when PgQuery::BOOLEAN_TEST_NOT_TRUE
-          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
-
-        when PgQuery::BOOLEAN_TEST_FALSE
-          Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
-
-        when PgQuery::BOOLEAN_TEST_NOT_FALSE
-          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
-
-        when PgQuery::BOOLEAN_TEST_UNKNOWN
-          Arel::Nodes::Equality.new(arg, Arel::Nodes::Unknown.new)
-
-        when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
-          Arel::Nodes::NotEqual.new(arg, Arel::Nodes::Unknown.new)
-
-        else
-          raise '?'
-        end
       end
 
       def visit_CaseWhen(expr:, result:)
