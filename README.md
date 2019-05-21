@@ -37,9 +37,15 @@ Or install it yourself as:
 => "SELECT id FROM users;"
 [2] > arel = Arel.sql_to_arel(sql)
 => #<Arel::SelectManager:0x00007fe4e39823d8>
-[3] > arel.to_sql
-=> "SELECT \"id\" FROM \"users\""
-```
+[3] > arel.to# ArelToolkit
+
+## Extensions
+
+Adds some missing Arel nodes and extends the existing visitors.
+
+## Overview
+
+- [![Build Sta
 
 ## Development
 
