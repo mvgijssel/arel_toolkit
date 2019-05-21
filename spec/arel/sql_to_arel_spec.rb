@@ -3,6 +3,58 @@ describe 'Arel.sql_to_arel' do
     Arel.sql_to_arel(sql).to_sql
   end
 
+  def ast_contains_constant(tree, constant)
+    case tree
+    when Array
+      tree.any? do |child|
+        ast_contains_constant(child, constant)
+      end
+    when Hash
+      tree.any? do |key, value|
+        next true if key.to_s == constant.to_s
+
+        ast_contains_constant(value, constant)
+      end
+    when String
+      tree.to_s == constant.to_s
+    when Integer
+      tree.to_s == constant.to_s
+    else
+      raise 'i dunno'
+    end
+  end
+
+  define :ast_contains do |expected|
+    match do |pg_query_tree|
+      ast_contains_constant(pg_query_tree, expected)
+    end
+
+    failure_message do |pg_query_tree|
+      "expected that #{pg_query_tree} would contain `#{expected}`"
+    end
+  end
+
+  shared_examples "a visited node" do |sql, pg_query_node|
+    it "expects `#{pg_query_node}` to exist" do
+      expect(Object.const_defined?(pg_query_node)).to eq true
+    end
+
+    it "expects `#{pg_query_node}` to appear in the ast" do
+      tree = PgQuery.parse(sql).tree
+      expect(tree).to ast_contains(Object.const_get(pg_query_node))
+    end
+
+    it "expects the sql `#{sql}` to parse the same" do
+      parsed_sql = Arel.sql_to_arel(sql).to_sql
+      expect(parsed_sql).to eq sql
+    end
+  end
+  # # NOTE: should run at the end
+  # children.each do |child|
+  #   sql, pg_query_node = child.metadata[:block].binding.local_variable_get(:args)
+  #   puts sql, pg_query_node
+  # end
+
   describe 'mathematical functions and operators' do
     it do
       sql = %(SELECT 2 + 2)
