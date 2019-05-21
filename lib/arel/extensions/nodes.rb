@@ -25,6 +25,16 @@ module Arel
       end
     end
 
+    class BitString < Arel::Nodes::Node
+      attr_reader :str
+
+      def initialize(str)
+        super()
+
+        @str = str
+      end
+    end
+
     class CurrentDate < Arel::Nodes::Node
     end
 

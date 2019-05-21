@@ -142,6 +142,10 @@ module Arel
         aliasname
       end
 
+      def visit_BitString(str:)
+        Arel::Nodes::BitString.new(str)
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
