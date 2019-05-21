@@ -20,7 +20,16 @@ module Arel
       end
 
       def visit_Arel_Nodes_Array(o, collector)
-        collector << "ARRAY[#{o.items.join(',')}]"
+        collector << 'ARRAY['
+        o.items.each { |item| visit(item, collector) }
+        collector << ']'
+      end
+
+      def visit_Arel_Nodes_Indirection(o, collector)
+        visit(o.arg, collector)
+        collector << '['
+        visit(o.indirection, collector)
+        collector << ']'
       end
 
       def visit_Arel_Nodes_NotEqual(o, collector)

@@ -13,6 +13,18 @@ module Arel
       end
     end
 
+    class Indirection < Arel::Nodes::Node
+      attr_reader :arg
+      attr_reader :indirection
+
+      def initialize(arg, indirection)
+        super()
+
+        @arg = arg
+        @indirection = indirection
+      end
+    end
+
     class CurrentDate < Arel::Nodes::Node
     end
 

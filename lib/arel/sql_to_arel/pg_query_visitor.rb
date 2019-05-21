@@ -30,7 +30,11 @@ module Arel
         dispatch_method = "visit_#{klass}"
         method = method(dispatch_method)
 
-        args = ([context] if method.parameters.include?(%i[opt context]) && context)
+        args = [context] if method.parameters.any? do |parameter|
+          next if context.nil?
+
+          parameter == %i[opt context] || parameter == %i[req context]
+        end
 
         if attributes.empty?
           send dispatch_method, *args
@@ -58,6 +62,10 @@ module Arel
 
       def visit_A_ArrayExpr(elements:)
         Arel::Nodes::Array.new visit(elements)
+      end
+
+      def visit_A_Const(val:)
+        visit(val, :const)
       end
 
       def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
@@ -142,8 +150,8 @@ module Arel
         ival
       end
 
-      def visit_ColumnRef(fields:)
-        UnboundColumnReference.new visit(fields).join('.')
+      def visit_ColumnRef(context = nil, fields:)
+        UnboundColumnReference.new visit(fields, context).join('.')
       end
 
       def visit_ResTarget(val:, name: nil)
@@ -279,10 +287,6 @@ module Arel
           -> { raise '?' }, # current_catalog,
           -> { raise '?' } # current_schema
         ][op].call
-      end
-
-      def visit_A_Indirection(**_attributes)
-        raise '?'
       end
 
       def visit_Null(**_)
