@@ -4,6 +4,8 @@ SimpleCov.formatter = SimpleCov::Formatter::Console
 SimpleCov.start
 
 require 'bundler/setup'
+require 'pry'
+require 'pry-alias'
 require 'arel_toolkit'
 
 require 'support/fake_record'
