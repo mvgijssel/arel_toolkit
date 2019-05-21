@@ -55,6 +55,7 @@ describe 'Arel.sql_to_arel' do
   it_behaves_like 'a visited node', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
   it_behaves_like 'a visited node', 'SELECT field[1]', 'PgQuery::A_INDICES'
   it_behaves_like 'a visited node', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
+  it_behaves_like 'a visited node', 'SELECT *', 'PgQuery::A_STAR'
 
   # # NOTE: should run at the end
   # children.each do |child|

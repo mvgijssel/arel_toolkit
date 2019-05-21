@@ -134,6 +134,10 @@ module Arel
         Arel::Nodes::Indirection.new(visit(arg, :operator), visit(indirection, :operator))
       end
 
+      def visit_A_Star
+        Arel.star
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -454,10 +458,6 @@ module Arel
         select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
         select_statement.orders = visit(sort_clause.to_a)
         select_statement
-      end
-
-      def visit_A_Star
-        Arel.star
       end
 
       def visit_RawStmt(stmt:)
