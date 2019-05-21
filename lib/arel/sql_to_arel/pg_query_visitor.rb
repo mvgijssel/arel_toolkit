@@ -138,6 +138,10 @@ module Arel
         Arel.star
       end
 
+      def visit_Alias(aliasname:)
+        aliasname
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -194,10 +198,6 @@ module Arel
         else
           raise "Unknown sublinktype: #{type}"
         end
-      end
-
-      def visit_Alias(aliasname:)
-        aliasname
       end
 
       def visit_RangeVar(aliaz: nil, relname:, inh:, relpersistence:)

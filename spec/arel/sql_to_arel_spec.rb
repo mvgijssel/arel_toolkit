@@ -19,6 +19,10 @@ describe 'Arel.sql_to_arel' do
       tree.to_s == constant.to_s
     when Integer
       tree.to_s == constant.to_s
+    when TrueClass
+      tree.to_s == constant.to_s
+    when FalseClass
+      tree.to_s == constant.to_s
     else
       raise 'i dunno'
     end
@@ -56,6 +60,8 @@ describe 'Arel.sql_to_arel' do
   it_behaves_like 'a visited node', 'SELECT field[1]', 'PgQuery::A_INDICES'
   it_behaves_like 'a visited node', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
   it_behaves_like 'a visited node', 'SELECT *', 'PgQuery::A_STAR'
+  # it_behaves_like 'a visited node', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
+  it_behaves_like 'a visited node', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
 
   # # NOTE: should run at the end
   # children.each do |child|
