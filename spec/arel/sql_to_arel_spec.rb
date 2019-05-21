@@ -49,6 +49,9 @@ describe 'Arel.sql_to_arel' do
       expect(parsed_sql).to eq sql
     end
   end
+
+  it_behaves_like 'a visited node', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
+
   # # NOTE: should run at the end
   # children.each do |child|
   #   sql, pg_query_node = child.metadata[:block].binding.local_variable_get(:args)

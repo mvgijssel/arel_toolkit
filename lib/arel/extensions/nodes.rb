@@ -3,6 +3,16 @@ module Arel
     class Unknown < Arel::Nodes::Node
     end
 
+    class Array < Arel::Nodes::Node
+      attr_reader :items
+
+      def initialize(items)
+        super()
+
+        @items = items
+      end
+    end
+
     class CurrentDate < Arel::Nodes::Node
     end
 

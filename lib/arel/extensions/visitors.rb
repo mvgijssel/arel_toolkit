@@ -19,6 +19,10 @@ module Arel
         collector << 'current_timestamp'
       end
 
+      def visit_Arel_Nodes_Array(o, collector)
+        collector << "ARRAY[#{o.items.join(',')}]"
+      end
+
       def visit_Arel_Nodes_NotEqual(o, collector)
         right = o.right
 

@@ -56,6 +56,10 @@ module Arel
         [object.keys.first, object.values.first]
       end
 
+      def visit_A_ArrayExpr(elements:)
+        Arel::Nodes::Array.new visit(elements)
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
