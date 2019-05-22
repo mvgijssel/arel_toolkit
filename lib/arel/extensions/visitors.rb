@@ -77,6 +77,16 @@ module Arel
       def visit_Arel_Nodes_Unknown(_o, collector)
         collector << 'UNKNOWN'
       end
+
+      def visit_Arel_Nodes_NaturalJoin(o, collector)
+        collector << "NATURAL JOIN "
+        collector = visit o.left, collector
+      end
+
+      def visit_Arel_Nodes_CrossJoin(o, collector)
+        collector << "CROSS JOIN "
+        collector = visit o.left, collector
+      end
     end
   end
 end

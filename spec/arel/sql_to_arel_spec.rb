@@ -105,7 +105,15 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', '???', 'PgQuery::INT_LIST'
   visit 'sql', 'SELECT 1', 'PgQuery::INTEGER'
   # visit 'sql', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
-  visit 'sql', 'SELECT * FROM "a" INNER JOIN "b" ON "a"."id" = "b"."id"', 'PgQuery::JOIN_EXPR'
+  visit 'sql',
+        'SELECT * FROM "a" ' \
+        'INNER JOIN "b" ON 1 = 1 ' \
+        'LEFT OUTER JOIN "c" ON 1 = 1 ' \
+        'FULL OUTER JOIN "d" ON 1 = 1 ' \
+        'RIGHT OUTER JOIN "e" ON 1 = 1 ' \
+        'CROSS JOIN "f" ' \
+        'NATURAL JOIN "g"',
+        'PgQuery::JOIN_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|

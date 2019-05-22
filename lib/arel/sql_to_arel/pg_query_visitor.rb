@@ -284,6 +284,38 @@ module Arel
         ival
       end
 
+      def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
+        join_class = case jointype
+                     when 0
+                       if is_natural
+                         Arel::Nodes::NaturalJoin
+                       elsif quals.nil?
+                         Arel::Nodes::CrossJoin
+                       else
+                         Arel::Nodes::InnerJoin
+                       end
+                     when 1
+                       Arel::Nodes::OuterJoin
+                     when 2
+                       Arel::Nodes::FullOuterJoin
+                     when 3
+                       Arel::Nodes::RightOuterJoin
+                     end
+
+        larg = visit(larg)
+        rarg = visit(rarg)
+
+        quals = Arel::Nodes::On.new visit(quals) if quals
+
+        join = join_class.new(rarg, quals)
+
+        if larg.is_a?(Array)
+          larg.concat([join])
+        else
+          [larg, join]
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -403,34 +435,6 @@ module Arel
           arg == '\'t\'' ? Arel::Nodes::True.new : Arel::Nodes::False.new
         else
           raise '?'
-        end
-      end
-
-      def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals:)
-        join_class = case jointype
-                     when 0
-                       raise 'do not know to natural join' if is_natural
-
-                       Arel::Nodes::InnerJoin
-                     when 1
-                       Arel::Nodes::OuterJoin
-                     when 2
-                       Arel::Nodes::FullOuterJoin
-                     when 3
-                       Arel::Nodes::RightOuterJoin
-                     end
-
-        larg = visit(larg)
-        rarg = visit(rarg)
-
-        quals = Arel::Nodes::On.new visit(quals) if quals
-
-        join = join_class.new(rarg, quals)
-
-        if larg.is_a?(Array)
-          larg.concat([join])
-        else
-          [larg, join]
         end
       end
 

@@ -50,5 +50,11 @@ module Arel
         @precision = precision
       end
     end
+
+    class NaturalJoin < Arel::Nodes::Join
+    end
+
+    class CrossJoin < Arel::Nodes::Join
+    end
   end
 end
