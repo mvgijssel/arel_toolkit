@@ -232,6 +232,54 @@ module Arel
         Arel::Nodes::SqlLiteral.new str
       end
 
+      def visit_FuncCall(
+        args: nil,
+        funcname:,
+        agg_star: nil,
+        agg_distinct: nil,
+        over: nil
+      )
+        args = if args
+                 visit args
+               elsif agg_star
+                 [Arel.star]
+               end
+
+        func_name = funcname[0]['String']['str']
+
+        func = case func_name
+               when 'sum'
+                 Arel::Nodes::Sum.new args
+
+               when 'rank'
+                 Arel::Nodes::Rank.new args
+
+               when 'count'
+                 Arel::Nodes::Count.new args
+
+               when 'generate_series'
+                 Arel::Nodes::GenerateSeries.new args
+
+               when 'max'
+                 Arel::Nodes::Max.new args
+
+               when 'min'
+                 Arel::Nodes::Min.new args
+
+               when 'avg'
+                 Arel::Nodes::Avg.new args
+
+               else
+                 Arel::Nodes::NamedFunction.new(func_name, args)
+               end
+
+        if over
+          Arel::Nodes::Over.new(func, visit(over))
+        else
+          func
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -392,54 +440,6 @@ module Arel
         Arel::Nodes::Window.new.tap do |window|
           window.orders = visit order_clause
           window.partitions = visit partition_clause
-        end
-      end
-
-      def visit_FuncCall(
-        args: nil,
-        funcname:,
-        agg_star: nil,
-        agg_distinct: nil,
-        over: nil
-      )
-        args = if args
-                 visit args
-               elsif agg_star
-                 [Arel.star]
-               end
-
-        func_name = funcname[0]['String']['str']
-
-        func = case func_name
-               when 'sum'
-                 Arel::Nodes::Sum.new args
-
-               when 'rank'
-                 Arel::Nodes::Rank.new args
-
-               when 'count'
-                 Arel::Nodes::Count.new args
-
-               when 'generate_series'
-                 Arel::Nodes::GenerateSeries.new args
-
-               when 'max'
-                 Arel::Nodes::Max.new args
-
-               when 'min'
-                 Arel::Nodes::Min.new args
-
-               when 'avg'
-                 Arel::Nodes::Avg.new args
-
-               else
-                 raise "? -> #{func_name}"
-               end
-
-        if over
-          Arel::Nodes::Over.new(func, visit(over))
-        else
-          func
         end
       end
 

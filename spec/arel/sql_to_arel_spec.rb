@@ -95,6 +95,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'EXPLAIN SELECT 1', 'PgQuery::EXPLAIN_STMT'
   # visit 'sql', 'FETCH some_cursor', 'PgQuery::FETCH_STMT'
   visit 'sql', 'SELECT 1.9', 'PgQuery::FLOAT'
+  visit 'sql', 'SELECT some_function("a", \'b\', 1)', 'PgQuery::FUNC_CALL'
 
   # # NOTE: should run at the end
   # children.each do |child|
