@@ -79,6 +79,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
   # visit 'sql', 'CREATE TABLE a (b integer NOT NULL)', 'PgQuery::CONSTRAINT'
   # visit 'sql', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
+  # visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::CREATE_FUNCTION_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
