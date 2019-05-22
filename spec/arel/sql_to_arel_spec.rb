@@ -38,7 +38,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  shared_examples 'a visited node' do |sql, pg_query_node|
+  shared_examples 'sql' do |sql, pg_query_node|
     it "expects `#{pg_query_node}` to exist" do
       expect(Object.const_defined?(pg_query_node)).to eq true
     end
@@ -54,20 +54,20 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  it_behaves_like 'a visited node', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
-  it_behaves_like 'a visited node', 'SELECT 1', 'PgQuery::A_CONST'
-  it_behaves_like 'a visited node', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
-  it_behaves_like 'a visited node', 'SELECT field[1]', 'PgQuery::A_INDICES'
-  it_behaves_like 'a visited node', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
-  it_behaves_like 'a visited node', 'SELECT *', 'PgQuery::A_STAR'
-  # it_behaves_like 'a visited node', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
-  it_behaves_like 'a visited node', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
-  # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
-  # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
-  it_behaves_like 'a visited node', "SELECT B'0101'", 'PgQuery::BIT_STRING'
-  it_behaves_like 'a visited node', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
-  it_behaves_like 'a visited node', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
-  it_behaves_like 'a visited node', 'SELECT CASE WHEN 1 THEN 1 ELSE 2 END', 'PgQuery::CASE_EXPR'
+  visit 'sql', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
+  visit 'sql', 'SELECT 1', 'PgQuery::A_CONST'
+  visit 'sql', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
+  visit 'sql', 'SELECT field[1]', 'PgQuery::A_INDICES'
+  visit 'sql', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
+  visit 'sql', 'SELECT *', 'PgQuery::A_STAR'
+  # visit 'sql', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
+  visit 'sql', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
+  # visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
+  # visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
+  visit 'sql', "SELECT B'0101'", 'PgQuery::BIT_STRING'
+  visit 'sql', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
+  visit 'sql', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
+  visit 'sql', 'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END', 'PgQuery::CASE_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|
