@@ -4,3 +4,9 @@ plugins:
     enabled: true
   bundler-audit:
     enabled: true
+  fixme:
+    enabled: true
+checks:
+  method-count:
+    config:
+      threshold: 30
