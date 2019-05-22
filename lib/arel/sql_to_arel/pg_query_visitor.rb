@@ -336,6 +336,17 @@ module Arel
         Arel.sql 'NULL'
       end
 
+      def visit_NullTest(arg:, nulltesttype:)
+        arg = visit(arg)
+
+        case nulltesttype
+        when PgQuery::CONSTR_TYPE_NULL
+          Arel::Nodes::Equality.new(arg, nil)
+        when PgQuery::CONSTR_TYPE_NOTNULL
+          Arel::Nodes::NotEqual.new(arg, nil)
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -537,17 +548,6 @@ module Arel
           Arel::Nodes::Least.new visit(args)
         else
           raise "Unknown Op -> #{op}"
-        end
-      end
-
-      def visit_NullTest(arg:, nulltesttype:)
-        arg = visit(arg)
-
-        case nulltesttype
-        when PgQuery::CONSTR_TYPE_NULL
-          Arel::Nodes::Equality.new(arg, nil)
-        when PgQuery::CONSTR_TYPE_NOTNULL
-          Arel::Nodes::NotEqual.new(arg, nil)
         end
       end
 
