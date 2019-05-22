@@ -86,6 +86,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', "CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()", 'PgQuery::CREATE_TRIG_STMT'
   # visit 'sql', "DEALLOCATE some_prepared_statement", 'PgQuery::DEALLOCATE_STMT'
   # visit 'sql', "DECLARE a CURSOR FOR SELECT 1", 'PgQuery::DECLARE_CURSOR_STMT'
+  # visit 'sql', "DO $$ a $$", 'PgQuery::DEF_ELEM'
 
   # # NOTE: should run at the end
   # children.each do |child|
