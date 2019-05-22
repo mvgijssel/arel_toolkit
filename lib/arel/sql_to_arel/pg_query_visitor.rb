@@ -228,6 +228,10 @@ module Arel
         UnboundColumnReference.new visit(fields, context).join('.')
       end
 
+      def visit_Float(str:)
+        Arel::Nodes::SqlLiteral.new str
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -324,10 +328,6 @@ module Arel
 
       def visit_ParamRef(number: nil)
         Arel::Nodes::BindParam.new(nil)
-      end
-
-      def visit_Float(str:)
-        Arel::Nodes::SqlLiteral.new str
       end
 
       def visit_TypeName(names:, typemod:)
