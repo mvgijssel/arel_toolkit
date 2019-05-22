@@ -347,6 +347,10 @@ module Arel
         end
       end
 
+      def visit_ParamRef(number: nil)
+        Arel::Nodes::BindParam.new(nil)
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -429,10 +433,6 @@ module Arel
 
       def visit_RangeFunction(**_attributes)
         raise '?'
-      end
-
-      def visit_ParamRef(number: nil)
-        Arel::Nodes::BindParam.new(nil)
       end
 
       def visit_TypeName(names:, typemod:)

@@ -123,6 +123,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'SELECT NULL', 'PgQuery::NULL'
   visit 'sql', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
   # visit 'sql', '???', 'PgQuery::OID_LIST'
+  visit 'sql', 'SELECT ?', 'PgQuery::PARAM_REF'
 
   # # NOTE: should run at the end
   # children.each do |child|
