@@ -124,6 +124,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
   # visit 'sql', '???', 'PgQuery::OID_LIST'
   visit 'sql', 'SELECT ?', 'PgQuery::PARAM_REF'
+  # visit 'sql', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
