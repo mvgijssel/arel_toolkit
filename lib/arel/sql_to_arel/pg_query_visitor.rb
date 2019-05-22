@@ -204,7 +204,7 @@ module Arel
           kees.conditions = visit args
 
           if defresult
-            default_result = to_supported_visitor_node(visit(defresult, :sql))
+            default_result = visit(defresult, :sql)
 
             kees.default = Arel::Nodes::Else.new default_result
           end
@@ -212,16 +212,14 @@ module Arel
       end
 
       def visit_CaseWhen(expr:, result:)
-        expr = to_supported_visitor_node(visit(expr))
-        result = to_supported_visitor_node(visit(result))
+        expr = visit(expr)
+        result = visit(result)
 
         Arel::Nodes::When.new(expr, result)
       end
 
       def visit_CoalesceExpr(args:)
-        args = visit(args).map do |arg|
-          to_supported_visitor_node(arg)
-        end
+        args = visit(args)
 
         Arel::Nodes::Coalesce.new args
       end
@@ -235,7 +233,7 @@ module Arel
         when :operator
           str
         when :const
-          "'#{str}'"
+          Arel.sql "'#{str}'"
         else
           "\"#{str}\""
         end
@@ -455,6 +453,7 @@ module Arel
         distinct_clause: nil,
         group_clause: nil,
         having_clause: nil,
+        with_clause: nil,
         op:
       )
 
@@ -476,7 +475,22 @@ module Arel
         select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
         select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
         select_statement.orders = visit(sort_clause.to_a)
+        select_statement.with = visit(with_clause) if with_clause
         select_statement
+      end
+
+      def visit_WithClause(ctes:, recursive: false)
+        if recursive
+          Arel::Nodes::WithRecursive.new visit(ctes)
+        else
+          Arel::Nodes::With.new visit(ctes)
+        end
+      end
+
+      def visit_CommonTableExpr(ctename:, ctequery:)
+        cte_table = Arel::Table.new(ctename)
+        cte_definition = visit(ctequery)
+        Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
       end
 
       def visit_RawStmt(stmt:)
@@ -611,15 +625,6 @@ module Arel
           [nil, join_sources]
         else
           [froms, join_sources]
-        end
-      end
-
-      def to_supported_visitor_node(value)
-        case value
-        when String
-          Arel.sql(value)
-        else
-          value
         end
       end
     end

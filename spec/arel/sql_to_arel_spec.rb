@@ -75,6 +75,8 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
   # visit 'sql', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
   visit 'sql', 'SELECT "id"', 'PgQuery::COLUMN_REF'
+  visit 'sql', 'WITH "a" AS (SELECT 1) SELECT * FROM "a"', 'PgQuery::COMMON_TABLE_EXPR'
+  visit 'sql', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|
