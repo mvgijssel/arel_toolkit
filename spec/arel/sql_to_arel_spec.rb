@@ -104,6 +104,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'INSERT INTO kerk (a,b,c) VALUES (1, "a", \'c\')', 'PgQuery::INSERT_STMT'
   # visit 'sql', '???', 'PgQuery::INT_LIST'
   visit 'sql', 'SELECT 1', 'PgQuery::INTEGER'
+  # visit 'sql', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
 
   # # NOTE: should run at the end
   # children.each do |child|
