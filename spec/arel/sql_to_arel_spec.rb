@@ -91,6 +91,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
   # visit 'sql', "DO $$ a $$", 'PgQuery::DO_STMT'
   # visit 'sql', "DROP TABLE some_tablr", 'PgQuery::DROP_STMT'
+  # visit 'sql', "EXECUTE some_prepared_statement", 'PgQuery::EXECUTE_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
