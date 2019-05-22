@@ -71,6 +71,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END", 'PgQuery::CASE_WHEN'
   # visit 'sql', "CHECKPOINT", 'PgQuery::CHECK_POINT_STMT'
   # visit 'sql', "CLOSE cursor;", 'PgQuery::CLOSE_PORTAL_STMT'
+  visit 'sql', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|

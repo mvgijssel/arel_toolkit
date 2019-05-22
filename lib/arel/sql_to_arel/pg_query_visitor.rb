@@ -229,6 +229,14 @@ module Arel
         end
       end
 
+      def visit_CoalesceExpr(args:)
+        args = visit(args).map do |arg|
+          to_supported_visitor_node(arg)
+        end
+
+        Arel::Nodes::Coalesce.new args
+      end
+
       def visit_Integer(ival:)
         # Arel::Attributes::Integer.new attributes[:ival]
         ival
@@ -321,10 +329,6 @@ module Arel
 
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
-      end
-
-      def visit_CoalesceExpr(args:)
-        Arel::Nodes::Coalesce.new visit(args)
       end
 
       def visit_TypeName(names:, typemod:)
