@@ -120,6 +120,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'sql', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
   visit 'sql', 'SELECT 1 FOR KEY SHARE', 'PgQuery::LOCKING_CLAUSE'
+  visit 'sql', 'SELECT NULL', 'PgQuery::NULL'
 
   # # NOTE: should run at the end
   # children.each do |child|

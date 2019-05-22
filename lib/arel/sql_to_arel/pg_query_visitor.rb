@@ -332,6 +332,10 @@ module Arel
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
       end
 
+      def visit_Null(**_)
+        Arel.sql 'NULL'
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -410,10 +414,6 @@ module Arel
           -> { raise '?' }, # current_catalog,
           -> { raise '?' } # current_schema
         ][op].call
-      end
-
-      def visit_Null(**_)
-        Arel.sql 'NULL'
       end
 
       def visit_RangeFunction(**_attributes)
