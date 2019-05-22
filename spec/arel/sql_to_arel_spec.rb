@@ -115,6 +115,7 @@ describe 'Arel.sql_to_arel' do
         'NATURAL JOIN "g"',
         'PgQuery::JOIN_EXPR'
 
+  visit 'sql', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
   # # NOTE: should run at the end
   # children.each do |child|
   #   sql, pg_query_node = child.metadata[:block].binding.local_variable_get(:args)
