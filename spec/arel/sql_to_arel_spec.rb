@@ -81,6 +81,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
   # visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::CREATE_FUNCTION_STMT'
   # visit 'sql', "CREATE SCHEMA secure", 'PgQuery::CREATE_SCHEMA_STMT'
+  # visit 'sql', "CREATE TABLE a (b integer)", 'PgQuery::CREATE_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
