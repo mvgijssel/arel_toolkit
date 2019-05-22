@@ -102,6 +102,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', "CREATE INDEX some_index ON some_table USING GIN (some_column)", 'PgQuery::INDEX_ELEM'
   # visit 'sql', "CREATE INDEX some_index ON some_table (some_column)", 'PgQuery::INDEX_STMT'
   # visit 'sql', 'INSERT INTO kerk (a,b,c) VALUES (1, "a", \'c\')', 'PgQuery::INSERT_STMT'
+  # visit 'sql', '???', 'PgQuery::INT_LIST'
 
   # # NOTE: should run at the end
   # children.each do |child|
