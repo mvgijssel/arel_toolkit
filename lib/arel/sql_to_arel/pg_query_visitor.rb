@@ -316,6 +316,22 @@ module Arel
         end
       end
 
+      def visit_LockingClause(strength:, wait_policy:)
+        strength_clause = {
+          1 => "FOR KEY SHARE",
+          2 => "FOR SHARE",
+          3 => "FOR NO KEY UPDATE",
+          4 => "FOR UPDATE",
+        }.fetch(strength)
+        wait_policy_clause = {
+          0 => "",
+          1 => " SKIP LOCKED",
+          2 => " NOWAIT",
+        }.fetch(wait_policy)
+
+        Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -456,6 +472,7 @@ module Arel
         group_clause: nil,
         having_clause: nil,
         with_clause: nil,
+        locking_clause: nil,
         op:
       )
 
@@ -478,6 +495,7 @@ module Arel
         select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
         select_statement.orders = visit(sort_clause.to_a)
         select_statement.with = visit(with_clause) if with_clause
+        select_statement.lock = visit(locking_clause) if locking_clause
         select_statement
       end
 
