@@ -115,7 +115,7 @@ describe 'Arel.sql_to_arel' do
         'NATURAL JOIN "g"',
         'PgQuery::JOIN_EXPR'
 
-  visit 'sql', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
+  # visit 'sql', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
   visit 'sql', 'SELECT 1 FOR UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'sql', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'sql', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
