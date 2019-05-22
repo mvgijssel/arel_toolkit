@@ -38,7 +38,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  shared_examples "a visited node" do |sql, pg_query_node|
+  shared_examples 'a visited node' do |sql, pg_query_node|
     it "expects `#{pg_query_node}` to exist" do
       expect(Object.const_defined?(pg_query_node)).to eq true
     end
@@ -65,9 +65,9 @@ describe 'Arel.sql_to_arel' do
   # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
   # it_behaves_like 'a visited node', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   it_behaves_like 'a visited node', "SELECT B'0101'", 'PgQuery::BIT_STRING'
-  it_behaves_like 'a visited node', "SELECT 1 WHERE 1 AND 2", 'PgQuery::BOOL_EXPR'
-  it_behaves_like 'a visited node', "SELECT 1 WHERE 1 IS TRUE", 'PgQuery::BOOLEAN_TEST'
-  it_behaves_like 'a visited node', "SELECT CASE WHEN 1 THEN 1 ELSE 2 END", 'PgQuery::CASE_EXPR'
+  it_behaves_like 'a visited node', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
+  it_behaves_like 'a visited node', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
+  it_behaves_like 'a visited node', 'SELECT CASE WHEN 1 THEN 1 ELSE 2 END', 'PgQuery::CASE_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|
