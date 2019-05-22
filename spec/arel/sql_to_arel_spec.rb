@@ -72,6 +72,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', "CHECKPOINT", 'PgQuery::CHECK_POINT_STMT'
   # visit 'sql', "CLOSE cursor;", 'PgQuery::CLOSE_PORTAL_STMT'
   visit 'sql', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
+  # visit 'sql', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
 
   # # NOTE: should run at the end
   # children.each do |child|
