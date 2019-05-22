@@ -68,6 +68,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
   visit 'sql', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
   visit 'sql', 'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END', 'PgQuery::CASE_EXPR'
+  visit 'sql', "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END", 'PgQuery::CASE_WHEN'
 
   # # NOTE: should run at the end
   # children.each do |child|

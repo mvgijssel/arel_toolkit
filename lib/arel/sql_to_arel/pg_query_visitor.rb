@@ -170,26 +170,6 @@ module Arel
         end
       end
 
-      def visit_CaseExpr(arg: nil, args:, defresult: nil)
-        Arel::Nodes::Case.new.tap do |kees|
-          kees.case = visit(arg) if arg
-
-          kees.conditions = visit args
-
-          if defresult
-            default_result = visit(defresult)
-            default_result = case default_result
-                             when Integer
-                               default_result
-                             else
-                               Arel.sql(default_result)
-                             end
-
-            kees.default = Arel::Nodes::Else.new default_result
-          end
-        end
-      end
-
       def visit_BooleanTest(arg:, booltesttype:)
         arg = visit(arg)
 
@@ -215,6 +195,27 @@ module Arel
         else
           raise '?'
         end
+      end
+
+      def visit_CaseExpr(arg: nil, args:, defresult: nil)
+        Arel::Nodes::Case.new.tap do |kees|
+          kees.case = visit(arg) if arg
+
+          kees.conditions = visit args
+
+          if defresult
+            default_result = to_supported_visitor_node(visit(defresult, :sql))
+
+            kees.default = Arel::Nodes::Else.new default_result
+          end
+        end
+      end
+
+      def visit_CaseWhen(expr:, result:)
+        expr = to_supported_visitor_node(visit(expr))
+        result = to_supported_visitor_node(visit(result))
+
+        Arel::Nodes::When.new(expr, result)
       end
 
       def visit_String(context = nil, str:)
@@ -284,21 +285,6 @@ module Arel
         subquery = visit(subquery)
 
         Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
-      end
-
-      def visit_CaseWhen(expr:, result:)
-        expr = visit(expr)
-        result = visit(result)
-
-        # TODO: Let's figure out if this is the way to go
-        result = case result
-                 when Integer
-                   result
-                 else
-                   Arel.sql(result)
-                 end
-
-        Arel::Nodes::When.new(expr, result)
       end
 
       def visit_SQLValueFunction(op:, typmod:)
@@ -620,6 +606,15 @@ module Arel
           [nil, join_sources]
         else
           [froms, join_sources]
+        end
+      end
+
+      def to_supported_visitor_node(value)
+        case value
+        when String
+          Arel.sql(value)
+        else
+          value
         end
       end
     end
