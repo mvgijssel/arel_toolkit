@@ -99,6 +99,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::FUNCTION_PARAMETER'
   # visit 'sql', "GRANT some_admins TO some_users", 'PgQuery::GRANT_ROLE_STMT'
   # visit 'sql', "GRANT SELECT ON some_table TO some_users", 'PgQuery::GRANT_STMT'
+  # visit 'sql', "CREATE INDEX some_index ON some_table USING GIN (some_column)", 'PgQuery::INDEX_ELEM'
 
   # # NOTE: should run at the end
   # children.each do |child|
