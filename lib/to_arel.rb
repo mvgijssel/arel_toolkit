@@ -320,7 +320,7 @@ module ToArel
     end
 
     def visit_CoalesceExpr(args:)
-      ::ArelExtensions::Nodes::Coalesce.new visit(args)
+      ::Arel::Nodes::Coalesce.new visit(args)
     end
 
     def visit_TypeName(names:, typemod:)

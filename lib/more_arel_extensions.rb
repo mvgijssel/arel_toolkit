@@ -1,5 +1,4 @@
 require 'arel'
-require 'arel_extensions'
 
 module Arel
   module Nodes
