@@ -280,6 +280,10 @@ module Arel
         end
       end
 
+      def visit_Integer(ival:)
+        ival
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -289,12 +293,6 @@ module Arel
         else
           "\"#{str}\""
         end
-      end
-
-
-      def visit_Integer(ival:)
-        # Arel::Attributes::Integer.new attributes[:ival]
-        ival
       end
 
       def visit_ResTarget(val:, name: nil)
