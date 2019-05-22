@@ -7,6 +7,7 @@ require 'bundler/setup'
 require 'pry'
 require 'pry-alias'
 require 'arel_toolkit'
+require 'to_arel'
 
 require 'support/fake_record'
 Arel::Table.engine = FakeRecord::Base.new
