@@ -218,6 +218,18 @@ module Arel
         Arel::Nodes::When.new(expr, result)
       end
 
+      def visit_CoalesceExpr(args:)
+        args = visit(args).map do |arg|
+          to_supported_visitor_node(arg)
+        end
+
+        Arel::Nodes::Coalesce.new args
+      end
+
+      def visit_ColumnRef(context = nil, fields:)
+        UnboundColumnReference.new visit(fields, context).join('.')
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -229,21 +241,10 @@ module Arel
         end
       end
 
-      def visit_CoalesceExpr(args:)
-        args = visit(args).map do |arg|
-          to_supported_visitor_node(arg)
-        end
-
-        Arel::Nodes::Coalesce.new args
-      end
 
       def visit_Integer(ival:)
         # Arel::Attributes::Integer.new attributes[:ival]
         ival
-      end
-
-      def visit_ColumnRef(context = nil, fields:)
-        UnboundColumnReference.new visit(fields, context).join('.')
       end
 
       def visit_ResTarget(val:, name: nil)

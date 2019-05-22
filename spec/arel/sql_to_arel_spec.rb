@@ -74,6 +74,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
   # visit 'sql', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
   # visit 'sql', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
+  visit 'sql', 'SELECT "id"', 'PgQuery::COLUMN_REF'
 
   # # NOTE: should run at the end
   # children.each do |child|
