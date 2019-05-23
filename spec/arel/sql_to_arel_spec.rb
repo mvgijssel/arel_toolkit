@@ -140,7 +140,23 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER GROUP some_role ADD USER some_user', 'PgQuery::ROLE_SPEC'
   visit 'all', "SELECT ROW(1, 2.5, 'a')", 'PgQuery::ROW_EXPR'
   visit 'pg', 'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table', 'PgQuery::RULE_STMT'
-  visit 'all', 'SELECT 1', 'PgQuery::SELECT_STMT'
+  visit 'all',
+        'SELECT 1 FROM "a" ' \
+        'WHERE TRUE ' \
+        'GROUP BY 1 ' \
+        'HAVING "a" > 1 ' \
+        'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC) ' \
+        'ORDER BY 1 ASC ' \
+        'LIMIT 10 ' \
+        'OFFSET 2 ' \
+        'FOR UPDATE',
+        'PgQuery::SELECT_STMT'
+
+  it 'translates FETCH into LIMIT' do
+    sql = "SELECT 1 FETCH FIRST 2 ROWS ONLY"
+    parsed_sql = Arel.sql_to_arel(sql).to_sql
+    expect(parsed_sql).to eq "SELECT 1 LIMIT 2"
+  end
 
   # # NOTE: should run at the end
   # children.each do |child|

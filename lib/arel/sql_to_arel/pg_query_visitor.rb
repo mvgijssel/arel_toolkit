@@ -415,6 +415,7 @@ module Arel
         having_clause: nil,
         with_clause: nil,
         locking_clause: nil,
+        window_clause: nil,
         op:
       )
 
@@ -428,6 +429,7 @@ module Arel
         select_core.wheres = [visit(where_clause)] if where_clause
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
+        select_core.windows = visit(window_clause) if window_clause
 
         # TODO: We have to deal with DISTINCT ON!
         select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
@@ -530,8 +532,10 @@ module Arel
         end
       end
 
-      def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:)
-        Arel::Nodes::Window.new.tap do |window|
+      def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:, name: nil)
+        instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
+
+        instance.tap do |window|
           window.orders = visit order_clause
           window.partitions = visit partition_clause
         end
