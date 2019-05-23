@@ -368,6 +368,13 @@ module Arel
         ordinality ? Arel::Nodes::WithOrdinality.new(node) : node
       end
 
+      def visit_RangeSubselect(aliaz:, subquery:, lateral: false)
+        aliaz = visit(aliaz)
+        subquery = visit(subquery)
+        node = Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
+        lateral ? Arel::Nodes::Lateral.new(node) : node
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -419,13 +426,6 @@ module Arel
 
       def visit_RangeVar(aliaz: nil, relname:, inh:, relpersistence:)
         Arel::Table.new relname, as: (visit(aliaz) if aliaz)
-      end
-
-      def visit_RangeSubselect(aliaz:, subquery:)
-        aliaz = visit(aliaz)
-        subquery = visit(subquery)
-
-        Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
       end
 
       def visit_SQLValueFunction(op:, typmod:)
