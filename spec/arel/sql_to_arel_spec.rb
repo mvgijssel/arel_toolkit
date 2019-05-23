@@ -171,6 +171,7 @@ describe 'Arel.sql_to_arel' do
         'current_catalog, ' \
         'current_schema',
         'PgQuery::SQL_VALUE_FUNCTION'
+  visit 'all', "SELECT 'some_string'", 'PgQuery::STRING'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
