@@ -129,6 +129,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
   visit 'sql', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
   visit 'sql', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON TRUE', 'PgQuery::RANGE_SUBSELECT'
+  visit 'sql', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
 
   # # NOTE: should run at the end
   # children.each do |child|

@@ -375,6 +375,16 @@ module Arel
         lateral ? Arel::Nodes::Lateral.new(node) : node
       end
 
+      def visit_RangeVar(aliaz: nil, relname:, inh: false, relpersistence:, schemaname: nil)
+        Arel::Table.new(
+          relname,
+          as: (visit(aliaz) if aliaz),
+          only: !inh,
+          relpersistence: relpersistence,
+          schema_name: schemaname,
+        )
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -422,10 +432,6 @@ module Arel
         else
           raise "Unknown sublinktype: #{type}"
         end
-      end
-
-      def visit_RangeVar(aliaz: nil, relname:, inh:, relpersistence:)
-        Arel::Table.new relname, as: (visit(aliaz) if aliaz)
       end
 
       def visit_SQLValueFunction(op:, typmod:)
@@ -503,7 +509,7 @@ module Arel
         select_core = Arel::Nodes::SelectCore.new
 
         froms, join_sources = generate_sources(from_clause)
-        select_core.from = froms.first if froms
+        select_core.from = froms if froms
         select_core.source.right = join_sources
 
         select_core.projections = visit(target_list) if target_list

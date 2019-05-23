@@ -105,6 +105,19 @@ module Arel
         collector << " WITH ORDINALITY"
       end
 
+      alias_method :old_visit_Arel_Table, :visit_Arel_Table
+      def visit_Arel_Table o, collector
+        if o.only
+          collector << 'ONLY '
+        end
+
+        if o.schema_name
+          collector << "\"#{o.schema_name}\"."
+        end
+
+        old_visit_Arel_Table(o, collector)
+      end
+
       # TODO: currently in Arel master, remove in time
       # Used by Lateral visitor to enclose select queries in parentheses
       def grouping_parentheses(o, collector)
