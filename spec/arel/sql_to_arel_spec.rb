@@ -38,11 +38,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  shared_examples 'sql' do |sql, pg_query_node|
-    it "expects `#{pg_query_node}` to exist" do
-      expect(Object.const_defined?(pg_query_node)).to eq true
-    end
-
+  shared_examples 'all' do |sql, pg_query_node|
     it "expects `#{pg_query_node}` to appear in the ast" do
       tree = PgQuery.parse(sql).tree
       expect(tree).to ast_contains(Object.const_get(pg_query_node))
@@ -54,60 +50,67 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  visit 'sql', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
-  visit 'sql', 'SELECT 1', 'PgQuery::A_CONST'
-  visit 'sql', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
-  visit 'sql', 'SELECT field[1]', 'PgQuery::A_INDICES'
-  visit 'sql', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
-  visit 'sql', 'SELECT *', 'PgQuery::A_STAR'
-  # visit 'sql', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
-  visit 'sql', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
-  # visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
-  # visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
-  visit 'sql', "SELECT B'0101'", 'PgQuery::BIT_STRING'
-  visit 'sql', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
-  visit 'sql', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
-  visit 'sql', 'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END', 'PgQuery::CASE_EXPR'
-  visit 'sql', "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END", 'PgQuery::CASE_WHEN'
-  # visit 'sql', "CHECKPOINT", 'PgQuery::CHECK_POINT_STMT'
-  # visit 'sql', "CLOSE cursor;", 'PgQuery::CLOSE_PORTAL_STMT'
-  visit 'sql', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
-  # visit 'sql', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
-  # visit 'sql', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
-  visit 'sql', 'SELECT "id"', 'PgQuery::COLUMN_REF'
-  visit 'sql', 'WITH "a" AS (SELECT 1) SELECT * FROM "a"', 'PgQuery::COMMON_TABLE_EXPR'
-  visit 'sql', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
-  # visit 'sql', 'CREATE TABLE a (b integer NOT NULL)', 'PgQuery::CONSTRAINT'
-  # visit 'sql', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
-  # visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::CREATE_FUNCTION_STMT'
-  # visit 'sql', "CREATE SCHEMA secure", 'PgQuery::CREATE_SCHEMA_STMT'
-  # visit 'sql', "CREATE TABLE a (b integer)", 'PgQuery::CREATE_STMT'
-  # visit 'sql', "CREATE TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
-  # visit 'sql', "CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
-  # visit 'sql', "CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
-  # visit 'sql', "CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()", 'PgQuery::CREATE_TRIG_STMT'
-  # visit 'sql', "DEALLOCATE some_prepared_statement", 'PgQuery::DEALLOCATE_STMT'
-  # visit 'sql', "DECLARE a CURSOR FOR SELECT 1", 'PgQuery::DECLARE_CURSOR_STMT'
-  # visit 'sql', "DO $$ a $$", 'PgQuery::DEF_ELEM'
-  # visit 'sql', 'DELETE FROM a', 'PgQuery::DELETE_STMT'
-  # visit 'sql', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
-  # visit 'sql', "DO $$ a $$", 'PgQuery::DO_STMT'
-  # visit 'sql', "DROP TABLE some_tablr", 'PgQuery::DROP_STMT'
-  # visit 'sql', "EXECUTE some_prepared_statement", 'PgQuery::EXECUTE_STMT'
-  # visit 'sql', 'EXPLAIN SELECT 1', 'PgQuery::EXPLAIN_STMT'
-  # visit 'sql', 'FETCH some_cursor', 'PgQuery::FETCH_STMT'
-  visit 'sql', 'SELECT 1.9', 'PgQuery::FLOAT'
-  visit 'sql', 'SELECT some_function("a", \'b\', 1)', 'PgQuery::FUNC_CALL'
-  # visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::FUNCTION_PARAMETER'
-  # visit 'sql', "GRANT some_admins TO some_users", 'PgQuery::GRANT_ROLE_STMT'
-  # visit 'sql', "GRANT SELECT ON some_table TO some_users", 'PgQuery::GRANT_STMT'
-  # visit 'sql', "CREATE INDEX some_index ON some_table USING GIN (some_column)", 'PgQuery::INDEX_ELEM'
-  # visit 'sql', "CREATE INDEX some_index ON some_table (some_column)", 'PgQuery::INDEX_STMT'
-  # visit 'sql', 'INSERT INTO kerk (a,b,c) VALUES (1, "a", \'c\')', 'PgQuery::INSERT_STMT'
-  # visit 'sql', '???', 'PgQuery::INT_LIST'
-  visit 'sql', 'SELECT 1', 'PgQuery::INTEGER'
-  # visit 'sql', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
-  visit 'sql',
+  shared_examples 'pg' do |sql, pg_query_node|
+    it "expects `#{pg_query_node}` to appear in the ast" do
+      tree = PgQuery.parse(sql).tree
+      expect(tree).to ast_contains(Object.const_get(pg_query_node))
+    end
+  end
+
+  visit 'all', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
+  visit 'all', 'SELECT 1', 'PgQuery::A_CONST'
+  visit 'all', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
+  visit 'all', 'SELECT field[1]', 'PgQuery::A_INDICES'
+  visit 'all', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
+  visit 'all', 'SELECT *', 'PgQuery::A_STAR'
+  visit 'pg', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
+  visit 'all', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
+  visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
+  visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
+  visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
+  visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
+  visit 'all', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
+  visit 'all', 'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END', 'PgQuery::CASE_EXPR'
+  visit 'all', "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END", 'PgQuery::CASE_WHEN'
+  visit 'pg', "CHECKPOINT", 'PgQuery::CHECK_POINT_STMT'
+  visit 'pg', "CLOSE cursor;", 'PgQuery::CLOSE_PORTAL_STMT'
+  visit 'all', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
+  # visit 'pg', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
+  visit 'pg', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
+  visit 'all', 'SELECT "id"', 'PgQuery::COLUMN_REF'
+  visit 'all', 'WITH "a" AS (SELECT 1) SELECT * FROM "a"', 'PgQuery::COMMON_TABLE_EXPR'
+  visit 'all', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
+  visit 'pg', 'CREATE TABLE a (b integer NOT NULL)', 'PgQuery::CONSTRAINT'
+  visit 'pg', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
+  visit 'pg', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::CREATE_FUNCTION_STMT'
+  visit 'pg', "CREATE SCHEMA secure", 'PgQuery::CREATE_SCHEMA_STMT'
+  visit 'pg', "CREATE TABLE a (b integer)", 'PgQuery::CREATE_STMT'
+  visit 'pg', "CREATE TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
+  visit 'pg', "CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
+  visit 'pg', "CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
+  visit 'pg', "CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()", 'PgQuery::CREATE_TRIG_STMT'
+  visit 'pg', "DEALLOCATE some_prepared_statement", 'PgQuery::DEALLOCATE_STMT'
+  visit 'pg', "DECLARE a CURSOR FOR SELECT 1", 'PgQuery::DECLARE_CURSOR_STMT'
+  visit 'pg', "DO $$ a $$", 'PgQuery::DEF_ELEM'
+  visit 'pg', 'DELETE FROM a', 'PgQuery::DELETE_STMT'
+  # visit 'pg', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
+  visit 'pg', "DO $$ a $$", 'PgQuery::DO_STMT'
+  visit 'pg', "DROP TABLE some_tablr", 'PgQuery::DROP_STMT'
+  visit 'pg', "EXECUTE some_prepared_statement", 'PgQuery::EXECUTE_STMT'
+  visit 'pg', 'EXPLAIN SELECT 1', 'PgQuery::EXPLAIN_STMT'
+  visit 'pg', 'FETCH some_cursor', 'PgQuery::FETCH_STMT'
+  visit 'all', 'SELECT 1.9', 'PgQuery::FLOAT'
+  visit 'all', 'SELECT some_function("a", \'b\', 1)', 'PgQuery::FUNC_CALL'
+  visit 'pg', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::FUNCTION_PARAMETER'
+  visit 'pg', "GRANT some_admins TO some_users", 'PgQuery::GRANT_ROLE_STMT'
+  visit 'pg', "GRANT SELECT ON some_table TO some_users", 'PgQuery::GRANT_STMT'
+  visit 'pg', "CREATE INDEX some_index ON some_table USING GIN (some_column)", 'PgQuery::INDEX_ELEM'
+  visit 'pg', "CREATE INDEX some_index ON some_table (some_column)", 'PgQuery::INDEX_STMT'
+  visit 'pg', 'INSERT INTO kerk (a,b,c) VALUES (1, "a", \'c\')', 'PgQuery::INSERT_STMT'
+  # visit 'pg', '???', 'PgQuery::INT_LIST'
+  visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
+  visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
+  visit 'all',
         'SELECT * FROM "a" ' \
         'INNER JOIN "b" ON 1 = 1 ' \
         'LEFT OUTER JOIN "c" ON 1 = 1 ' \
@@ -117,21 +120,21 @@ describe 'Arel.sql_to_arel' do
         'NATURAL JOIN "g"',
         'PgQuery::JOIN_EXPR'
 
-  # visit 'sql', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
-  visit 'sql', 'SELECT 1 FOR UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
-  visit 'sql', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
-  visit 'sql', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
-  visit 'sql', 'SELECT 1 FOR KEY SHARE', 'PgQuery::LOCKING_CLAUSE'
-  visit 'sql', 'SELECT NULL', 'PgQuery::NULL'
-  visit 'sql', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
-  # visit 'sql', '???', 'PgQuery::OID_LIST'
-  visit 'sql', 'SELECT ?', 'PgQuery::PARAM_REF'
-  # visit 'sql', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
-  visit 'sql', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
-  visit 'sql', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON TRUE', 'PgQuery::RANGE_SUBSELECT'
-  visit 'sql', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
-  visit 'sql', 'SELECT 1', 'PgQuery::RAW_STMT'
-  # visit 'sql', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
+  visit 'pg', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
+  visit 'all', 'SELECT 1 FOR UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all', 'SELECT 1 FOR KEY SHARE', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all', 'SELECT NULL', 'PgQuery::NULL'
+  visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
+  # visit 'pg', '???', 'PgQuery::OID_LIST'
+  visit 'all', 'SELECT ?', 'PgQuery::PARAM_REF'
+  visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
+  visit 'all', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
+  visit 'all', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON TRUE', 'PgQuery::RANGE_SUBSELECT'
+  visit 'all', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
+  visit 'all', 'SELECT 1', 'PgQuery::RAW_STMT'
+  visit 'pg', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
