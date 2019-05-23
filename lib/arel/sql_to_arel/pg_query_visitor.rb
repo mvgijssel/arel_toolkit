@@ -385,6 +385,10 @@ module Arel
         )
       end
 
+      def visit_RawStmt(stmt:)
+        visit(stmt)
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -541,10 +545,6 @@ module Arel
         cte_table = Arel::Table.new(ctename)
         cte_definition = visit(ctequery)
         Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
-      end
-
-      def visit_RawStmt(stmt:)
-        visit(stmt) if stmt
       end
 
       def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
