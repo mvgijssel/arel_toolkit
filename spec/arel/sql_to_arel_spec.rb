@@ -125,6 +125,7 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', '???', 'PgQuery::OID_LIST'
   visit 'sql', 'SELECT ?', 'PgQuery::PARAM_REF'
   # visit 'sql', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
+  visit 'sql', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
 
   # # NOTE: should run at the end
   # children.each do |child|

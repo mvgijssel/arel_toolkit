@@ -243,6 +243,8 @@ module Arel
                  visit args
                elsif agg_star
                  [Arel.star]
+               else
+                 []
                end
 
         func_name = funcname[0]['String']['str']
@@ -351,6 +353,21 @@ module Arel
         Arel::Nodes::BindParam.new(nil)
       end
 
+      def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)
+        raise 'i dunno' unless is_rowsfrom
+
+        functions = functions.map do |function_array|
+          function, empty_value = function_array
+          raise 'i dunno' unless empty_value.nil?
+
+          visit(function)
+        end
+
+        node = Arel::Nodes::RangeFunction.new functions
+        node = lateral ? Arel::Nodes::Lateral.new(node) : node
+        ordinality ? Arel::Nodes::WithOrdinality.new(node) : node
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -429,10 +446,6 @@ module Arel
           -> { raise '?' }, # current_catalog,
           -> { raise '?' } # current_schema
         ][op].call
-      end
-
-      def visit_RangeFunction(**_attributes)
-        raise '?'
       end
 
       def visit_TypeName(names:, typemod:)
