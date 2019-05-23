@@ -79,46 +79,42 @@ module Arel
       end
 
       def visit_Arel_Nodes_NaturalJoin(o, collector)
-        collector << "NATURAL JOIN "
+        collector << 'NATURAL JOIN '
         collector = visit o.left, collector
       end
 
       def visit_Arel_Nodes_CrossJoin(o, collector)
-        collector << "CROSS JOIN "
+        collector << 'CROSS JOIN '
         collector = visit o.left, collector
       end
 
       # TODO: currently in Arel master, remove in time
       def visit_Arel_Nodes_Lateral(o, collector)
-        collector << "LATERAL "
+        collector << 'LATERAL '
         grouping_parentheses o, collector
       end
 
       def visit_Arel_Nodes_RangeFunction(o, collector)
-        collector << "ROWS FROM ("
+        collector << 'ROWS FROM ('
         visit o.expr, collector
-        collector << ")"
+        collector << ')'
       end
 
       def visit_Arel_Nodes_WithOrdinality(o, collector)
         visit o.expr, collector
-        collector << " WITH ORDINALITY"
+        collector << ' WITH ORDINALITY'
       end
 
-      alias_method :old_visit_Arel_Table, :visit_Arel_Table
-      def visit_Arel_Table o, collector
-        if o.only
-          collector << 'ONLY '
-        end
+      alias old_visit_Arel_Table visit_Arel_Table
+      def visit_Arel_Table(o, collector)
+        collector << 'ONLY ' if o.only
 
-        if o.schema_name
-          collector << "\"#{o.schema_name}\"."
-        end
+        collector << "\"#{o.schema_name}\"." if o.schema_name
 
         old_visit_Arel_Table(o, collector)
       end
 
-      def visit_Arel_Nodes_Row o, collector
+      def visit_Arel_Nodes_Row(o, collector)
         collector << 'ROW('
         visit o.expr, collector
         collector << ')'
@@ -128,9 +124,9 @@ module Arel
       # Used by Lateral visitor to enclose select queries in parentheses
       def grouping_parentheses(o, collector)
         if o.expr.is_a? Nodes::SelectStatement
-          collector << "("
+          collector << '('
           visit o.expr, collector
-          collector << ")"
+          collector << ')'
         else
           visit o.expr, collector
         end

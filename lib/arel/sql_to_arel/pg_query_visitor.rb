@@ -320,15 +320,15 @@ module Arel
 
       def visit_LockingClause(strength:, wait_policy:)
         strength_clause = {
-          1 => "FOR KEY SHARE",
-          2 => "FOR SHARE",
-          3 => "FOR NO KEY UPDATE",
-          4 => "FOR UPDATE",
+          1 => 'FOR KEY SHARE',
+          2 => 'FOR SHARE',
+          3 => 'FOR NO KEY UPDATE',
+          4 => 'FOR UPDATE'
         }.fetch(strength)
         wait_policy_clause = {
-          0 => "",
-          1 => " SKIP LOCKED",
-          2 => " NOWAIT",
+          0 => '',
+          1 => ' SKIP LOCKED',
+          2 => ' NOWAIT'
         }.fetch(wait_policy)
 
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
@@ -381,7 +381,7 @@ module Arel
           as: (visit(aliaz) if aliaz),
           only: !inh,
           relpersistence: relpersistence,
-          schema_name: schemaname,
+          schema_name: schemaname
         )
       end
 
