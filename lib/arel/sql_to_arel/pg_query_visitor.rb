@@ -399,6 +399,10 @@ module Arel
         end
       end
 
+      def visit_RowExpr(args:, row_format:)
+        Arel::Nodes::Row.new(visit(args), row_format)
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator

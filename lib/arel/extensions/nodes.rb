@@ -86,5 +86,16 @@ module Arel
         old_initialize(name, as: as, type_caster: type_caster)
       end
     end
+
+    # postgres only: https://www.postgresql.org/docs/9.2/sql-expressions.html
+    class Row < Arel::Nodes::Unary
+      attr_reader :row_format
+
+      def initialize(args, row_format)
+        super(args)
+
+        @row_format = row_format
+      end
+    end
   end
 end

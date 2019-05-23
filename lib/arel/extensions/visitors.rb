@@ -118,6 +118,12 @@ module Arel
         old_visit_Arel_Table(o, collector)
       end
 
+      def visit_Arel_Nodes_Row o, collector
+        collector << 'ROW('
+        visit o.expr, collector
+        collector << ')'
+      end
+
       # TODO: currently in Arel master, remove in time
       # Used by Lateral visitor to enclose select queries in parentheses
       def grouping_parentheses(o, collector)

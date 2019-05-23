@@ -138,6 +138,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER TABLE some_table RENAME COLUMN some_column TO a', 'PgQuery::RENAME_STMT'
   visit 'all', 'SELECT 1', 'PgQuery::RES_TARGET'
   visit 'pg', 'ALTER GROUP some_role ADD USER some_user', 'PgQuery::ROLE_SPEC'
+  visit 'all', "SELECT ROW(1, 2.5, 'a')", 'PgQuery::ROW_EXPR'
 
   # # NOTE: should run at the end
   # children.each do |child|
