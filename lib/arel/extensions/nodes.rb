@@ -97,5 +97,17 @@ module Arel
         @row_format = row_format
       end
     end
+
+    Arel::Nodes::Ordering.class_eval do
+      # postgres only: https://www.postgresql.org/docs/9.4/queries-order.html
+      attr_accessor :nulls
+
+      alias_method :old_initialize, :initialize
+      def initialize(expr, nulls = 0)
+        super(expr)
+
+        @nulls = nulls
+      end
+    end
   end
 end

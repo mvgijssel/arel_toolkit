@@ -443,6 +443,18 @@ module Arel
         select_statement
       end
 
+      def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
+        result = visit(node)
+        case sortby_dir
+        when 1
+          Arel::Nodes::Ascending.new(result, sortby_nulls)
+        when 2
+          Arel::Nodes::Descending.new(result, sortby_nulls)
+        else
+          result
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -553,18 +565,6 @@ module Arel
         cte_table = Arel::Table.new(ctename)
         cte_definition = visit(ctequery)
         Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
-      end
-
-      def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
-        result = visit(node)
-        case sortby_dir
-        when 1
-          Arel::Nodes::Ascending.new(result)
-        when 2
-          Arel::Nodes::Descending.new(result)
-        else
-          result
-        end
       end
 
       def visit_MinMaxExpr(op:, args:)

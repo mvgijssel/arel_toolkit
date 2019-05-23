@@ -120,6 +120,29 @@ module Arel
         collector << ')'
       end
 
+      alias old_visit_Arel_Nodes_Ascending visit_Arel_Nodes_Ascending
+      def visit_Arel_Nodes_Ascending o, collector
+        old_visit_Arel_Nodes_Ascending(o, collector)
+        apply_ordering_nulls(o, collector)
+      end
+
+      alias old_visit_Arel_Nodes_Descending visit_Arel_Nodes_Descending
+      def visit_Arel_Nodes_Descending o, collector
+        old_visit_Arel_Nodes_Descending(o, collector)
+        apply_ordering_nulls(o, collector)
+      end
+
+      def apply_ordering_nulls(o, collector)
+        case o.nulls
+        when 1
+          collector << ' NULLS FIRST'
+        when 2
+          collector << ' NULLS LAST'
+        else
+          collector
+        end
+      end
+
       # TODO: currently in Arel master, remove in time
       # Used by Lateral visitor to enclose select queries in parentheses
       def grouping_parentheses(o, collector)
