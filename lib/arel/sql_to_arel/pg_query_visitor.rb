@@ -403,6 +403,44 @@ module Arel
         Arel::Nodes::Row.new(visit(args), row_format)
       end
 
+      def visit_SelectStmt(
+        from_clause: nil,
+        limit_count: nil,
+        target_list:,
+        sort_clause: nil,
+        where_clause: nil,
+        limit_offset: nil,
+        distinct_clause: nil,
+        group_clause: nil,
+        having_clause: nil,
+        with_clause: nil,
+        locking_clause: nil,
+        op:
+      )
+
+        select_core = Arel::Nodes::SelectCore.new
+
+        froms, join_sources = generate_sources(from_clause)
+        select_core.from = froms if froms
+        select_core.source.right = join_sources
+
+        select_core.projections = visit(target_list) if target_list
+        select_core.wheres = [visit(where_clause)] if where_clause
+        select_core.groups = visit(group_clause) if group_clause
+        select_core.havings = [visit(having_clause)] if having_clause
+
+        # TODO: We have to deal with DISTINCT ON!
+        select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
+
+        select_statement = Arel::Nodes::SelectStatement.new [select_core]
+        select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
+        select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
+        select_statement.orders = visit(sort_clause.to_a)
+        select_statement.with = visit(with_clause) if with_clause
+        select_statement.lock = visit(locking_clause) if locking_clause
+        select_statement
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -497,44 +535,6 @@ module Arel
           window.orders = visit order_clause
           window.partitions = visit partition_clause
         end
-      end
-
-      def visit_SelectStmt(
-        from_clause: nil,
-        limit_count: nil,
-        target_list:,
-        sort_clause: nil,
-        where_clause: nil,
-        limit_offset: nil,
-        distinct_clause: nil,
-        group_clause: nil,
-        having_clause: nil,
-        with_clause: nil,
-        locking_clause: nil,
-        op:
-      )
-
-        select_core = Arel::Nodes::SelectCore.new
-
-        froms, join_sources = generate_sources(from_clause)
-        select_core.from = froms if froms
-        select_core.source.right = join_sources
-
-        select_core.projections = visit(target_list) if target_list
-        select_core.wheres = [visit(where_clause)] if where_clause
-        select_core.groups = visit(group_clause) if group_clause
-        select_core.havings = [visit(having_clause)] if having_clause
-
-        # TODO: We have to deal with DISTINCT ON!
-        select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
-
-        select_statement = Arel::Nodes::SelectStatement.new [select_core]
-        select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
-        select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
-        select_statement.orders = visit(sort_clause.to_a)
-        select_statement.with = visit(with_clause) if with_clause
-        select_statement.lock = visit(locking_clause) if locking_clause
-        select_statement
       end
 
       def visit_WithClause(ctes:, recursive: false)

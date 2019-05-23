@@ -140,6 +140,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER GROUP some_role ADD USER some_user', 'PgQuery::ROLE_SPEC'
   visit 'all', "SELECT ROW(1, 2.5, 'a')", 'PgQuery::ROW_EXPR'
   visit 'pg', 'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table', 'PgQuery::RULE_STMT'
+  visit 'all', 'SELECT 1', 'PgQuery::SELECT_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
