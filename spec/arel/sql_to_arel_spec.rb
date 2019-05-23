@@ -136,6 +136,7 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT 1', 'PgQuery::RAW_STMT'
   visit 'pg', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
   visit 'pg', 'ALTER TABLE some_table RENAME COLUMN some_column TO a', 'PgQuery::RENAME_STMT'
+  visit 'all', 'SELECT 1', 'PgQuery::RES_TARGET'
 
   # # NOTE: should run at the end
   # children.each do |child|

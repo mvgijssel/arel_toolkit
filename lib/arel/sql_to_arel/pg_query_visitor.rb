@@ -389,6 +389,16 @@ module Arel
         visit(stmt)
       end
 
+      def visit_ResTarget(val:, name: nil)
+        val = visit(val)
+
+        if name
+          Arel::Nodes::As.new(val, Arel.sql(name))
+        else
+          val
+        end
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -397,16 +407,6 @@ module Arel
           Arel.sql "'#{str}'"
         else
           "\"#{str}\""
-        end
-      end
-
-      def visit_ResTarget(val:, name: nil)
-        val = visit(val)
-
-        if name
-          Arel::Nodes::As.new(val, Arel.sql(name))
-        else
-          val
         end
       end
 
