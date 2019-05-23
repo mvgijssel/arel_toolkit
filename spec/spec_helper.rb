@@ -5,7 +5,6 @@ SimpleCov.start
 
 require 'bundler/setup'
 require 'arel_toolkit'
-require 'to_arel'
 
 require 'support/fake_record'
 Arel::Table.engine = FakeRecord::Base.new
