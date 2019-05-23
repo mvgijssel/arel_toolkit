@@ -151,6 +151,7 @@ describe 'Arel.sql_to_arel' do
         'OFFSET 2 ' \
         'FOR UPDATE',
         'PgQuery::SELECT_STMT'
+  visit 'pg', 'INSERT INTO som_table (a) VALUES (DEFAULT)', 'PgQuery::SET_TO_DEFAULT'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
