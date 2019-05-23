@@ -54,7 +54,7 @@ module ToArel
       return attribute.map { |attr| visit(attr, context) } if attribute.is_a? Array
 
       klass, attributes = klass_and_attributes(attribute)
-      dispatch_method = "visit_#{klass}"
+      dispatch_method = "visit_#{klass}".to_sym
       method = method(dispatch_method)
 
       args = ([context] if method.parameters.include?(%i[opt context]) && context)
@@ -136,7 +136,7 @@ module ToArel
         Arel::Nodes::Exists.new subselect
 
       else
-        raise "Unknown sublinktype: #{type}"
+        raise "Unknown sublinktype: #{sub_link_type}"
       end
     end
 
