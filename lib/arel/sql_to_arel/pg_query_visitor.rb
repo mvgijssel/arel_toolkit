@@ -349,7 +349,7 @@ module Arel
         end
       end
 
-      def visit_ParamRef(number: nil)
+      def visit_ParamRef(_args)
         Arel::Nodes::BindParam.new(nil)
       end
 
