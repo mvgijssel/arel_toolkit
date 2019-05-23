@@ -83,6 +83,8 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', "CREATE SCHEMA secure", 'PgQuery::CREATE_SCHEMA_STMT'
   # visit 'sql', "CREATE TABLE a (b integer)", 'PgQuery::CREATE_STMT'
   # visit 'sql', "CREATE TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
+  # visit 'sql', "CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
+  # visit 'sql', "CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)", 'PgQuery::CREATE_TABLE_AS_STMT'
   # visit 'sql', "CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()", 'PgQuery::CREATE_TRIG_STMT'
   # visit 'sql', "DEALLOCATE some_prepared_statement", 'PgQuery::DEALLOCATE_STMT'
   # visit 'sql', "DECLARE a CURSOR FOR SELECT 1", 'PgQuery::DECLARE_CURSOR_STMT'
