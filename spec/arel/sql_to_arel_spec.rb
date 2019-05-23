@@ -131,6 +131,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON TRUE', 'PgQuery::RANGE_SUBSELECT'
   visit 'sql', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
   visit 'sql', 'SELECT 1', 'PgQuery::RAW_STMT'
+  # visit 'sql', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
 
   # # NOTE: should run at the end
   # children.each do |child|
