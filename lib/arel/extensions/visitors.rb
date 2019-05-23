@@ -9,14 +9,53 @@ module Arel
       def visit_Arel_Nodes_CurrentTime(o, collector)
         collector << 'current_time'
         collector << "(#{o.precision.to_i})" if o.precision
+        collector
       end
 
       def visit_Arel_Nodes_CurrentDate(_o, collector)
         collector << 'current_date'
       end
 
-      def visit_Arel_Nodes_CurrentTimestamp(_o, collector)
+      def visit_Arel_Nodes_CurrentTimestamp(o, collector)
         collector << 'current_timestamp'
+        collector << "(#{o.precision.to_i})" if o.precision
+        collector
+      end
+
+      def visit_Arel_Nodes_LocalTime(o, collector)
+        collector << 'localtime'
+        collector << "(#{o.precision.to_i})" if o.precision
+        collector
+      end
+
+      def visit_Arel_Nodes_LocalTimeStamp(o, collector)
+        collector << 'localtimestamp'
+        collector << "(#{o.precision.to_i})" if o.precision
+        collector
+      end
+
+      def visit_Arel_Nodes_CurrentRole(o, collector)
+        collector << 'current_role'
+      end
+
+      def visit_Arel_Nodes_CurrentUser(o, collector)
+        collector << 'current_user'
+      end
+
+      def visit_Arel_Nodes_SessionUser(o, collector)
+        collector << 'session_user'
+      end
+
+      def visit_Arel_Nodes_User(o, collector)
+        collector << 'user'
+      end
+
+      def visit_Arel_Nodes_CurrentCatalog(o, collector)
+        collector << 'current_catalog'
+      end
+
+      def visit_Arel_Nodes_CurrentSchema(o, collector)
+        collector << 'current_schema'
       end
 
       def visit_Arel_Nodes_Array(o, collector)

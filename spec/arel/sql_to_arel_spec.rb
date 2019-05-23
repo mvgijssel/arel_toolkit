@@ -153,6 +153,24 @@ describe 'Arel.sql_to_arel' do
         'PgQuery::SELECT_STMT'
   visit 'pg', 'INSERT INTO som_table (a) VALUES (DEFAULT)', 'PgQuery::SET_TO_DEFAULT'
   visit 'all', 'SELECT 1 ORDER BY "a" ASC, 2 DESC NULLS FIRST, \'3\' ASC NULLS LAST', 'PgQuery::SORT_BY'
+  visit 'all',
+        'SELECT ' \
+        'current_date, ' \
+        'current_time, ' \
+        'current_time(1), ' \
+        'current_timestamp, ' \
+        'current_timestamp(2), ' \
+        'localtime, ' \
+        'localtime(3), ' \
+        'localtimestamp, ' \
+        'localtimestamp(4), ' \
+        'current_role, ' \
+        'current_user, ' \
+        'session_user, ' \
+        'user, ' \
+        'current_catalog, ' \
+        'current_schema',
+        'PgQuery::SQL_VALUE_FUNCTION'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'

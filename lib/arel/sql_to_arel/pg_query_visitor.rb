@@ -455,6 +455,26 @@ module Arel
         end
       end
 
+      def visit_SQLValueFunction(op:, typmod:)
+        [
+          -> { Arel::Nodes::CurrentDate.new },
+          -> { Arel::Nodes::CurrentTime.new },
+          -> { Arel::Nodes::CurrentTime.new(precision: typmod) },
+          -> { Arel::Nodes::CurrentTimestamp.new },
+          -> { Arel::Nodes::CurrentTimestamp.new(precision: typmod) },
+          -> { Arel::Nodes::LocalTime.new },
+          -> { Arel::Nodes::LocalTime.new(precision: typmod) },
+          -> { Arel::Nodes::LocalTimeStamp.new },
+          -> { Arel::Nodes::LocalTimeStamp.new(precision: typmod) },
+          -> { Arel::Nodes::CurrentRole.new },
+          -> { Arel::Nodes::CurrentUser.new },
+          -> { Arel::Nodes::User.new },
+          -> { Arel::Nodes::SessionUser.new },
+          -> { Arel::Nodes::CurrentCatalog.new },
+          -> { Arel::Nodes::CurrentSchema.new },
+        ][op].call
+      end
+
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -492,26 +512,6 @@ module Arel
         else
           raise "Unknown sublinktype: #{type}"
         end
-      end
-
-      def visit_SQLValueFunction(op:, typmod:)
-        [
-          -> { Arel::Nodes::CurrentDate.new },
-          -> { Arel::Nodes::CurrentTime.new },
-          -> { Arel::Nodes::CurrentTime.new(precision: typmod) },
-          -> { Arel::Nodes::CurrentTimestamp.new },
-          -> { raise '?' }, # current_timestamp, # with precision
-          -> { raise '?' }, # localtime,
-          -> { raise '?' }, # localtime, # with precision
-          -> { raise '?' }, # localtimestamp,
-          -> { raise '?' }, # localtimestamp, # with precision
-          -> { raise '?' }, # current_role,
-          -> { raise '?' }, # current_user,
-          -> { raise '?' }, # session_user,
-          -> { raise '?' }, # user,
-          -> { raise '?' }, # current_catalog,
-          -> { raise '?' } # current_schema
-        ][op].call
       end
 
       def visit_TypeName(names:, typemod:)

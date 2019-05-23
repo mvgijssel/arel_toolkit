@@ -38,10 +38,7 @@ module Arel
     class CurrentDate < Arel::Nodes::Node
     end
 
-    class CurrentTimestamp < Arel::Nodes::Node
-    end
-
-    class CurrentTime < Arel::Nodes::Node
+    class TimeWithPrecision < Arel::Nodes::Node
       attr_reader :precision
 
       def initialize(precision: nil)
@@ -49,6 +46,36 @@ module Arel
 
         @precision = precision
       end
+    end
+
+    class CurrentTimestamp < TimeWithPrecision
+    end
+
+    class CurrentTime < TimeWithPrecision
+    end
+
+    class LocalTime < TimeWithPrecision
+    end
+
+    class LocalTimeStamp < TimeWithPrecision
+    end
+
+    class CurrentRole < Arel::Nodes::Node
+    end
+
+    class CurrentUser < Arel::Nodes::Node
+    end
+
+    class SessionUser < Arel::Nodes::Node
+    end
+
+    class User < Arel::Nodes::Node
+    end
+
+    class CurrentCatalog < Arel::Nodes::Node
+    end
+
+    class CurrentSchema < Arel::Nodes::Node
     end
 
     class NaturalJoin < Arel::Nodes::Join
