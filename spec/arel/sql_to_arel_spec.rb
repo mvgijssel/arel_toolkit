@@ -192,6 +192,13 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
+  visit 'all',
+        'SELECT 1, ' \
+        'RANK() OVER (PARTITION BY "some_column" ORDER BY "other_column" ASC), ' \
+        'SUM("some_column") OVER () ' \
+        'FROM "a" ' \
+        'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
+        'PgQuery::WINDOW_DEF'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
