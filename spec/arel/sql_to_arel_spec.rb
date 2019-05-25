@@ -189,6 +189,7 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
   visit 'pg', 'UPDATE some_table SET some_column = 1', 'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
+  visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
