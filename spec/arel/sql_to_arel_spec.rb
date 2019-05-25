@@ -184,6 +184,7 @@ describe 'Arel.sql_to_arel' do
         '',
         'PgQuery::SUB_LINK'
   visit 'pg', 'BEGIN; COMMIT', 'PgQuery::TRANSACTION_STMT'
+  visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
