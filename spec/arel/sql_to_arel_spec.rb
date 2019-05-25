@@ -78,7 +78,10 @@ describe 'Arel.sql_to_arel' do
   # visit 'pg', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
   visit 'pg', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
   visit 'all', 'SELECT "id"', 'PgQuery::COLUMN_REF'
-  visit 'all', 'WITH "a" AS (SELECT 1) SELECT * FROM "a"', 'PgQuery::COMMON_TABLE_EXPR'
+  visit 'all',
+        'WITH "a" AS (SELECT 1) '\
+        'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") "d"',
+        'PgQuery::COMMON_TABLE_EXPR'
   visit 'all', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
   visit 'pg', 'CREATE TABLE a (b integer NOT NULL)', 'PgQuery::CONSTRAINT'
   visit 'pg', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
@@ -199,6 +202,7 @@ describe 'Arel.sql_to_arel' do
         'FROM "a" ' \
         'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
         'PgQuery::WINDOW_DEF'
+  visit 'all', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"', 'PgQuery::WITH_CLAUSE'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'

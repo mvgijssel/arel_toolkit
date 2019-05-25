@@ -197,6 +197,12 @@ module Arel
         UnboundColumnReference.new visit(fields, context).join('.')
       end
 
+      def visit_CommonTableExpr(ctename:, ctequery:)
+        cte_table = Arel::Table.new(ctename)
+        cte_definition = visit(ctequery)
+        Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
+      end
+
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
       end
@@ -532,12 +538,6 @@ module Arel
         else
           Arel::Nodes::With.new visit(ctes)
         end
-      end
-
-      def visit_CommonTableExpr(ctename:, ctequery:)
-        cte_table = Arel::Table.new(ctename)
-        cte_definition = visit(ctequery)
-        Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
       end
 
       def visit_MinMaxExpr(op:, args:)
