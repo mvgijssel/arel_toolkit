@@ -189,6 +189,12 @@ module Arel
         collector << ')'
       end
 
+      def visit_Arel_Nodes_TypeCast(o, collector)
+        visit o.arg, collector
+        collector << '::'
+        collector << o.type_name
+      end
+
       def apply_ordering_nulls(o, collector)
         case o.nulls
         when 1

@@ -497,12 +497,12 @@ RSpec.describe 'Arel.sql_to_arel' do
       end
 
       it do
-        a = %(SELECT CASE 1 > 0 WHEN true THEN 'ok' ELSE NULL END)
-        b = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        a = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
+        b = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
         expect(Arel.sql_to_arel(a).to_sql).to eq b
 
-        c = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
-        d = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        c = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
+        d = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
         expect(Arel.sql_to_arel(c).to_sql).to eq d
       end
 

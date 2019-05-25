@@ -11,7 +11,6 @@ module Arel
   module SqlToArel
     class PgQueryVisitor
       PG_CATALOG = 'pg_catalog'.freeze
-      BOOLEAN = 'boolean'.freeze
 
       attr_reader :object
 
@@ -497,35 +496,24 @@ module Arel
         end
       end
 
-      # TODO: implement all
+      def visit_TypeCast(arg:, type_name:)
+        arg = visit(arg)
+        type_name = visit(type_name)
+
+        Arel::Nodes::TypeCast.new(arg, type_name)
+      end
+
       def visit_TypeName(names:, typemod:)
         names = names.map do |name|
           visit(name, :operator)
         end
 
-        catalog, type = names
+        names = names.reject { |name| name == PG_CATALOG }
 
-        raise 'do not know how to handle non pg catalog types' if catalog != PG_CATALOG
+        raise "Don't know how to handle typemod `#{typemod}`" if typemod != -1
+        raise "Don't know how to handle `#{names.length}` names" if names.length > 1
 
-        case type
-        when 'bool'
-          BOOLEAN
-        else
-          raise "do not know how to handle #{type}"
-        end
-      end
-
-      def visit_TypeCast(arg:, type_name:)
-        arg = visit(arg)
-        type_name = visit(type_name)
-
-        case type_name
-        when BOOLEAN
-          # TODO: Maybe we can do this a bit better
-          arg == '\'t\'' ? Arel::Nodes::True.new : Arel::Nodes::False.new
-        else
-          raise '?'
-        end
+        names.first
       end
 
       # TODO: implement all

@@ -131,7 +131,7 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT ?', 'PgQuery::PARAM_REF'
   visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
   visit 'all', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
-  visit 'all', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON TRUE', 'PgQuery::RANGE_SUBSELECT'
+  visit 'all', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON \'t\'::bool', 'PgQuery::RANGE_SUBSELECT'
   visit 'all', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
   visit 'all', 'SELECT 1', 'PgQuery::RAW_STMT'
   visit 'pg', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
@@ -142,7 +142,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table', 'PgQuery::RULE_STMT'
   visit 'all',
         'SELECT 1 FROM "a" ' \
-        'WHERE TRUE ' \
+        "WHERE 't'::bool " \
         'GROUP BY 1 ' \
         'HAVING "a" > 1 ' \
         'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC) ' \
@@ -185,11 +185,18 @@ describe 'Arel.sql_to_arel' do
         'PgQuery::SUB_LINK'
   visit 'pg', 'BEGIN; COMMIT', 'PgQuery::TRANSACTION_STMT'
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
+  visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq 'SELECT 1 LIMIT 2'
+  end
+
+  it 'translates CAST into ::' do
+    sql = 'SELECT CAST(3 AS TEXT)'
+    parsed_sql = Arel.sql_to_arel(sql).to_sql
+    expect(parsed_sql).to eq 'SELECT 3::text'
   end
 
   it 'translates SOME into ANY' do
