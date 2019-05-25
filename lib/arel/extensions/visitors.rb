@@ -171,6 +171,24 @@ module Arel
         apply_ordering_nulls(o, collector)
       end
 
+      def visit_Arel_Nodes_All o, collector
+        collector << 'ALL('
+        visit o.expr, collector
+        collector << ')'
+      end
+
+      def visit_Arel_Nodes_Any o, collector
+        collector << 'ANY('
+        visit o.expr, collector
+        collector << ')'
+      end
+
+      def visit_Arel_Nodes_ArraySubselect(o, collector)
+        collector << 'ARRAY('
+        visit o.expr, collector
+        collector << ')'
+      end
+
       def apply_ordering_nulls(o, collector)
         case o.nulls
         when 1

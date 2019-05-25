@@ -23,6 +23,9 @@ Metrics/BlockLength:
 Style/Documentation:
   Enabled: false
 
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
 Layout/MultilineMethodCallIndentation:
   Enabled: true
   EnforcedStyle: indented

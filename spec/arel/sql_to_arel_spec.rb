@@ -172,11 +172,28 @@ describe 'Arel.sql_to_arel' do
         'current_schema',
         'PgQuery::SQL_VALUE_FUNCTION'
   visit 'all', "SELECT 'some_string'", 'PgQuery::STRING'
+  visit 'all',
+        'SELECT ' \
+        'EXISTS (SELECT 1 = 1), ' \
+        '"column" > ALL(SELECT AVG("amount") FROM "some_table"), ' \
+        '"column" = ANY(SELECT "a" FROM "b"), ' \
+        '' \
+        '1 < (SELECT 1), ' \
+        '' \
+        'ARRAY(SELECT 1)' \
+        '',
+        'PgQuery::SUB_LINK'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq 'SELECT 1 LIMIT 2'
+  end
+
+  it 'translates SOME into ANY' do
+    sql = 'SELECT "a" <= SOME(SELECT 1)'
+    parsed_sql = Arel.sql_to_arel(sql).to_sql
+    expect(parsed_sql).to eq 'SELECT "a" <= ANY(SELECT 1)'
   end
 
   # # NOTE: should run at the end

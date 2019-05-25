@@ -23,43 +23,6 @@ module Arel
 
       private
 
-      def visit(attribute, context = nil)
-        return attribute.map { |attr| visit(attr, context) } if attribute.is_a? Array
-
-        klass, attributes = klass_and_attributes(attribute)
-        dispatch_method = "visit_#{klass}"
-        method = method(dispatch_method)
-
-        args = [context] if method.parameters.any? do |parameter|
-          next if context.nil?
-
-          parameter == %i[opt context] || parameter == %i[req context]
-        end
-
-        if attributes.empty?
-          send dispatch_method, *args
-        else
-          kwargs = attributes.transform_keys do |key|
-            key
-              .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-              .downcase
-              .to_sym
-          end
-
-          kwargs.delete(:location)
-
-          if (aliaz = kwargs.delete(:alias))
-            kwargs[:aliaz] = aliaz
-          end
-
-          send dispatch_method, *args, **kwargs
-        end
-      end
-
-      def klass_and_attributes(object)
-        [object.keys.first, object.values.first]
-      end
-
       def visit_A_ArrayExpr(elements:)
         Arel::Nodes::Array.new visit(elements)
       end
@@ -68,6 +31,7 @@ module Arel
         visit(val, :const)
       end
 
+      # TODO: implement all of these
       def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
         case kind
         when PgQuery::AEXPR_OP
@@ -120,6 +84,12 @@ module Arel
 
         when PgQuery::AEXPR_NULLIF
           raise 'Can not deal with NULLIF for now'
+
+        when PgQuery::AEXPR_DISTINCT
+          raise '?'
+
+        when PgQuery::AEXPR_NOT_DISTINCT
+          raise '?'
 
         else
           raise '?'
@@ -232,6 +202,7 @@ module Arel
         Arel::Nodes::SqlLiteral.new str
       end
 
+      # TODO: implement all
       def visit_FuncCall(
         args: nil,
         funcname:,
@@ -415,8 +386,8 @@ module Arel
         having_clause: nil,
         with_clause: nil,
         locking_clause: nil,
-        window_clause: nil,
-        op:
+        op:,
+        window_clause: nil
       )
 
         select_core = Arel::Nodes::SelectCore.new
@@ -486,34 +457,47 @@ module Arel
         end
       end
 
-      def visit_SubLink(subselect:, sub_link_type:)
-        # SUBLINK_TYPE_EXISTS = 0     # EXISTS(SELECT ...)
-        # SUBLINK_TYPE_ALL = 1        # (lefthand) op ALL (SELECT ...)
-        # SUBLINK_TYPE_ANY = 2        # (lefthand) op ANY (SELECT ...)
-        # SUBLINK_TYPE_ROWCOMPARE = 3 # (lefthand) op (SELECT ...)
-        # SUBLINK_TYPE_EXPR = 4       # (SELECT with single targetlist item ...)
-        # SUBLINK_TYPE_MULTIEXPR = 5  # (SELECT with multiple targetlist items ...)
-        # SUBLINK_TYPE_ARRAY = 6      # ARRAY(SELECT with single targetlist item ...)
-        # SUBLINK_TYPE_CTE = 7        # WITH query (never actually part of an expression),
-        #                             # for SubPlans only
+      def visit_SubLink(subselect:, sub_link_type:, testexpr: nil, oper_name: nil)
+        subselect = visit(subselect)
+        testexpr = visit(testexpr) if testexpr
+        operator = if oper_name
+                     operator = visit(oper_name, :operator)
+                     raise "dunno how to handle `#{operator.length}`" if operator.length > 1
 
-        subselect = (visit(subselect) if subselect)
+                     operator.first
+                   end
 
         case sub_link_type
-        when PgQuery::SUBLINK_TYPE_EXPR
-          visit(subselect)
-
-        when PgQuery::SUBLINK_TYPE_ANY
-          raise '2'
-
         when PgQuery::SUBLINK_TYPE_EXISTS
           Arel::Nodes::Exists.new subselect
+
+        when PgQuery::SUBLINK_TYPE_ALL
+          generate_comparison(testexpr, Arel::Nodes::All.new(subselect), operator)
+
+        when PgQuery::SUBLINK_TYPE_ANY
+          generate_comparison(testexpr, Arel::Nodes::Any.new(subselect), operator)
+
+        when PgQuery::SUBLINK_TYPE_ROWCOMPARE
+          raise '?'
+
+        when PgQuery::SUBLINK_TYPE_EXPR
+          Arel::Nodes::Grouping.new(subselect)
+
+        when PgQuery::SUBLINK_TYPE_MULTIEXPR
+          raise '?'
+
+        when PgQuery::SUBLINK_TYPE_ARRAY
+          Arel::Nodes::ArraySubselect.new(subselect)
+
+        when PgQuery::SUBLINK_TYPE_CTE
+          raise '?'
 
         else
           raise "Unknown sublinktype: #{type}"
         end
       end
 
+      # TODO: implement all
       def visit_TypeName(names:, typemod:)
         names = names.map do |name|
           visit(name, :operator)
@@ -544,6 +528,7 @@ module Arel
         end
       end
 
+      # TODO: implement all
       def visit_WindowDef(partition_clause: [], order_clause: [], frame_options:, name: nil)
         instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
 
@@ -578,6 +563,7 @@ module Arel
         end
       end
 
+      # TODO: implement all
       def generate_comparison(left, right, operator)
         case operator
         when '='
@@ -632,6 +618,42 @@ module Arel
         else
           raise "Dunno operator `#{operator}`"
         end
+      end
+
+      def visit(attribute, context = nil)
+        return attribute.map { |attr| visit(attr, context) } if attribute.is_a? Array
+
+        klass, attributes = klass_and_attributes(attribute)
+        dispatch_method = "visit_#{klass}"
+        method = method(dispatch_method)
+
+        arg_has_context = (method.parameters.include?(%i[opt context]) ||
+          method.parameters.include?(%i[req context])) && context
+
+        args = arg_has_context ? [context] : nil
+
+        if attributes.empty?
+          send dispatch_method, *args
+        else
+          kwargs = attributes.transform_keys do |key|
+            key
+              .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+              .downcase
+              .to_sym
+          end
+
+          kwargs.delete(:location)
+
+          if (aliaz = kwargs.delete(:alias))
+            kwargs[:aliaz] = aliaz
+          end
+
+          send dispatch_method, *args, **kwargs
+        end
+      end
+
+      def klass_and_attributes(object)
+        [object.keys.first, object.values.first]
       end
 
       def generate_boolean_expression(args, boolean_class)
