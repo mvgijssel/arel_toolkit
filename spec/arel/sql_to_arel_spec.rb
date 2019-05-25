@@ -186,6 +186,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'BEGIN; COMMIT', 'PgQuery::TRANSACTION_STMT'
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
   visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
+  visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
