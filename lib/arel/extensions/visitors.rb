@@ -195,6 +195,68 @@ module Arel
         collector << o.type_name
       end
 
+      def visit_Arel_Nodes_DistinctFrom(o, collector)
+        visit o.left, collector
+        collector << ' IS DISTINCT FROM '
+        visit o.right, collector
+      end
+
+      def visit_Arel_Nodes_NotDistinctFrom(o, collector)
+        visit o.left, collector
+        collector << ' IS NOT DISTINCT FROM '
+        visit o.right, collector
+      end
+
+      def visit_Arel_Nodes_NullIf(o, collector)
+        collector << 'NULLIF('
+        visit o.left, collector
+        collector << ', '
+        visit o.right, collector
+        collector << ')'
+      end
+
+      def visit_Arel_Nodes_Similar(o, collector)
+        visit o.left, collector
+        collector << ' SIMILAR TO '
+        visit o.right, collector
+        if o.escape
+          collector << ' ESCAPE '
+          visit o.escape, collector
+        else
+          collector
+        end
+      end
+
+      def visit_Arel_Nodes_NotSimilar(o, collector)
+        visit o.left, collector
+        collector << ' NOT SIMILAR TO '
+        visit o.right, collector
+        if o.escape
+          collector << ' ESCAPE '
+          visit o.escape, collector
+        else
+          collector
+        end
+      end
+
+      def visit_Arel_Nodes_NotBetween(o, collector)
+        collector = visit o.left, collector
+        collector << ' NOT BETWEEN '
+        visit o.right, collector
+      end
+
+      def visit_Arel_Nodes_BetweenSymmetric(o, collector)
+        collector = visit o.left, collector
+        collector << ' BETWEEN SYMMETRIC '
+        visit o.right, collector
+      end
+
+      def visit_Arel_Nodes_NotBetweenSymmetric(o, collector)
+        collector = visit o.left, collector
+        collector << ' NOT BETWEEN SYMMETRIC '
+        visit o.right, collector
+      end
+
       def apply_ordering_nulls(o, collector)
         case o.nulls
         when 1

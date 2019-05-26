@@ -31,68 +31,140 @@ module Arel
         visit(val, :const)
       end
 
-      # TODO: implement all of these
       def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
         case kind
         when PgQuery::AEXPR_OP
           left = visit(lexpr)
           right = visit(rexpr)
-
           operator = visit(name[0], :operator)
           generate_comparison(left, right, operator)
 
         when PgQuery::AEXPR_OP_ANY
           left = visit(lexpr)
-
           right = visit(rexpr)
-          right = Arel::Nodes::Any.new [Arel.sql(right)]
-
+          right = Arel::Nodes::Any.new right
           operator = visit(name[0], :operator)
           generate_comparison(left, right, operator)
 
+        when PgQuery::AEXPR_OP_ALL
+          left = visit(lexpr)
+          right = visit(rexpr)
+          right = Arel::Nodes::All.new right
+          operator = visit(name[0], :operator)
+          generate_comparison(left, right, operator)
+
+        when PgQuery::AEXPR_DISTINCT
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::DistinctFrom.new(left, right)
+
+        when PgQuery::AEXPR_NOT_DISTINCT
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::NotDistinctFrom.new(left, right)
+
+        when PgQuery::AEXPR_NULLIF
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::NullIf.new(left, right)
+
+        when PgQuery::AEXPR_OF
+          raise '?'
+
         when PgQuery::AEXPR_IN
           left = visit(lexpr)
-          left = left.is_a?(String) ? Arel.sql(left) : left
-
-          right = visit(rexpr).map do |result|
-            result.is_a?(String) ? Arel.sql(result) : result
-          end
-
+          right = visit(rexpr)
           operator = visit(name[0], :operator)
+
           if operator == '<>'
             Arel::Nodes::NotIn.new(left, right)
           else
             Arel::Nodes::In.new(left, right)
           end
 
-        when PgQuery::CONSTR_TYPE_FOREIGN
-          raise '?'
+        when PgQuery::AEXPR_LIKE
+          left = visit(lexpr)
+          right = visit(rexpr)
+          escape = nil
+
+          if right.is_a?(Array)
+            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+
+            right, escape = right
+          end
+
+          operator = visit(name[0], :operator)
+
+          if operator == '~~'
+            Arel::Nodes::Matches.new(left, right, escape, true)
+          else
+            Arel::Nodes::DoesNotMatch.new(left, right, escape, true)
+          end
+
+        when PgQuery::AEXPR_ILIKE
+          left = visit(lexpr)
+          right = visit(rexpr)
+          escape = nil
+
+          if right.is_a?(Array)
+            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+
+            right, escape = right
+          end
+
+          operator = visit(name[0], :operator)
+
+          if operator == '~~*'
+            Arel::Nodes::Matches.new(left, right, escape, false)
+          else
+            Arel::Nodes::DoesNotMatch.new(left, right, escape, false)
+          end
+
+        when PgQuery::AEXPR_SIMILAR
+          left = visit(lexpr)
+          right = visit(rexpr)
+          escape = nil
+
+          if right.is_a?(Array)
+            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+
+            right, escape = right
+          end
+
+          escape = nil if escape == 'NULL'
+          operator = visit(name[0], :operator)
+
+          if operator == '~'
+            Arel::Nodes::Similar.new(left, right, escape)
+          else
+            Arel::Nodes::NotSimilar.new(left, right, escape)
+          end
 
         when PgQuery::AEXPR_BETWEEN
           left = visit(lexpr)
-
-          right = visit(rexpr).map do |result|
-            result.is_a?(String) ? Arel.sql(result) : result
-          end
-
+          right = visit(rexpr)
           Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
 
-        when PgQuery::AEXPR_NOT_BETWEEN,
-             PgQuery::AEXPR_BETWEEN_SYM,
-             PgQuery::AEXPR_NOT_BETWEEN_SYM
-          raise '?'
+        when PgQuery::AEXPR_NOT_BETWEEN
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::NotBetween.new left, Arel::Nodes::And.new(right)
 
-        when PgQuery::AEXPR_NULLIF
-          raise 'Can not deal with NULLIF for now'
+        when PgQuery::AEXPR_BETWEEN_SYM
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::BetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
-        when PgQuery::AEXPR_DISTINCT
-          raise '?'
+        when PgQuery::AEXPR_NOT_BETWEEN_SYM
+          left = visit(lexpr)
+          right = visit(rexpr)
+          Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
-        when PgQuery::AEXPR_NOT_DISTINCT
+        when PgQuery::AEXPR_PAREN
           raise '?'
 
         else
-          raise '?'
+          raise "Unknown Expr type `#{kind}`"
         end
       end
 
@@ -223,32 +295,41 @@ module Arel
                  []
                end
 
-        func_name = funcname[0]['String']['str']
 
-        func = case func_name
-               when 'sum'
+        function_names = visit(funcname, :operator)
+
+        func = case function_names
+               when ['sum']
                  Arel::Nodes::Sum.new args
 
-               when 'rank'
+               when ['rank']
                  Arel::Nodes::Rank.new args
 
-               when 'count'
+               when ['count']
                  Arel::Nodes::Count.new args
 
-               when 'generate_series'
+               when ['generate_series']
                  Arel::Nodes::GenerateSeries.new args
 
-               when 'max'
+               when ['max']
                  Arel::Nodes::Max.new args
 
-               when 'min'
+               when ['min']
                  Arel::Nodes::Min.new args
 
-               when 'avg'
+               when ['avg']
                  Arel::Nodes::Avg.new args
 
+               when [PG_CATALOG, 'like_escape']
+                 args
+
+               when [PG_CATALOG, 'similar_escape']
+                 args
+
                else
-                 Arel::Nodes::NamedFunction.new(func_name, args)
+                 raise "Don't know how to handle `#{function_names}`" if function_names.length > 1
+
+                 Arel::Nodes::NamedFunction.new(function_names.first, args)
                end
 
         if over

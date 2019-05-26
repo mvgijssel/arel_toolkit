@@ -169,6 +169,37 @@ module Arel
         @type_name = type_name
       end
     end
+
+    class DistinctFrom < Arel::Nodes::Binary
+    end
+
+    class NotDistinctFrom < Arel::Nodes::Binary
+    end
+
+    class NullIf < Arel::Nodes::Binary
+    end
+
+    # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
+    class Similar < Arel::Nodes::Matches
+      def initialize(left, right, escape = nil)
+        super(left, right, escape, false)
+      end
+    end
+
+    # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
+    class NotSimilar < Arel::Nodes::Similar
+    end
+
+    class NotBetween < Arel::Nodes::Between
+    end
+
+    # postgres only: https://www.postgresql.org/docs/9.1/functions-comparison.html
+    class BetweenSymmetric < Arel::Nodes::Between
+    end
+
+    # postgres only: https://www.postgresql.org/docs/9.1/functions-comparison.html
+    class NotBetweenSymmetric < Arel::Nodes::BetweenSymmetric
+    end
   end
 end
 

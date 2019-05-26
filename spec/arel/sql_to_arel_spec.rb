@@ -21,12 +21,23 @@ describe 'Arel.sql_to_arel' do
       tree.to_s == constant.to_s
     when FalseClass
       tree.to_s == constant.to_s
+    when NilClass
+      tree.to_s == constant.to_s
     else
-      raise 'i dunno'
+      raise '?'
     end
   end
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/AbcSize
+
+  around(:example) do |example|
+    old_visitor = Arel::Table.engine.connection.visitor
+    Arel::Table.engine.connection.visitor = Arel::Visitors::PostgreSQL.new(
+      Arel::Table.engine.connection,
+    )
+    example.call
+    Arel::Table.engine.connection.visitor = old_visitor
+  end
 
   define :ast_contains do |expected|
     match do |pg_query_tree|
@@ -59,7 +70,23 @@ describe 'Arel.sql_to_arel' do
 
   visit 'all', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
   visit 'all', 'SELECT 1', 'PgQuery::A_CONST'
-  visit 'all', 'SELECT 1 IN (1)', 'PgQuery::A_EXPR'
+  visit 'all',
+        'SELECT ' \
+        '1 = 2, ' \
+        "3 = ANY('{4,5}'), 'a' = ANY($1), " \
+        "6 = ALL('{7,8}'), 'b' = ALL($2), " \
+        '"c" IS DISTINCT FROM "d", 7 IS NOT DISTINCT FROM \'d\', ' \
+        "NULLIF(9, 10), NULLIF('e', 'f'), " \
+        '' \
+        "11 IN (12), 'a' NOT IN ('b'), " \
+        "'ghi' NOT LIKE 'gh%', 'ghi' LIKE '_h_' ESCAPE 'i', " \
+        "'jkl' NOT ILIKE 'jk%', 'jkl' ILIKE '_k_' ESCAPE 'k', " \
+        "'mn' SIMILAR TO '(m|o)', 'mn' NOT SIMILAR TO '_h{1}%' ESCAPE '_', " \
+        '14 BETWEEN 13 AND 15, ' \
+        '16 NOT BETWEEN 17 AND 18, ' \
+        '20 BETWEEN SYMMETRIC 21 AND 19, ' \
+        '22 NOT BETWEEN SYMMETRIC 24 AND 23',
+        'PgQuery::A_EXPR'
   visit 'all', 'SELECT field[1]', 'PgQuery::A_INDICES'
   visit 'all', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
   visit 'all', 'SELECT *', 'PgQuery::A_STAR'
