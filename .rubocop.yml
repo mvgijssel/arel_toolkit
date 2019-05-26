@@ -1,6 +1,9 @@
 Style/FrozenStringLiteralComment:
   Enabled: false
 
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
 Bundler/OrderedGems:
   Enabled: false
 

@@ -21,11 +21,11 @@ module FakeRecord
           Column.new('id', :integer),
           Column.new('name', :string),
           Column.new('bool', :boolean),
-          Column.new('created_at', :date)
+          Column.new('created_at', :date),
         ],
         'products' => [
           Column.new('id', :integer),
-          Column.new('price', :decimal)
+          Column.new('price', :decimal),
         ]
       }
       @columns_hash = {

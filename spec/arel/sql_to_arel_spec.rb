@@ -3,6 +3,8 @@ describe 'Arel.sql_to_arel' do
     Arel.sql_to_arel(sql).to_sql
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/AbcSize
   def ast_contains_constant(tree, constant)
     case tree
     when Array
@@ -27,6 +29,8 @@ describe 'Arel.sql_to_arel' do
       raise 'i dunno'
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/AbcSize
 
   define :ast_contains do |expected|
     match do |pg_query_tree|
@@ -70,8 +74,12 @@ describe 'Arel.sql_to_arel' do
   visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
   visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
   visit 'all', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
-  visit 'all', 'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END', 'PgQuery::CASE_EXPR'
-  visit 'all', "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END", 'PgQuery::CASE_WHEN'
+  visit 'all',
+        'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END',
+        'PgQuery::CASE_EXPR'
+  visit 'all',
+        "SELECT CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END",
+        'PgQuery::CASE_WHEN'
   visit 'pg', 'CHECKPOINT', 'PgQuery::CHECK_POINT_STMT'
   visit 'pg', 'CLOSE cursor;', 'PgQuery::CLOSE_PORTAL_STMT'
   visit 'all', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
@@ -82,16 +90,19 @@ describe 'Arel.sql_to_arel' do
         'WITH "a" AS (SELECT 1) '\
         'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") "d"',
         'PgQuery::COMMON_TABLE_EXPR'
-  visit 'all', 'WITH RECURSIVE "c" AS (SELECT \'a\') SELECT \'b\', 1 FROM "c"', 'PgQuery::COMMON_TABLE_EXPR'
   visit 'pg', 'CREATE TABLE a (b integer NOT NULL)', 'PgQuery::CONSTRAINT'
   visit 'pg', 'COPY reports TO STDOUT', 'PgQuery::COPY_STMT'
-  visit 'pg', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::CREATE_FUNCTION_STMT'
+  visit 'pg',
+        "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
+        'PgQuery::CREATE_FUNCTION_STMT'
   visit 'pg', 'CREATE SCHEMA secure', 'PgQuery::CREATE_SCHEMA_STMT'
   visit 'pg', 'CREATE TABLE a (b integer)', 'PgQuery::CREATE_STMT'
   visit 'pg', 'CREATE TABLE a AS (SELECT * FROM reports)', 'PgQuery::CREATE_TABLE_AS_STMT'
   visit 'pg', 'CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)', 'PgQuery::CREATE_TABLE_AS_STMT'
   visit 'pg', 'CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)', 'PgQuery::CREATE_TABLE_AS_STMT'
-  visit 'pg', 'CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()', 'PgQuery::CREATE_TRIG_STMT'
+  visit 'pg',
+        'CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()',
+        'PgQuery::CREATE_TRIG_STMT'
   visit 'pg', 'DEALLOCATE some_prepared_statement', 'PgQuery::DEALLOCATE_STMT'
   visit 'pg', 'DECLARE a CURSOR FOR SELECT 1', 'PgQuery::DECLARE_CURSOR_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DEF_ELEM'
@@ -104,7 +115,9 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'FETCH some_cursor', 'PgQuery::FETCH_STMT'
   visit 'all', 'SELECT 1.9', 'PgQuery::FLOAT'
   visit 'all', 'SELECT some_function("a", \'b\', 1)', 'PgQuery::FUNC_CALL'
-  visit 'pg', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;", 'PgQuery::FUNCTION_PARAMETER'
+  visit 'pg',
+        "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
+        'PgQuery::FUNCTION_PARAMETER'
   visit 'pg', 'GRANT some_admins TO some_users', 'PgQuery::GRANT_ROLE_STMT'
   visit 'pg', 'GRANT SELECT ON some_table TO some_users', 'PgQuery::GRANT_STMT'
   visit 'pg', 'CREATE INDEX some_index ON some_table USING GIN (some_column)', 'PgQuery::INDEX_ELEM'
@@ -133,16 +146,22 @@ describe 'Arel.sql_to_arel' do
   # visit 'pg', '???', 'PgQuery::OID_LIST'
   visit 'all', 'SELECT ?', 'PgQuery::PARAM_REF'
   visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
-  visit 'all', 'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY', 'PgQuery::RANGE_FUNCTION'
-  visit 'all', 'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON \'t\'::bool', 'PgQuery::RANGE_SUBSELECT'
-  visit 'all', 'SELECT 1 FROM "public"."table_is_a_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
+  visit 'all',
+        'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
+        'PgQuery::RANGE_FUNCTION'
+  visit 'all',
+        'SELECT * FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON \'t\'::bool',
+        'PgQuery::RANGE_SUBSELECT'
+  visit 'all', 'SELECT 1 FROM "public"."table_is_range_var" "alias", ONLY "b"', 'PgQuery::RANGE_VAR'
   visit 'all', 'SELECT 1', 'PgQuery::RAW_STMT'
   visit 'pg', 'REFRESH MATERIALIZED VIEW view WITH NO DATA', 'PgQuery::REFRESH_MAT_VIEW_STMT'
   visit 'pg', 'ALTER TABLE some_table RENAME COLUMN some_column TO a', 'PgQuery::RENAME_STMT'
   visit 'all', 'SELECT 1', 'PgQuery::RES_TARGET'
   visit 'pg', 'ALTER GROUP some_role ADD USER some_user', 'PgQuery::ROLE_SPEC'
   visit 'all', "SELECT ROW(1, 2.5, 'a')", 'PgQuery::ROW_EXPR'
-  visit 'pg', 'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table', 'PgQuery::RULE_STMT'
+  visit 'pg',
+        'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table',
+        'PgQuery::RULE_STMT'
   visit 'all',
         'SELECT 1 FROM "a" ' \
         "WHERE 't'::bool " \
@@ -155,7 +174,9 @@ describe 'Arel.sql_to_arel' do
         'FOR UPDATE',
         'PgQuery::SELECT_STMT'
   visit 'pg', 'INSERT INTO som_table (a) VALUES (DEFAULT)', 'PgQuery::SET_TO_DEFAULT'
-  visit 'all', 'SELECT 1 ORDER BY "a" ASC, 2 DESC NULLS FIRST, \'3\' ASC NULLS LAST', 'PgQuery::SORT_BY'
+  visit 'all',
+        'SELECT 1 ORDER BY "a" ASC, 2 DESC NULLS FIRST, \'3\' ASC NULLS LAST',
+        'PgQuery::SORT_BY'
   visit 'all',
         'SELECT ' \
         'current_date, ' \

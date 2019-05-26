@@ -212,7 +212,6 @@ module Arel
         args: nil,
         funcname:,
         agg_star: nil,
-        agg_distinct: nil,
         over: nil
       )
         args = if args
@@ -394,6 +393,8 @@ module Arel
         op:,
         window_clause: nil
       )
+
+        raise "Unknown op `#{op}`" unless op.zero?
 
         select_core = Arel::Nodes::SelectCore.new
 

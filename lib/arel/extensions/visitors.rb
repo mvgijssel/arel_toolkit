@@ -34,27 +34,27 @@ module Arel
         collector
       end
 
-      def visit_Arel_Nodes_CurrentRole(o, collector)
+      def visit_Arel_Nodes_CurrentRole(_o, collector)
         collector << 'current_role'
       end
 
-      def visit_Arel_Nodes_CurrentUser(o, collector)
+      def visit_Arel_Nodes_CurrentUser(_o, collector)
         collector << 'current_user'
       end
 
-      def visit_Arel_Nodes_SessionUser(o, collector)
+      def visit_Arel_Nodes_SessionUser(_o, collector)
         collector << 'session_user'
       end
 
-      def visit_Arel_Nodes_User(o, collector)
+      def visit_Arel_Nodes_User(_o, collector)
         collector << 'user'
       end
 
-      def visit_Arel_Nodes_CurrentCatalog(o, collector)
+      def visit_Arel_Nodes_CurrentCatalog(_o, collector)
         collector << 'current_catalog'
       end
 
-      def visit_Arel_Nodes_CurrentSchema(o, collector)
+      def visit_Arel_Nodes_CurrentSchema(_o, collector)
         collector << 'current_schema'
       end
 
@@ -119,12 +119,12 @@ module Arel
 
       def visit_Arel_Nodes_NaturalJoin(o, collector)
         collector << 'NATURAL JOIN '
-        collector = visit o.left, collector
+        visit o.left, collector
       end
 
       def visit_Arel_Nodes_CrossJoin(o, collector)
         collector << 'CROSS JOIN '
-        collector = visit o.left, collector
+        visit o.left, collector
       end
 
       # TODO: currently in Arel master, remove in time
@@ -160,24 +160,24 @@ module Arel
       end
 
       alias old_visit_Arel_Nodes_Ascending visit_Arel_Nodes_Ascending
-      def visit_Arel_Nodes_Ascending o, collector
+      def visit_Arel_Nodes_Ascending(o, collector)
         old_visit_Arel_Nodes_Ascending(o, collector)
         apply_ordering_nulls(o, collector)
       end
 
       alias old_visit_Arel_Nodes_Descending visit_Arel_Nodes_Descending
-      def visit_Arel_Nodes_Descending o, collector
+      def visit_Arel_Nodes_Descending(o, collector)
         old_visit_Arel_Nodes_Descending(o, collector)
         apply_ordering_nulls(o, collector)
       end
 
-      def visit_Arel_Nodes_All o, collector
+      def visit_Arel_Nodes_All(o, collector)
         collector << 'ALL('
         visit o.expr, collector
         collector << ')'
       end
 
-      def visit_Arel_Nodes_Any o, collector
+      def visit_Arel_Nodes_Any(o, collector)
         collector << 'ANY('
         visit o.expr, collector
         collector << ')'

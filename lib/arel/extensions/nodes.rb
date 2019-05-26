@@ -1,3 +1,6 @@
+# rubocop:disable Metrics/ParameterLists
+# rubocop:disable Naming/UncommunicativeMethodParamName
+
 module Arel
   module Nodes
     class Unknown < Arel::Nodes::Node
@@ -105,7 +108,14 @@ module Arel
       attr_accessor :relpersistence
 
       alias_method :old_initialize, :initialize
-      def initialize(name, as: nil, type_caster: nil, only: false, schema_name: nil, relpersistence: 'p')
+      def initialize(
+        name,
+        as: nil,
+        type_caster: nil,
+        only: false,
+        schema_name: nil,
+        relpersistence: 'p'
+      )
         @only = only
         @schema_name = schema_name
         @relpersistence = relpersistence
@@ -161,3 +171,6 @@ module Arel
     end
   end
 end
+
+# rubocop:enable Metrics/ParameterLists
+# rubocop:enable Naming/UncommunicativeMethodParamName
