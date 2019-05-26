@@ -1,8 +1,4 @@
 describe 'Arel.sql_to_arel' do
-  def sql_arel_sql(sql)
-    Arel.sql_to_arel(sql).to_sql
-  end
-
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/AbcSize
   def ast_contains_constant(tree, constant)
