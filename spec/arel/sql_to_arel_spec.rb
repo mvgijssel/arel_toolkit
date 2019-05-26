@@ -197,8 +197,19 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
   visit 'all',
         'SELECT 1, ' \
-        'RANK() OVER (PARTITION BY "some_column" ORDER BY "other_column" ASC), ' \
-        'SUM("some_column") OVER () ' \
+        'SUM("a") OVER (RANGE CURRENT ROW), ' \
+        'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), ' \
+        'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING), ' \
+        'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND CURRENT ROW), ' \
+        'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING), ' \
+        'SUM("a") OVER (ROWS 2 PRECEDING), ' \
+        'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING), ' \
+        'SUM("a") OVER (ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING), ' \
+        'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), ' \
+        'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND 1 FOLLOWING), ' \
+        'SUM("a") OVER (ROWS BETWEEN 1 PRECEDING AND UNBOUNDED FOLLOWING), ' \
+        'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING), ' \
+        'SUM("a") OVER () ' \
         'FROM "a" ' \
         'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
         'PgQuery::WINDOW_DEF'
