@@ -356,7 +356,7 @@ module Arel
           as: (visit(aliaz) if aliaz),
           only: !inh,
           relpersistence: relpersistence,
-          schema_name: schemaname
+          schema_name: schemaname,
         )
       end
 
@@ -624,12 +624,12 @@ module Arel
                     if frame_option_names.include?('FRAMEOPTION_BETWEEN')
                       Arel::Nodes::Between.new(
                         range_klass.new,
-                        Arel::Nodes::And.new([start_node, end_node])
+                        Arel::Nodes::And.new([start_node, end_node]),
                       )
                     else
                       range_klass.new start_node
                     end
-        end
+                  end
 
         instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
 
