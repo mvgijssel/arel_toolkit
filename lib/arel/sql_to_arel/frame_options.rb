@@ -3,8 +3,6 @@ module Arel
     class FrameOptions
       class << self
         def arel(frame_options, start_offset, end_offset)
-          return if frame_options.nil?
-
           frame_option_names = calculate_frame_option_names(frame_options)
           return unless frame_option_names.include?('FRAMEOPTION_NONDEFAULT')
 

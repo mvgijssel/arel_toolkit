@@ -538,11 +538,14 @@ module Arel
         instance.tap do |window|
           window.orders = visit order_clause
           window.partitions = visit partition_clause
-          window.framing = FrameOptions.arel(
-            frame_options,
-            (visit(start_offset) if start_offset),
-            (visit(end_offset) if end_offset),
-          )
+
+          if frame_options
+            window.framing = FrameOptions.arel(
+              frame_options,
+              (visit(start_offset) if start_offset),
+              (visit(end_offset) if end_offset),
+            )
+          end
         end
       end
 
