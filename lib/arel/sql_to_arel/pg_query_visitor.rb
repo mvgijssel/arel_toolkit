@@ -310,6 +310,17 @@ module Arel
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
       end
 
+      def visit_MinMaxExpr(op:, args:)
+        case op
+        when 0
+          Arel::Nodes::Greatest.new visit(args)
+        when 1
+          Arel::Nodes::Least.new visit(args)
+        else
+          raise "Unknown Op -> #{op}"
+        end
+      end
+
       def visit_Null(**_)
         Arel.sql 'NULL'
       end
@@ -474,34 +485,7 @@ module Arel
                      operator.first
                    end
 
-        case sub_link_type
-        when PgQuery::SUBLINK_TYPE_EXISTS
-          Arel::Nodes::Exists.new subselect
-
-        when PgQuery::SUBLINK_TYPE_ALL
-          generate_comparison(testexpr, Arel::Nodes::All.new(subselect), operator)
-
-        when PgQuery::SUBLINK_TYPE_ANY
-          generate_comparison(testexpr, Arel::Nodes::Any.new(subselect), operator)
-
-        when PgQuery::SUBLINK_TYPE_ROWCOMPARE
-          raise '?'
-
-        when PgQuery::SUBLINK_TYPE_EXPR
-          Arel::Nodes::Grouping.new(subselect)
-
-        when PgQuery::SUBLINK_TYPE_MULTIEXPR
-          raise '?'
-
-        when PgQuery::SUBLINK_TYPE_ARRAY
-          Arel::Nodes::ArraySubselect.new(subselect)
-
-        when PgQuery::SUBLINK_TYPE_CTE
-          raise '?'
-
-        else
-          raise "Unknown sublinktype: #{type}"
-        end
+        generate_sublink(sub_link_type, subselect, testexpr, operator)
       end
 
       def visit_TypeCast(arg:, type_name:)
@@ -532,7 +516,6 @@ module Arel
         start_offset: nil,
         end_offset: nil
       )
-
         instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
 
         instance.tap do |window|
@@ -554,17 +537,6 @@ module Arel
           Arel::Nodes::WithRecursive.new visit(ctes)
         else
           Arel::Nodes::With.new visit(ctes)
-        end
-      end
-
-      def visit_MinMaxExpr(op:, args:)
-        case op
-        when 0
-          Arel::Nodes::Greatest.new visit(args)
-        when 1
-          Arel::Nodes::Least.new visit(args)
-        else
-          raise "Unknown Op -> #{op}"
         end
       end
 
@@ -699,6 +671,37 @@ module Arel
           [nil, join_sources]
         else
           [froms, join_sources]
+        end
+      end
+
+      def generate_sublink(sub_link_type, subselect, testexpr, operator)
+        case sub_link_type
+        when PgQuery::SUBLINK_TYPE_EXISTS
+          Arel::Nodes::Exists.new subselect
+
+        when PgQuery::SUBLINK_TYPE_ALL
+          generate_comparison(testexpr, Arel::Nodes::All.new(subselect), operator)
+
+        when PgQuery::SUBLINK_TYPE_ANY
+          generate_comparison(testexpr, Arel::Nodes::Any.new(subselect), operator)
+
+        when PgQuery::SUBLINK_TYPE_ROWCOMPARE
+          raise '?'
+
+        when PgQuery::SUBLINK_TYPE_EXPR
+          Arel::Nodes::Grouping.new(subselect)
+
+        when PgQuery::SUBLINK_TYPE_MULTIEXPR
+          raise '?'
+
+        when PgQuery::SUBLINK_TYPE_ARRAY
+          Arel::Nodes::ArraySubselect.new(subselect)
+
+        when PgQuery::SUBLINK_TYPE_CTE
+          raise '?'
+
+        else
+          raise "Unknown sublinktype: #{type}"
         end
       end
     end
