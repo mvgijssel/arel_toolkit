@@ -336,11 +336,11 @@ module Arel
                  Arel::Nodes::NamedFunction.new(function_names.first, args)
                end
 
-        func.distinct = agg_distinct.nil? ? false : true
-        func.orders = agg_order ? visit(agg_order) : []
-        func.filter = agg_filter ? visit(agg_filter) : nil
-        func.within_group = agg_within_group
-        func.variardic = func_variadic
+        func.distinct = (agg_distinct.nil? ? false : true) unless func.is_a?(::Array)
+        func.orders = (agg_order ? visit(agg_order) : []) unless func.is_a?(::Array)
+        func.filter = (agg_filter ? visit(agg_filter) : nil) unless func.is_a?(::Array)
+        func.within_group = agg_within_group unless func.is_a?(::Array)
+        func.variardic = func_variadic unless func.is_a?(::Array)
 
         if over
           Arel::Nodes::Over.new(func, visit(over))

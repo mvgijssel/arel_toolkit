@@ -68,7 +68,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  visit 'all', 'SELECT ARRAY[1,2,3]', 'PgQuery::A_ARRAY_EXPR'
+  visit 'all', 'SELECT ARRAY[1, 2, 3]', 'PgQuery::A_ARRAY_EXPR'
   visit 'all', 'SELECT 1', 'PgQuery::A_CONST'
   visit 'all',
         'SELECT ' \
@@ -182,7 +182,7 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT NULL', 'PgQuery::NULL'
   visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
   # visit 'pg', '???', 'PgQuery::OID_LIST'
-  visit 'all', 'SELECT ?', 'PgQuery::PARAM_REF'
+  visit 'all', 'SELECT $1', 'PgQuery::PARAM_REF'
   visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
   visit 'all',
         'SELECT * FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',

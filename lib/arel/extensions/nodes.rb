@@ -139,7 +139,6 @@ module Arel
       # postgres only: https://www.postgresql.org/docs/9.4/queries-order.html
       attr_accessor :nulls
 
-      alias_method :old_initialize, :initialize
       def initialize(expr, nulls = 0)
         super(expr)
 
@@ -207,6 +206,14 @@ module Arel
       attr_accessor :filter
       attr_accessor :within_group
       attr_accessor :variardic
+
+      def initialize(expr, aliaz = nil)
+        super()
+        @expressions = expr
+        @alias       = aliaz && SqlLiteral.new(aliaz)
+        @distinct    = false
+        @orders      = []
+      end
     end
   end
 end
