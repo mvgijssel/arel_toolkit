@@ -280,11 +280,16 @@ module Arel
         Arel::Nodes::SqlLiteral.new str
       end
 
-      # TODO: implement all
+      # https://github.com/postgres/postgres/blob/REL_10_1/src/include/nodes/parsenodes.h
       def visit_FuncCall(
-        args: nil,
         funcname:,
+        args: nil,
+        agg_order: nil,
+        agg_filter: nil,
+        agg_within_group: nil,
         agg_star: nil,
+        agg_distinct: nil,
+        func_variadic: nil,
         over: nil
       )
         args = if args
@@ -294,7 +299,6 @@ module Arel
                else
                  []
                end
-
 
         function_names = visit(funcname, :operator)
 
@@ -331,6 +335,12 @@ module Arel
 
                  Arel::Nodes::NamedFunction.new(function_names.first, args)
                end
+
+        func.distinct = agg_distinct.nil? ? false : true
+        func.orders = agg_order ? visit(agg_order) : []
+        func.filter = agg_filter ? visit(agg_filter) : nil
+        func.within_group = agg_within_group
+        func.variardic = func_variadic
 
         if over
           Arel::Nodes::Over.new(func, visit(over))

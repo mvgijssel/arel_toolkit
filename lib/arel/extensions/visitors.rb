@@ -60,7 +60,7 @@ module Arel
 
       def visit_Arel_Nodes_Array(o, collector)
         collector << 'ARRAY['
-        o.items.each { |item| visit(item, collector) }
+        inject_join(o.items, collector, ', ')
         collector << ']'
       end
 
@@ -255,6 +255,44 @@ module Arel
         collector = visit o.left, collector
         collector << ' NOT BETWEEN SYMMETRIC '
         visit o.right, collector
+      end
+
+      def visit_Arel_Nodes_NamedFunction o, collector
+        aggregate(o.name, o, collector)
+      end
+
+      def aggregate(name, o, collector)
+        collector << "#{name}("
+        collector << 'DISTINCT ' if o.distinct
+        collector << 'VARIADIC ' if o.variardic
+
+        collector = inject_join(o.expressions, collector, ', ')
+
+        if o.within_group
+          collector << ')'
+          collector << ' WITHIN GROUP ('
+        end
+
+        if o.orders.any?
+          collector << SPACE unless o.within_group
+          collector << 'ORDER BY '
+          collector = inject_join o.orders, collector, ', '
+        end
+
+        collector << ')'
+
+        if o.filter
+          collector << ' FILTER(WHERE '
+          visit o.filter, collector
+          collector << ')'
+        end
+
+        if o.alias
+          collector << ' AS '
+          visit o.alias, collector
+        else
+          collector
+        end
       end
 
       def apply_ordering_nulls(o, collector)

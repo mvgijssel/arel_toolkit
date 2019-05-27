@@ -200,6 +200,14 @@ module Arel
     # postgres only: https://www.postgresql.org/docs/9.1/functions-comparison.html
     class NotBetweenSymmetric < Arel::Nodes::BetweenSymmetric
     end
+
+    Arel::Nodes::Function.class_eval do
+      # postgres only: https://www.postgresql.org/docs/9.5/functions-aggregate.html
+      attr_accessor :orders
+      attr_accessor :filter
+      attr_accessor :within_group
+      attr_accessor :variardic
+    end
   end
 end
 

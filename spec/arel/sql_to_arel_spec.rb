@@ -68,7 +68,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
-  visit 'all', 'SELECT ARRAY[1]', 'PgQuery::A_ARRAY_EXPR'
+  visit 'all', 'SELECT ARRAY[1,2,3]', 'PgQuery::A_ARRAY_EXPR'
   visit 'all', 'SELECT 1', 'PgQuery::A_CONST'
   visit 'all',
         'SELECT ' \
@@ -137,7 +137,22 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'EXPLAIN SELECT 1', 'PgQuery::EXPLAIN_STMT'
   visit 'pg', 'FETCH some_cursor', 'PgQuery::FETCH_STMT'
   visit 'all', 'SELECT 1.9', 'PgQuery::FLOAT'
-  visit 'all', 'SELECT some_function("a", \'b\', 1)', 'PgQuery::FUNC_CALL'
+  visit 'all',
+        'SELECT ' \
+        'SUM("a") AS some_a_sum, ' \
+        'RANK("b"), ' \
+        'COUNT("c"), ' \
+        'GENERATE_SERIES(1, 5), ' \
+        'MAX("d"), ' \
+        'MIN("e"), ' \
+        'AVG("f"), ' \
+        'SUM("a" ORDER BY "id", "a" DESC), ' \
+        'SUM("a") FILTER(WHERE "a" = 1), ' \
+        'SUM("a") WITHIN GROUP (ORDER BY "a"), ' \
+        'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
+        'COUNT(DISTINCT "some_column"), ' \
+        'some_function("a", \'b\', 1)',
+        'PgQuery::FUNC_CALL'
   visit 'pg',
         "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
         'PgQuery::FUNCTION_PARAMETER'
@@ -275,6 +290,12 @@ describe 'Arel.sql_to_arel' do
     sql = 'SELECT "a" <= SOME(SELECT 1)'
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq 'SELECT "a" <= ANY(SELECT 1)'
+  end
+
+  it 'removes ALL inside a function' do
+    sql = 'SELECT SUM(ALL "a")'
+    parsed_sql = Arel.sql_to_arel(sql).to_sql
+    expect(parsed_sql).to eq 'SELECT SUM("a")'
   end
 
   # # NOTE: should run at the end
