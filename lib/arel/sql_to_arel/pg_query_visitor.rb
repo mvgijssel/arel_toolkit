@@ -511,8 +511,15 @@ module Arel
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
 
-        # TODO: We have to deal with DISTINCT ON!
-        select_core.set_quantifier = Arel::Nodes::Distinct.new if distinct_clause
+        if distinct_clause == [nil]
+          select_core.set_quantifier = Arel::Nodes::Distinct.new
+        elsif distinct_clause.is_a?(Array)
+          select_core.set_quantifier = Arel::Nodes::DistinctOn.new(visit(distinct_clause))
+        elsif distinct_clause.nil?
+          select_core.set_quantifier = nil
+        else
+          raise "Unknown distinct clause `#{distinct_clause}`"
+        end
 
         select_statement = Arel::Nodes::SelectStatement.new [select_core]
         select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count

@@ -201,7 +201,9 @@ describe 'Arel.sql_to_arel' do
         'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table',
         'PgQuery::RULE_STMT'
   visit 'all',
-        'SELECT 1 FROM "a" ' \
+        'SELECT ' \
+        "DISTINCT 'id', (SELECT DISTINCT ON ( 'a' ) 'a'), " \
+        '1 FROM "a" ' \
         "WHERE 't'::bool " \
         'GROUP BY 1 ' \
         'HAVING "a" > 1 ' \
