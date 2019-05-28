@@ -291,6 +291,11 @@ module Arel
         super('&&', left, right)
       end
     end
+
+    Arel::Nodes::SelectStatement.class_eval do
+      # For INSERT statements
+      attr_accessor :values_lists
+    end
   end
 end
 
