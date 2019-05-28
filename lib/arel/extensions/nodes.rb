@@ -291,6 +291,42 @@ module Arel
         super('&&', left, right)
       end
     end
+
+    Arel::Nodes::SelectStatement.class_eval do
+      # For INSERT statements
+      attr_accessor :values_lists
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    Arel::Nodes::InsertStatement.class_eval do
+      attr_accessor :on_conflict
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class DefaultValues < Arel::Nodes::Node
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class DefaultValues < Arel::Nodes::Node
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class Conflict < Arel::Nodes::Node
+      attr_accessor :action
+      attr_accessor :infer
+      attr_accessor :values
+      attr_accessor :wheres
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class Infer < Arel::Nodes::Node
+      attr_accessor :name
+      attr_accessor :indexes
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class SetToDefault < Arel::Nodes::Node
+    end
   end
 end
 

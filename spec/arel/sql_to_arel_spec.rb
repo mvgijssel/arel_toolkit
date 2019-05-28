@@ -160,7 +160,23 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'GRANT SELECT ON some_table TO some_users', 'PgQuery::GRANT_STMT'
   visit 'pg', 'CREATE INDEX some_index ON some_table USING GIN (some_column)', 'PgQuery::INDEX_ELEM'
   visit 'pg', 'CREATE INDEX some_index ON some_table (some_column)', 'PgQuery::INDEX_STMT'
-  visit 'pg', 'INSERT INTO kerk (a,b,c) VALUES (1, "a", \'c\')', 'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" ("a", "b", "c", "d") VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1)',
+        'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" VALUES (1)', 'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" DEFAULT VALUES', 'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" VALUES (1) ON CONFLICT DO NOTHING', 'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT DO UPDATE ' \
+        'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
+        'WHERE 2 = 3',
+        'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT ON CONSTRAINT constaint_name DO UPDATE SET "a" = 1',
+        'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT (a, b) DO UPDATE SET "a" = 1',
+        'PgQuery::INSERT_STMT'
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
   visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'

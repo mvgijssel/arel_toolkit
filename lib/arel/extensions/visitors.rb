@@ -271,6 +271,79 @@ module Arel
         end
       end
 
+      def visit_Arel_Nodes_DefaultValues(_o, collector)
+        collector << 'DEFAULT VALUES'
+      end
+
+      # rubocop:disable Metrics/AbcSize
+      def visit_Arel_Nodes_InsertStatement(o, collector)
+        collector << 'INSERT INTO '
+        collector = visit o.relation, collector
+        if o.columns.any?
+          collector << " (#{o.columns.map do |x|
+            quote_column_name x.name
+          end.join ', '})"
+        end
+
+        collector = if o.values
+                      maybe_visit o.values, collector
+                    elsif o.select
+                      maybe_visit o.select, collector
+                    else
+                      collector
+                    end
+
+        visit(o.on_conflict, collector) if o.on_conflict
+        collector
+      end
+      # rubocop:enable Metrics/AbcSize
+
+      # rubocop:disable Metrics/AbcSize
+      def visit_Arel_Nodes_Conflict(o, collector)
+        collector << ' ON CONFLICT '
+
+        visit(o.infer, collector) if o.infer
+
+        case o.action
+        when 1
+          collector << 'DO NOTHING'
+        when 2
+          collector << 'DO UPDATE SET '
+        else
+          raise "Unknown conflict clause `#{action}`"
+        end
+
+        o.values.any? && (inject_join o.values, collector, ', ')
+
+        if o.wheres.any?
+          collector << ' WHERE '
+          collector = inject_join o.wheres, collector, ' AND '
+        end
+
+        collector
+      end
+      # rubocop:enable Metrics/AbcSize
+
+      def visit_Arel_Nodes_Infer(o, collector)
+        if o.name
+          collector << 'ON CONSTRAINT '
+          collector << o.name
+          collector << SPACE
+        end
+
+        if o.indexes
+          collector << '('
+          inject_join o.indexes, collector, ', '
+          collector << ') '
+        end
+
+        collector
+      end
+
+      def visit_Arel_Nodes_SetToDefault(_o, collector)
+        collector << 'DEFAULT'
+      end
+
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize

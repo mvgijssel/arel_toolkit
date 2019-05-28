@@ -349,6 +349,51 @@ module Arel
         end
       end
 
+      def visit_InferClause(conname: nil, index_elems: nil)
+        infer = Arel::Nodes::Infer.new
+        infer.name = Arel.sql(conname) if conname
+        infer.indexes = visit(index_elems) if index_elems
+        infer
+      end
+
+      def visit_IndexElem(name:, ordering:, nulls_ordering:)
+        raise "Unknown ordering `#{ordering}`" unless ordering.zero?
+        raise "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
+
+        Arel.sql(name)
+      end
+
+      def visit_InsertStmt(
+        relation:,
+        cols: [],
+        select_stmt: nil,
+        on_conflict_clause: nil,
+        with_clause: nil,
+        override:
+      )
+        raise "Unknown override `#{override}`" unless override.zero?
+        raise "Unknown with_clause `#{override}`" unless with_clause.nil?
+
+        relation = visit(relation)
+        cols = visit(cols, :insert).map do |col|
+          Arel::Attribute.new(relation, col)
+        end
+        select_stmt = visit(select_stmt) if select_stmt
+
+        insert_statement = Arel::Nodes::InsertStatement.new
+        insert_statement.relation = relation
+        insert_statement.columns = cols
+
+        if select_stmt
+          insert_statement.values = select_stmt.values_lists if select_stmt
+        else
+          insert_statement.values = Arel::Nodes::DefaultValues.new
+        end
+
+        insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
+        insert_statement
+      end
+
       def visit_Integer(ival:)
         ival
       end
@@ -427,6 +472,15 @@ module Arel
         end
       end
 
+      def visit_OnConflictClause(action:, infer: nil, target_list: nil, where_clause: nil)
+        conflict = Arel::Nodes::Conflict.new
+        conflict.action = action
+        conflict.infer = visit(infer) if infer
+        conflict.values = target_list ? visit(target_list, :update) : []
+        conflict.wheres = where_clause ? [visit(where_clause)] : []
+        conflict
+      end
+
       def visit_ParamRef(_args)
         Arel::Nodes::BindParam.new(nil)
       end
@@ -467,13 +521,25 @@ module Arel
         visit(stmt)
       end
 
-      def visit_ResTarget(val:, name: nil)
-        val = visit(val)
+      def visit_ResTarget(context, val: nil, name: nil)
+        case context
+        when :select
+          val = visit(val)
 
-        if name
-          Arel::Nodes::As.new(val, Arel.sql(name))
+          if name
+            Arel::Nodes::As.new(val, Arel.sql(name))
+          else
+            val
+          end
+        when :insert
+          name
+        when :update
+          Arel::Nodes::Equality.new(
+            Arel.sql(visit_String(str: name)),
+            visit(val),
+          )
         else
-          val
+          raise "Unknown context `#{context}`"
         end
       end
 
@@ -484,7 +550,7 @@ module Arel
       def visit_SelectStmt(
         from_clause: nil,
         limit_count: nil,
-        target_list:,
+        target_list: nil,
         sort_clause: nil,
         where_clause: nil,
         limit_offset: nil,
@@ -494,7 +560,8 @@ module Arel
         with_clause: nil,
         locking_clause: nil,
         op:,
-        window_clause: nil
+        window_clause: nil,
+        values_lists: nil
       )
 
         raise "Unknown op `#{op}`" unless op.zero?
@@ -505,7 +572,7 @@ module Arel
         select_core.from = froms if froms
         select_core.source.right = join_sources
 
-        select_core.projections = visit(target_list) if target_list
+        select_core.projections = visit(target_list, :select) if target_list
         select_core.wheres = [visit(where_clause)] if where_clause
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
@@ -527,7 +594,30 @@ module Arel
         select_statement.orders = visit(sort_clause.to_a)
         select_statement.with = visit(with_clause) if with_clause
         select_statement.lock = visit(locking_clause) if locking_clause
+        if values_lists
+          values_lists = visit(values_lists).map do |values_list|
+            values_list.map do |value|
+              case value
+              when String
+                value
+              when Integer
+                Arel.sql(value.to_s)
+              when Arel::Nodes::TypeCast
+                Arel.sql(value.to_sql)
+              when Arel::Nodes::BindParam
+                value
+              else
+                raise "Unknown value `#{value}`"
+              end
+            end
+          end
+          select_statement.values_lists = Arel::Nodes::ValuesList.new(values_lists)
+        end
         select_statement
+      end
+
+      def visit_SetToDefault(_args)
+        Arel::Nodes::SetToDefault.new
       end
 
       def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
