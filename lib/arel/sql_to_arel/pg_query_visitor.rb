@@ -488,7 +488,7 @@ module Arel
         visit(stmt)
       end
 
-      def visit_ResTarget(context, val: nil, name:)
+      def visit_ResTarget(context, val: nil, name: nil)
         case context
         when :select
           val = visit(val)
@@ -534,7 +534,7 @@ module Arel
         select_core.from = froms if froms
         select_core.source.right = join_sources
 
-        select_core.projections = visit(target_list) if target_list
+        select_core.projections = visit(target_list, :select) if target_list
         select_core.wheres = [visit(where_clause)] if where_clause
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
