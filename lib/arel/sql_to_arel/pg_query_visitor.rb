@@ -613,7 +613,7 @@ module Arel
         select_statement
       end
 
-      def visit_SetToDefault(*args)
+      def visit_SetToDefault(_args)
         Arel::Nodes::SetToDefault.new
       end
 
