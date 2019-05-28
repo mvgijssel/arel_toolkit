@@ -173,7 +173,6 @@ describe 'Arel.sql_to_arel' do
         'CROSS JOIN "f" ' \
         'NATURAL JOIN "g"',
         'PgQuery::JOIN_EXPR'
-
   visit 'pg', 'LOCK TABLE some_table IN SHARE MODE;', 'PgQuery::LOCK_STMT'
   visit 'all', 'SELECT 1 FOR UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'all', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
@@ -275,6 +274,43 @@ describe 'Arel.sql_to_arel' do
         'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
         'PgQuery::WINDOW_DEF'
   visit 'all', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"', 'PgQuery::WITH_CLAUSE'
+
+  it 'implements all operators' do
+    sql = 'SELECT ' \
+          '11 + 11, ' \
+          '12 - 12, ' \
+          '10 * 10, ' \
+          '13 / 13, ' \
+          '13 % 2' \
+          '2.0 ^ 3.0, ' \
+          ' |/ 16, ' \
+          ' ||/ 17, ' \
+          '14 !, ' \
+          '!! 15, ' \
+          ' @ -5, ' \
+          '2 & 3, ' \
+          '2 | 3, ' \
+          '17 # 5, ' \
+          ' ~ 5, ' \
+          '1 << 4, ' \
+          '8 >> 2, ' \
+          '8 < 7, ' \
+          '5 > 4, ' \
+          '9 <= 9, ' \
+          '6 >= 6, ' \
+          '1 = 1, ' \
+          '2 != 3, ' \
+          'ARRAY[1, 4, 3] @> ARRAY[3, 1], ' \
+          'ARRAY[2, 7] <@ ARRAY[1, 7, 4, 2, 6], ' \
+          'ARRAY[1, 4, 3] && ARRAY[2, 1], ' \
+          'ARRAY[1, 2, 3] || ARRAY[4, 5, 6], ' \
+          'ARRAY[1] || ARRAY[ARRAY[4], ARRAY[7]], ' \
+          '3 || ARRAY[4, 5, 6], ' \
+          'ARRAY[4, 5, 6] || 7'
+
+    parsed_sql = Arel.sql_to_arel(sql).to_sql
+    expect(parsed_sql).to eq sql
+  end
 
   it 'translates FETCH into LIMIT' do
     sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'

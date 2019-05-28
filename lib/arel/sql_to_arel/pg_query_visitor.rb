@@ -31,27 +31,27 @@ module Arel
         visit(val, :const)
       end
 
-      def visit_A_Expr(kind:, lexpr:, rexpr:, name:)
+      def visit_A_Expr(kind:, lexpr: nil, rexpr: nil, name:)
         case kind
         when PgQuery::AEXPR_OP
-          left = visit(lexpr)
-          right = visit(rexpr)
+          left = visit(lexpr) if lexpr
+          right = visit(rexpr) if rexpr
           operator = visit(name[0], :operator)
-          generate_comparison(left, right, operator)
+          generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_OP_ANY
           left = visit(lexpr)
           right = visit(rexpr)
           right = Arel::Nodes::Any.new right
           operator = visit(name[0], :operator)
-          generate_comparison(left, right, operator)
+          generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_OP_ALL
           left = visit(lexpr)
           right = visit(rexpr)
           right = Arel::Nodes::All.new right
           operator = visit(name[0], :operator)
-          generate_comparison(left, right, operator)
+          generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_DISTINCT
           left = visit(lexpr)
@@ -83,7 +83,7 @@ module Arel
           end
 
         when PgQuery::AEXPR_LIKE
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           escape = nil
 
@@ -102,7 +102,7 @@ module Arel
           end
 
         when PgQuery::AEXPR_ILIKE
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           escape = nil
 
@@ -121,7 +121,7 @@ module Arel
           end
 
         when PgQuery::AEXPR_SIMILAR
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           escape = nil
 
@@ -141,22 +141,22 @@ module Arel
           end
 
         when PgQuery::AEXPR_BETWEEN
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_NOT_BETWEEN
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::NotBetween.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_BETWEEN_SYM
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::BetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_NOT_BETWEEN_SYM
-          left = visit(lexpr)
+          left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
@@ -638,60 +638,71 @@ module Arel
         end
       end
 
-      # TODO: implement all
-      def generate_comparison(left, right, operator)
+      def generate_operator(left, right, operator)
         case operator
-        when '='
-          Arel::Nodes::Equality.new(left, right)
-        when '<>'
-          Arel::Nodes::NotEqual.new(left, right)
-        when '>'
-          Arel::Nodes::GreaterThan.new(left, right)
-        when '>='
-          Arel::Nodes::GreaterThanOrEqual.new(left, right)
-        when '<'
-          Arel::Nodes::LessThan.new(left, right)
-        when '<='
-          Arel::Nodes::LessThanOrEqual.new(left, right)
-        when '*'
-          Arel::Nodes::Multiplication.new(left, right)
+
+        # https://www.postgresql.org/docs/10/functions-math.html
         when '+'
           Arel::Nodes::Addition.new(left, right)
         when '-'
           Arel::Nodes::Subtraction.new(left, right)
+        when '*'
+          Arel::Nodes::Multiplication.new(left, right)
         when '/'
           Arel::Nodes::Division.new(left, right)
-        when '!'
-          raise 'Missing factorial implementation'
-        when '!!'
-          raise 'Missing factorial (prefix) implementation'
+        when '%'
+          Arel::Nodes::Modulo.new(left, right)
+        when '^'
+          Arel::Nodes::Exponentiation.new(left, right)
         when '|/'
-          raise 'Missing square root implementation'
+          Arel::Nodes::SquareRoot.new(right)
         when '||/'
-          raise 'Missing cube root implementation'
+          Arel::Nodes::CubeRoot.new(right)
+        when '!'
+          Arel::Nodes::Factorial.new(left || right, false)
+        when '!!'
+          Arel::Nodes::Factorial.new(right, true)
+        when '@'
+          Arel::Nodes::Absolute.new(right)
+        when '&'
+          Arel::Nodes::BitwiseAnd.new(left, right)
+        when '|'
+          Arel::Nodes::BitwiseOr.new(left, right)
+        when '#'
+          Arel::Nodes::BitwiseXor.new(left, right)
+        when '~'
+          Arel::Nodes::BitwiseNot.new(right)
         when '<<'
           Arel::Nodes::BitwiseShiftLeft.new(left, right)
         when '>>'
           Arel::Nodes::BitwiseShiftRight.new(left, right)
-        when '&'
-          Arel::Nodes::BitwiseAnd.new(left, right)
-        when '^'
 
-          # TODO: `#` is bitwise xor, right? Check out:
-          # -> https://www.postgresql.org/docs/9.4/functions-math.html
-          # -> https://github.com/rails/rails/blob/master/activerecord/lib/arel/math.rb#L30
-          # Am I wrong, or is this a bug in Arel?
+        # https://www.postgresql.org/docs/9.0/functions-comparison.html
+        when '<'
+          Arel::Nodes::LessThan.new(left, right)
+        when '>'
+          Arel::Nodes::GreaterThan.new(left, right)
+        when '<='
+          Arel::Nodes::LessThanOrEqual.new(left, right)
+        when '>='
+          Arel::Nodes::GreaterThanOrEqual.new(left, right)
+        when '='
+          Arel::Nodes::Equality.new(left, right)
+        when '<>'
+          Arel::Nodes::NotEqual.new(left, right)
 
-          Arel::Nodes::BitwiseXor.new(left, right)
-        when '#'
-          raise 'Missing bitwise xor implementation'
-        when '%'
-          raise 'Missing cube root implementation'
-        when '|'
-          Arel::Nodes::BitwiseOr.new(left, right)
+        # https://www.postgresql.org/docs/9.1/functions-array.html
+        when '@>'
+          Arel::Nodes::Contains.new(left, right)
+        when '<@'
+          Arel::Nodes::ContainedBy.new(left, right)
+        when '&&'
+          Arel::Nodes::Overlap.new(left, right)
+        when '||'
+          Arel::Nodes::Concat.new(left, right)
 
         else
-          raise "Dunno operator `#{operator}`"
+          raise "Unknown operator `#{operator}`"
         end
       end
 
@@ -778,10 +789,10 @@ module Arel
           Arel::Nodes::Exists.new subselect
 
         when PgQuery::SUBLINK_TYPE_ALL
-          generate_comparison(testexpr, Arel::Nodes::All.new(subselect), operator)
+          generate_operator(testexpr, Arel::Nodes::All.new(subselect), operator)
 
         when PgQuery::SUBLINK_TYPE_ANY
-          generate_comparison(testexpr, Arel::Nodes::Any.new(subselect), operator)
+          generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
 
         when PgQuery::SUBLINK_TYPE_ROWCOMPARE
           raise '?'

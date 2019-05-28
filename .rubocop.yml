@@ -1,9 +1,6 @@
 Style/FrozenStringLiteralComment:
   Enabled: false
 
-Style/TrailingCommaInArguments:
-  EnforcedStyleForMultiline: comma
-
 Bundler/OrderedGems:
   Enabled: false
 
@@ -27,6 +24,9 @@ Style/Documentation:
   Enabled: false
 
 Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 
 Layout/MultilineMethodCallIndentation:

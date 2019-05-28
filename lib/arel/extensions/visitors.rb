@@ -257,10 +257,23 @@ module Arel
         visit o.right, collector
       end
 
-      def visit_Arel_Nodes_NamedFunction o, collector
+      def visit_Arel_Nodes_NamedFunction(o, collector)
         aggregate(o.name, o, collector)
       end
 
+      def visit_Arel_Nodes_Factorial(o, collector)
+        if o.prefix
+          collector << '!! '
+          visit o.expr, collector
+        else
+          visit o.expr, collector
+          collector << ' !'
+        end
+      end
+
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/AbcSize
       def aggregate(name, o, collector)
         collector << "#{name}("
         collector << 'DISTINCT ' if o.distinct
@@ -294,6 +307,9 @@ module Arel
           collector
         end
       end
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
 
       def apply_ordering_nulls(o, collector)
         case o.nulls

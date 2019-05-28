@@ -215,6 +215,82 @@ module Arel
         @orders      = []
       end
     end
+
+    # https://www.postgresql.org/docs/9.4/functions-math.html
+    class Factorial < Arel::Nodes::Unary
+      attr_accessor :prefix
+
+      def initialize(expr, prefix)
+        super(expr)
+        @prefix = prefix
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.4/functions-math.html
+    class SquareRoot < Arel::Nodes::UnaryOperation
+      def initialize(operand)
+        super('|/', operand)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.4/functions-math.html
+    class CubeRoot < Arel::Nodes::UnaryOperation
+      def initialize(operand)
+        super('||/', operand)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.4/functions-math.html
+    class Modulo < Arel::Nodes::InfixOperation
+      def initialize(left, right)
+        super(:%, left, right)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.4/functions-math.html
+    class Absolute < Arel::Nodes::UnaryOperation
+      def initialize(operand)
+        super('@', operand)
+      end
+    end
+
+    # TODO: `#` is bitwise xor, right? Check out:
+    # -> https://www.postgresql.org/docs/9.4/functions-math.html
+    # -> https://github.com/rails/rails/blob/master/activerecord/lib/arel/math.rb#L30
+    # Am I wrong, or is this a bug in Arel?
+    class BitwiseXor < InfixOperation
+      def initialize(left, right)
+        super('#', left, right)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.1/functions-array.html
+    class Exponentiation < InfixOperation
+      def initialize(left, right)
+        super(:^, left, right)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.1/functions-array.html
+    class Contains < InfixOperation
+      def initialize(left, right)
+        super('@>', left, right)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.1/functions-array.html
+    class ContainedBy < InfixOperation
+      def initialize(left, right)
+        super('<@', left, right)
+      end
+    end
+
+    # https://www.postgresql.org/docs/9.1/functions-array.html
+    class Overlap < InfixOperation
+      def initialize(left, right)
+        super('&&', left, right)
+      end
+    end
   end
 end
 
