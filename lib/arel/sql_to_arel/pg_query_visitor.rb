@@ -349,8 +349,18 @@ module Arel
         end
       end
 
-      def visit_InferClause(conname:)
-        Arel.sql(conname)
+      def visit_InferClause(conname: nil, index_elems: nil)
+        infer = Arel::Nodes::Infer.new
+        infer.name = Arel.sql(conname) if conname
+        infer.indexes = visit(index_elems) if index_elems
+        infer
+      end
+
+      def visit_IndexElem(name:, ordering:, nulls_ordering:)
+        raise "Unknown ordering `#{ordering}`" unless ordering.zero?
+        raise "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
+
+        Arel.sql(name)
       end
 
       def visit_InsertStmt(

@@ -299,11 +299,7 @@ module Arel
       def visit_Arel_Nodes_Conflict(o, collector)
         collector << ' ON CONFLICT '
 
-        if o.infer
-          collector << 'ON CONSTRAINT '
-          visit(o.infer, collector) if o.infer
-          collector << SPACE
-        end
+        visit(o.infer, collector) if o.infer
 
         case o.action
         when 1
@@ -321,6 +317,22 @@ module Arel
         if o.wheres.any?
           collector << ' WHERE '
           collector = inject_join o.wheres, collector, ' AND '
+        end
+
+        collector
+      end
+
+      def visit_Arel_Nodes_Infer(o, collector)
+        if o.name
+          collector << 'ON CONSTRAINT '
+          collector << o.name
+          collector << SPACE
+        end
+
+        if o.indexes
+          collector << '('
+          inject_join o.indexes, collector, ', '
+          collector << ') '
         end
 
         collector
