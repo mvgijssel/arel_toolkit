@@ -313,8 +313,9 @@ module Arel
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     class Conflict < Arel::Nodes::Node
       attr_accessor :action
-      attr_accessor :wheres
+      attr_accessor :infer
       attr_accessor :values
+      attr_accessor :wheres
     end
 
     # https://www.postgresql.org/docs/9.5/sql-insert.html

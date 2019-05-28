@@ -299,6 +299,12 @@ module Arel
       def visit_Arel_Nodes_Conflict(o, collector)
         collector << ' ON CONFLICT '
 
+        if o.infer
+          collector << 'ON CONSTRAINT '
+          visit(o.infer, collector) if o.infer
+          collector << SPACE
+        end
+
         case o.action
         when 1
           collector << 'DO NOTHING'

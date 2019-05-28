@@ -172,6 +172,9 @@ describe 'Arel.sql_to_arel' do
         'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
         'WHERE 2 = 3',
         'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT ON CONSTRAINT constaint_name DO UPDATE SET "a" = 1',
+        'PgQuery::INSERT_STMT'
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
   visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'

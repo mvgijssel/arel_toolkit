@@ -349,6 +349,10 @@ module Arel
         end
       end
 
+      def visit_InferClause(conname:)
+        Arel.sql(conname)
+      end
+
       def visit_InsertStmt(
         relation:,
         cols: [],
@@ -456,10 +460,11 @@ module Arel
       end
 
       def visit_OnConflictClause(action:, infer: nil, target_list: nil, where_clause: nil)
-        conflict = Arel::Nodes::Conflict.new()
+        conflict = Arel::Nodes::Conflict.new
         conflict.action = action
-        conflict.wheres = [visit(where_clause)] if where_clause
-        conflict.values = visit(target_list, :update) if target_list
+        conflict.infer = visit(infer) if infer
+        conflict.values = target_list ? visit(target_list, :update) : []
+        conflict.wheres = where_clause ? [visit(where_clause)] : []
         conflict
       end
 
