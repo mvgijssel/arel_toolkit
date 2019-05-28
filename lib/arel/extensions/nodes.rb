@@ -296,6 +296,30 @@ module Arel
       # For INSERT statements
       attr_accessor :values_lists
     end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    Arel::Nodes::InsertStatement.class_eval do
+      attr_accessor :on_conflict
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class DefaultValues < Arel::Nodes::Node
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class DefaultValues < Arel::Nodes::Node
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class Conflict < Arel::Nodes::Node
+      attr_accessor :action
+      attr_accessor :wheres
+      attr_accessor :values
+    end
+
+    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    class SetToDefault < Arel::Nodes::Node
+    end
   end
 end
 

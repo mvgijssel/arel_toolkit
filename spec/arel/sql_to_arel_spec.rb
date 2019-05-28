@@ -163,6 +163,15 @@ describe 'Arel.sql_to_arel' do
   visit 'all',
         'INSERT INTO "t" ("a", "b", "c", "d") VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1)',
         'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" VALUES (1)', 'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" VALUES (1)', 'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" DEFAULT VALUES', 'PgQuery::INSERT_STMT'
+  visit 'all', 'INSERT INTO "t" VALUES (1) ON CONFLICT DO NOTHING', 'PgQuery::INSERT_STMT'
+  visit 'all',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT DO UPDATE ' \
+        'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
+        'WHERE 2 = 3',
+        'PgQuery::INSERT_STMT'
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
   visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'

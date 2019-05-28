@@ -366,7 +366,14 @@ module Arel
         insert_statement = Arel::Nodes::InsertStatement.new
         insert_statement.relation = relation
         insert_statement.columns = cols
-        insert_statement.values = select_stmt.values_lists if select_stmt
+
+        if select_stmt
+          insert_statement.values = select_stmt.values_lists if select_stmt
+        else
+          insert_statement.values = Arel::Nodes::DefaultValues.new
+        end
+
+        insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
         insert_statement
       end
 
@@ -448,6 +455,14 @@ module Arel
         end
       end
 
+      def visit_OnConflictClause(action:, infer: nil, target_list: nil, where_clause: nil)
+        conflict = Arel::Nodes::Conflict.new()
+        conflict.action = action
+        conflict.wheres = [visit(where_clause)] if where_clause
+        conflict.values = visit(target_list, :update) if target_list
+        conflict
+      end
+
       def visit_ParamRef(_args)
         Arel::Nodes::BindParam.new(nil)
       end
@@ -500,6 +515,11 @@ module Arel
           end
         when :insert
           name
+        when :update
+          Arel::Nodes::Equality.new(
+            Arel.sql(visit_String(str: name)),
+            visit(val),
+          )
         else
           raise "Unknown context `#{context}`"
         end
@@ -576,6 +596,10 @@ module Arel
           select_statement.values_lists = Arel::Nodes::ValuesList.new(values_lists)
         end
         select_statement
+      end
+
+      def visit_SetToDefault(*args)
+        Arel::Nodes::SetToDefault.new
       end
 
       def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
