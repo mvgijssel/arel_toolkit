@@ -36,4 +36,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '~> 0.69'
   spec.add_development_dependency 'guard', '~> 2.15'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
+
+  spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry-nav'
+  spec.add_development_dependency 'pry-rescue'
+  spec.add_development_dependency 'pry-stack_explorer'
+  spec.add_development_dependency 'pry-alias'
 end

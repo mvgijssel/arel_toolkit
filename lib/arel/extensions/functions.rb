@@ -24,12 +24,6 @@ module Arel
       end
     end
 
-    class Any < Arel::Nodes::NamedFunction
-      def initialize(args)
-        super 'ANY', args
-      end
-    end
-
     class Coalesce < Arel::Nodes::NamedFunction
       def initialize(args)
         super 'COALESCE', args
