@@ -158,7 +158,7 @@ RSpec.describe 'Arel.sql_to_arel' do
 
         describe 'having' do
           it do
-            sql = %(SELECT "id" FROM "salaries" GROUP BY "salary" HAVING MIN("salary") > AVG("salary"))
+            sql = %(SELECT "id" FROM "a" GROUP BY "salary" HAVING MIN("salary") > AVG("salary"))
             expect(sql_arel_sql(sql)).to eq sql
           end
         end
@@ -335,12 +335,6 @@ RSpec.describe 'Arel.sql_to_arel' do
       end
 
       xit do
-        a = %(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
-        b = %(SELECT "m"."name" AS mname, "pname" FROM "manufacturers" m, LATERAL get_product_names("m"."id") pname)
-        expect(Arel.sql_to_arel(a).to_sql).to eq b
-      end
-
-      xit do
         a = %(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
         b = %(SELECT "x", "y" FROM "a" FULL JOIN "b" ON 1 > 0)
         expect(Arel.sql_to_arel(a).to_sql).to eq b
@@ -379,12 +373,6 @@ RSpec.describe 'Arel.sql_to_arel' do
       xit do
         a = %(SELECT * FROM "a" ORDER BY "x" ASC NULLS LAST)
         b = %(SELECT * FROM "a" ORDER BY "x" ASC NULLS LAST)
-        expect(Arel.sql_to_arel(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
-        b = %(SELECT * FROM "accounts" WHERE "status" = CASE WHEN "x" = 1 THEN \'active\' ELSE \'inactive\' END)
         expect(Arel.sql_to_arel(a).to_sql).to eq b
       end
 
@@ -497,12 +485,12 @@ RSpec.describe 'Arel.sql_to_arel' do
       end
 
       it do
-        a = %(SELECT CASE 1 > 0 WHEN true THEN 'ok' ELSE NULL END)
-        b = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        a = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
+        b = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
         expect(Arel.sql_to_arel(a).to_sql).to eq b
 
-        c = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
-        d = %(SELECT CASE 1 > 0 WHEN TRUE THEN 'ok' ELSE NULL END)
+        c = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
+        d = %(SELECT CASE 1 > 0 WHEN 't'::bool THEN 'ok' ELSE NULL END)
         expect(Arel.sql_to_arel(c).to_sql).to eq d
       end
 
@@ -549,12 +537,6 @@ RSpec.describe 'Arel.sql_to_arel' do
       end
 
       it do
-        a = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" a)
-        b = %(SELECT CASE WHEN "a"."status" = 1 THEN \'active\' WHEN "a"."status" = 2 THEN \'inactive\' END FROM "accounts" "a")
-        expect(Arel.sql_to_arel(a).to_sql).to eq b
-      end
-
-      it do
         a = %(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
         b = %(SELECT DISTINCT "a", "b", * FROM "c" WHERE "d" = "e")
         expect(Arel.sql_to_arel(a).to_sql).to eq b
@@ -569,12 +551,6 @@ RSpec.describe 'Arel.sql_to_arel' do
       it do
         a = %(SELECT sum("price_cents") FROM "products")
         b = %(SELECT SUM("price_cents") FROM "products")
-        expect(Arel.sql_to_arel(a).to_sql).to eq b
-      end
-
-      it do
-        a = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" a)
-        b = %(SELECT CASE WHEN "a"."status" = 1 THEN 'active' WHEN "a"."status" = 2 THEN 'inactive' ELSE 'unknown' END FROM "accounts" "a")
         expect(Arel.sql_to_arel(a).to_sql).to eq b
       end
 
@@ -606,12 +582,6 @@ RSpec.describe 'Arel.sql_to_arel' do
       xit do
         a = %(SELECT * FROM "x" WHERE "y" = "z"[?][?])
         b = %(SELECT * FROM "x" WHERE "y" = "z"[?][?])
-        expect(Arel.sql_to_arel(a).to_sql).to eq b
-      end
-
-      xit do
-        a = %(SELECT * FROM (VALUES ('anne', 'smxith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
-        b = %(SELECT * FROM (VALUES ('anne', 'smxith'), ('bob', 'jones'), ('joe', 'blow')) names(\"first\", \"last\"))
         expect(Arel.sql_to_arel(a).to_sql).to eq b
       end
 
