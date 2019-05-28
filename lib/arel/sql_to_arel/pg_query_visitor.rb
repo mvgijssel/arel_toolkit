@@ -371,6 +371,9 @@ module Arel
         with_clause: nil,
         override:
       )
+        raise "Unknown override `#{override}`" unless override.zero?
+        raise "Unknown with_clause `#{override}`" unless with_clause.nil?
+
         relation = visit(relation)
         cols = visit(cols, :insert).map do |col|
           Arel::Attribute.new(relation, col)

@@ -275,6 +275,7 @@ module Arel
         collector << 'DEFAULT VALUES'
       end
 
+      # rubocop:disable Metrics/AbcSize
       def visit_Arel_Nodes_InsertStatement(o, collector)
         collector << 'INSERT INTO '
         collector = visit o.relation, collector
@@ -295,7 +296,9 @@ module Arel
         visit(o.on_conflict, collector) if o.on_conflict
         collector
       end
+      # rubocop:enable Metrics/AbcSize
 
+      # rubocop:disable Metrics/AbcSize
       def visit_Arel_Nodes_Conflict(o, collector)
         collector << ' ON CONFLICT '
 
@@ -310,9 +313,7 @@ module Arel
           raise "Unknown conflict clause `#{action}`"
         end
 
-        if o.values.any?
-          collector = inject_join o.values, collector, ', '
-        end
+        o.values.any? && (inject_join o.values, collector, ', ')
 
         if o.wheres.any?
           collector << ' WHERE '
@@ -321,6 +322,7 @@ module Arel
 
         collector
       end
+      # rubocop:enable Metrics/AbcSize
 
       def visit_Arel_Nodes_Infer(o, collector)
         if o.name
