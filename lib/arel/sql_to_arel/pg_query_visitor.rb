@@ -276,6 +276,10 @@ module Arel
         Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
       end
 
+      def visit_CurrentOfExpr(cursor_name:)
+        Arel::Nodes::CurrentOfExpression.new(cursor_name)
+      end
+
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
       end
@@ -694,6 +698,28 @@ module Arel
         raise "Don't know how to handle `#{names.length}` names" if names.length > 1
 
         names.first
+      end
+
+      def visit_UpdateStmt(
+        relation:,
+        target_list:,
+        where_clause: nil,
+        from_clause: [],
+        returning_list: [],
+        with_clause: nil
+      )
+        relation = visit(relation)
+        target_list = visit(target_list, :update)
+
+        update_statement = Arel::Nodes::UpdateStatement.new
+        update_statement.relation = relation
+        update_statement.froms = visit(from_clause)
+        update_statement.values = target_list
+        update_statement.wheres = where_clause ? [visit(where_clause)] : []
+        update_statement.with = visit(with_clause) if with_clause
+        update_statement.returning = visit(returning_list, :select)
+
+        update_statement
       end
 
       def visit_WindowDef(

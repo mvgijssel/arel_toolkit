@@ -266,7 +266,18 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
   visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
-  visit 'pg', 'UPDATE some_table SET some_column = 1', 'PgQuery::UPDATE_STMT'
+  visit 'all',
+        'WITH "query" AS (SELECT 1 AS a) ' \
+        'UPDATE ONLY "some_table" "table_alias" ' \
+        'SET "b" = "query"."a", "d" = DEFAULT, "e" = (SELECT 1), "d" = ROW(DEFAULT) ' \
+        'FROM "query", "other_query" WHERE 1 = 1 ' \
+        'RETURNING *, "c" AS some_column',
+        'PgQuery::UPDATE_STMT'
+  visit 'all',
+        'UPDATE ONLY "some_table" ' \
+        'SET "b" = "query"."a", "c" = 1.0, "d" = \'e`\', "f" = \'t\'::bool ' \
+        'WHERE CURRENT OF some_cursor',
+        'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
