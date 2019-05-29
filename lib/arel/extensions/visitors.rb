@@ -417,7 +417,8 @@ module Arel
         collector << o.cursor_name
       end
 
-      def visit_Arel_Nodes_DeleteStatement o, collector
+      # rubocop:disable Metrics/AbcSize
+      def visit_Arel_Nodes_DeleteStatement(o, collector)
         if o.with
           collector = visit o.with, collector
           collector << SPACE
@@ -443,6 +444,7 @@ module Arel
 
         maybe_visit o.limit, collector
       end
+      # rubocop:enable Metrics/AbcSize
 
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
