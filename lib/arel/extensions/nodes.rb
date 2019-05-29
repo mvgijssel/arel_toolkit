@@ -1,5 +1,6 @@
 # rubocop:disable Metrics/ParameterLists
 # rubocop:disable Naming/UncommunicativeMethodParamName
+# rubocop:disable Metrics/ModuleLength
 
 module Arel
   module Nodes
@@ -299,7 +300,10 @@ module Arel
 
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     Arel::Nodes::InsertStatement.class_eval do
+      attr_accessor :with
       attr_accessor :on_conflict
+      attr_accessor :override
+      attr_accessor :returning
     end
 
     # https://www.postgresql.org/docs/9.5/sql-insert.html
@@ -350,3 +354,4 @@ end
 
 # rubocop:enable Metrics/ParameterLists
 # rubocop:enable Naming/UncommunicativeMethodParamName
+# rubocop:enable Metrics/ModuleLength

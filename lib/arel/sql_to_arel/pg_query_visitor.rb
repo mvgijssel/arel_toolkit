@@ -373,11 +373,9 @@ module Arel
         select_stmt: nil,
         on_conflict_clause: nil,
         with_clause: nil,
+        returning_list: [],
         override:
       )
-        raise "Unknown override `#{override}`" unless override.zero?
-        raise "Unknown with_clause `#{override}`" unless with_clause.nil?
-
         relation = visit(relation)
         cols = visit(cols, :insert).map do |col|
           Arel::Attribute.new(relation, col)
@@ -387,6 +385,8 @@ module Arel
         insert_statement = Arel::Nodes::InsertStatement.new
         insert_statement.relation = relation
         insert_statement.columns = cols
+        insert_statement.override = override
+        insert_statement.with = visit(with_clause) if with_clause
 
         if select_stmt
           insert_statement.values = select_stmt.values_lists if select_stmt
@@ -394,6 +394,7 @@ module Arel
           insert_statement.values = Arel::Nodes::DefaultValues.new
         end
 
+        insert_statement.returning = visit(returning_list, :select)
         insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
         insert_statement
       end
