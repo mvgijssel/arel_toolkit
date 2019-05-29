@@ -1,5 +1,6 @@
 # rubocop:disable Metrics/ParameterLists
 # rubocop:disable Naming/UncommunicativeMethodParamName
+# rubocop:disable Metrics/ModuleLength
 
 module Arel
   module Nodes
@@ -353,3 +354,4 @@ end
 
 # rubocop:enable Metrics/ParameterLists
 # rubocop:enable Naming/UncommunicativeMethodParamName
+# rubocop:enable Metrics/ModuleLength
