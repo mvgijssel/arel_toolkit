@@ -276,6 +276,10 @@ module Arel
         Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
       end
 
+      def visit_CurrentOfExpr(cursor_name:)
+        Arel::Nodes::CurrentOfExpression.new(cursor_name)
+      end
+
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
       end

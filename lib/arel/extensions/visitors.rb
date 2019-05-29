@@ -387,6 +387,11 @@ module Arel
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/PerceivedComplexity
 
+      def visit_Arel_Nodes_CurrentOfExpression(o, collector)
+        collector << 'CURRENT OF '
+        collector << o.cursor_name
+      end
+
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
