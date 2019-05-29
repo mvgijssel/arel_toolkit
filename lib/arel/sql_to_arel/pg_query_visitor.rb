@@ -701,7 +701,7 @@ module Arel
         target_list:,
         where_clause: nil,
         from_clause: [],
-        returning_list: nil,
+        returning_list: [],
         with_clause: nil
       )
         relation = visit(relation)
@@ -713,6 +713,8 @@ module Arel
         update_statement.values = target_list
         update_statement.wheres = where_clause ? [visit(where_clause)] : []
         update_statement.with = visit(with_clause) if with_clause
+        update_statement.returning = visit(returning_list, :select)
+
         update_statement
       end
 

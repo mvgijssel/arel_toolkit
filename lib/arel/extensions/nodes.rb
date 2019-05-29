@@ -332,6 +332,7 @@ module Arel
     Arel::Nodes::UpdateStatement.class_eval do
       attr_accessor :with
       attr_accessor :froms
+      attr_accessor :returning
     end
   end
 end

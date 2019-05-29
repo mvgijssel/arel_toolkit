@@ -268,7 +268,10 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
   visit 'all',
         'WITH "query" AS (SELECT 1 AS a) ' \
-        'UPDATE "some_table" SET "b" = "query"."a" FROM "query", "other_query" WHERE 1 = 1',
+        'UPDATE ONLY "some_table" "table_alias" ' \
+        'SET "b" = "query"."a", "d" = DEFAULT, "e" = (SELECT 1), "d" = ROW(DEFAULT) ' \
+        'FROM "query", "other_query" WHERE 1 = 1 ' \
+        'RETURNING *, "c" AS some_column',
         'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'

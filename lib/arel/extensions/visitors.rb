@@ -376,6 +376,11 @@ module Arel
           collector = inject_join wheres, collector, ' AND '
         end
 
+        unless o.returning.empty?
+          collector << ' RETURNING '
+          collector = inject_join o.returning, collector, ', '
+        end
+
         collector
       end
       # rubocop:enable Metrics/AbcSize
