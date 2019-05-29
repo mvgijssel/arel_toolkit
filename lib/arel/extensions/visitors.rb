@@ -417,6 +417,33 @@ module Arel
         collector << o.cursor_name
       end
 
+      def visit_Arel_Nodes_DeleteStatement o, collector
+        if o.with
+          collector = visit o.with, collector
+          collector << SPACE
+        end
+
+        collector << 'DELETE FROM '
+        collector = visit o.relation, collector
+
+        if o.using
+          collector << ' USING '
+          collector = inject_join o.using, collector, ', '
+        end
+
+        if o.wheres.any?
+          collector << WHERE
+          collector = inject_join o.wheres, collector, AND
+        end
+
+        unless o.returning.empty?
+          collector << ' RETURNING '
+          collector = inject_join o.returning, collector, ', '
+        end
+
+        maybe_visit o.limit, collector
+      end
+
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
