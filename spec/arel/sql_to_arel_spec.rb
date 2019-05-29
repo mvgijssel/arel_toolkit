@@ -161,7 +161,14 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'CREATE INDEX some_index ON some_table USING GIN (some_column)', 'PgQuery::INDEX_ELEM'
   visit 'pg', 'CREATE INDEX some_index ON some_table (some_column)', 'PgQuery::INDEX_STMT'
   visit 'all',
-        'INSERT INTO "t" ("a", "b", "c", "d") VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1)',
+        'INSERT INTO "t" ("a", "b", "c", "d") ' \
+        'OVERRIDING SYSTEM VALUE ' \
+        'VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1) ' \
+        'RETURNING *, "some_column" AS some_column_alias',
+        'PgQuery::INSERT_STMT'
+  visit 'all',
+        'WITH RECURSIVE "a" AS (SELECT "some_table"."a" FROM "some_table") ' \
+        'INSERT INTO "t" OVERRIDING USER VALUE VALUES (1)',
         'PgQuery::INSERT_STMT'
   visit 'all', 'INSERT INTO "t" VALUES (1)', 'PgQuery::INSERT_STMT'
   visit 'all', 'INSERT INTO "t" DEFAULT VALUES', 'PgQuery::INSERT_STMT'

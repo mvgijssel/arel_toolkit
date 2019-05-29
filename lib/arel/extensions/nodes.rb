@@ -299,7 +299,10 @@ module Arel
 
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     Arel::Nodes::InsertStatement.class_eval do
+      attr_accessor :with
       attr_accessor :on_conflict
+      attr_accessor :override
+      attr_accessor :returning
     end
 
     # https://www.postgresql.org/docs/9.5/sql-insert.html
