@@ -280,6 +280,25 @@ module Arel
         Arel::Nodes::CurrentOfExpression.new(cursor_name)
       end
 
+      def visit_DeleteStmt(
+        relation:,
+        using_clause: nil,
+        where_clause: nil,
+        returning_list: [],
+        with_clause: nil
+      )
+        relation = visit(relation)
+
+        delete_statement = Arel::Nodes::DeleteStatement.new
+        delete_statement.relation = relation
+        delete_statement.using = visit(using_clause) if using_clause
+        delete_statement.wheres = where_clause ? [visit(where_clause)] : []
+        delete_statement.with = visit(with_clause) if with_clause
+        delete_statement.returning = visit(returning_list, :select)
+
+        delete_statement
+      end
+
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
       end

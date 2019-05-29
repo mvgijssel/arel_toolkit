@@ -129,7 +129,14 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'DEALLOCATE some_prepared_statement', 'PgQuery::DEALLOCATE_STMT'
   visit 'pg', 'DECLARE a CURSOR FOR SELECT 1', 'PgQuery::DECLARE_CURSOR_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DEF_ELEM'
-  visit 'pg', 'DELETE FROM a', 'PgQuery::DELETE_STMT'
+  visit 'all',
+        'WITH "some_delete_query" AS (SELECT 1 AS some_column) ' \
+        'DELETE FROM ONLY "a" "some_table" ' \
+        'USING "other_table", "another_table" ' \
+        'WHERE "other_table"."other_column" = 1.0 ' \
+        'RETURNING *, "some_delete_query"."some_column"',
+        'PgQuery::DELETE_STMT'
+  visit 'all', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', 'PgQuery::DELETE_STMT'
   # visit 'pg', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DO_STMT'
   visit 'pg', 'DROP TABLE some_tablr', 'PgQuery::DROP_STMT'
