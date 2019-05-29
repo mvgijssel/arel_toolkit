@@ -327,6 +327,12 @@ module Arel
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     class SetToDefault < Arel::Nodes::Node
     end
+
+    # https://www.postgresql.org/docs/10/sql-update.html
+    Arel::Nodes::UpdateStatement.class_eval do
+      attr_accessor :with
+      attr_accessor :froms
+    end
   end
 end
 

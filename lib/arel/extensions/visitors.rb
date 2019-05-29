@@ -344,6 +344,40 @@ module Arel
         collector << 'DEFAULT'
       end
 
+      # rubocop:disable Metrics/AbcSize
+      def visit_Arel_Nodes_UpdateStatement(o, collector)
+        if o.with
+          collector = visit o.with, collector
+          collector << SPACE
+        end
+
+        wheres = if o.orders.empty? && o.limit.nil?
+                   o.wheres
+                 else
+                   [Nodes::In.new(o.key, [build_subselect(o.key, o)])]
+                 end
+
+        collector << 'UPDATE '
+        collector = visit o.relation, collector
+        unless o.values.empty?
+          collector << ' SET '
+          collector = inject_join o.values, collector, ', '
+        end
+
+        unless o.froms.empty?
+          collector << ' FROM '
+          collector = inject_join o.froms, collector, ', '
+        end
+
+        unless wheres.empty?
+          collector << ' WHERE '
+          collector = inject_join wheres, collector, ' AND '
+        end
+
+        collector
+      end
+      # rubocop:enable Metrics/AbcSize
+
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize

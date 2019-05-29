@@ -696,6 +696,26 @@ module Arel
         names.first
       end
 
+      def visit_UpdateStmt(
+        relation:,
+        target_list:,
+        where_clause: nil,
+        from_clause: [],
+        returning_list: nil,
+        with_clause: nil
+      )
+        relation = visit(relation)
+        target_list = visit(target_list, :update)
+
+        update_statement = Arel::Nodes::UpdateStatement.new
+        update_statement.relation = relation
+        update_statement.froms = visit(from_clause)
+        update_statement.values = target_list
+        update_statement.wheres = where_clause ? [visit(where_clause)] : []
+        update_statement.with = visit(with_clause) if with_clause
+        update_statement
+      end
+
       def visit_WindowDef(
         partition_clause: [],
         order_clause: [],
