@@ -344,7 +344,9 @@ module Arel
         collector << 'DEFAULT'
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/PerceivedComplexity
       def visit_Arel_Nodes_UpdateStatement(o, collector)
         if o.with
           collector = visit o.with, collector
@@ -377,6 +379,8 @@ module Arel
         collector
       end
       # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
