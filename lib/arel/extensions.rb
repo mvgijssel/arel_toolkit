@@ -11,6 +11,7 @@ require 'arel/extensions/session_user'
 require 'arel/extensions/user'
 require 'arel/extensions/current_catalog'
 require 'arel/extensions/current_schema'
+require 'arel/extensions/array'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

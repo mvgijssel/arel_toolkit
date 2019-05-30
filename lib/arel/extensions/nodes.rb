@@ -4,16 +4,6 @@
 
 module Arel
   module Nodes
-    class Array < Arel::Nodes::Node
-      attr_reader :items
-
-      def initialize(items)
-        super()
-
-        @items = items
-      end
-    end
-
     class Indirection < Arel::Nodes::Node
       attr_reader :arg
       attr_reader :indirection

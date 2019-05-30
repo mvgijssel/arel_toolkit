@@ -6,12 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_Array(o, collector)
-        collector << 'ARRAY['
-        inject_join(o.items, collector, ', ')
-        collector << ']'
-      end
-
       def visit_Arel_Nodes_Indirection(o, collector)
         visit(o.arg, collector)
         collector << '['
