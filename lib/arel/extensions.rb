@@ -52,6 +52,7 @@ require 'arel/extensions/conflict'
 require 'arel/extensions/infer'
 require 'arel/extensions/set_to_default'
 require 'arel/extensions/update_statement'
+require 'arel/extensions/current_of_expression'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

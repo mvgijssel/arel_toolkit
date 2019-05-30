@@ -48,11 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      def visit_Arel_Nodes_CurrentOfExpression(o, collector)
-        collector << 'CURRENT OF '
-        collector << o.cursor_name
-      end
-
       # rubocop:disable Metrics/AbcSize
       def visit_Arel_Nodes_DeleteStatement(o, collector)
         if o.with
