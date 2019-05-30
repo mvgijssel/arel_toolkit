@@ -48,32 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      # rubocop:disable Metrics/AbcSize
-      def visit_Arel_Nodes_Conflict(o, collector)
-        collector << ' ON CONFLICT '
-
-        visit(o.infer, collector) if o.infer
-
-        case o.action
-        when 1
-          collector << 'DO NOTHING'
-        when 2
-          collector << 'DO UPDATE SET '
-        else
-          raise "Unknown conflict clause `#{action}`"
-        end
-
-        o.values.any? && (inject_join o.values, collector, ', ')
-
-        if o.wheres.any?
-          collector << ' WHERE '
-          collector = inject_join o.wheres, collector, ' AND '
-        end
-
-        collector
-      end
-      # rubocop:enable Metrics/AbcSize
-
       def visit_Arel_Nodes_Infer(o, collector)
         if o.name
           collector << 'ON CONSTRAINT '
