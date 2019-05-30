@@ -1,8 +1,8 @@
 module Arel
   module Nodes
-    class Coalesce < Arel::Nodes::NamedFunction
+    class Rank < Arel::Nodes::NamedFunction
       def initialize(args)
-        super 'COALESCE', args
+        super 'RANK', args
       end
     end
   end

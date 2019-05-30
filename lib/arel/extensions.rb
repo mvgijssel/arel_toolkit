@@ -57,6 +57,7 @@ require 'arel/extensions/delete_statement'
 require 'arel/extensions/least'
 require 'arel/extensions/greatest'
 require 'arel/extensions/generate_series'
+require 'arel/extensions/rank'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/visitors'
