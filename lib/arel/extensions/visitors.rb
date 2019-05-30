@@ -48,35 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      # rubocop:disable Metrics/AbcSize
-      def visit_Arel_Nodes_DeleteStatement(o, collector)
-        if o.with
-          collector = visit o.with, collector
-          collector << SPACE
-        end
-
-        collector << 'DELETE FROM '
-        collector = visit o.relation, collector
-
-        if o.using
-          collector << ' USING '
-          collector = inject_join o.using, collector, ', '
-        end
-
-        if o.wheres.any?
-          collector << WHERE
-          collector = inject_join o.wheres, collector, AND
-        end
-
-        unless o.returning.empty?
-          collector << ' RETURNING '
-          collector = inject_join o.returning, collector, ', '
-        end
-
-        maybe_visit o.limit, collector
-      end
-      # rubocop:enable Metrics/AbcSize
-
       def apply_ordering_nulls(o, collector)
         case o.nulls
         when 1
