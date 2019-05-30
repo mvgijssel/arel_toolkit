@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_TypeCast(o, collector)
-        visit o.arg, collector
-        collector << '::'
-        collector << o.type_name
-      end
-
       def visit_Arel_Nodes_DistinctFrom(o, collector)
         visit o.left, collector
         collector << ' IS DISTINCT FROM '

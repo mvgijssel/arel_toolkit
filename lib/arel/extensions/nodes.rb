@@ -4,17 +4,6 @@
 
 module Arel
   module Nodes
-    # postgres only: https://www.postgresql.org/docs/9.1/sql-expressions.html
-    class TypeCast < Arel::Nodes::Node
-      attr_reader :arg
-      attr_reader :type_name
-
-      def initialize(arg, type_name)
-        @arg = arg
-        @type_name = type_name
-      end
-    end
-
     class DistinctFrom < Arel::Nodes::Binary
     end
 
