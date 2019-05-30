@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (31 May 2019)
+## 0.2.0 (31st of May 2019)
 
 ### New features
 
