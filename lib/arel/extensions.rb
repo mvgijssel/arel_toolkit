@@ -41,6 +41,7 @@ require 'arel/extensions/cube_root'
 require 'arel/extensions/modulo'
 require 'arel/extensions/absolute'
 require 'arel/extensions/bitwise_xor'
+require 'arel/extensions/exponentiation'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
