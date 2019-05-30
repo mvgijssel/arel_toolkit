@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    class NotDistinctFrom < Arel::Nodes::Binary
-    end
-
     class NullIf < Arel::Nodes::Binary
     end
 
