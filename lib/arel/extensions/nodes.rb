@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    class CrossJoin < Arel::Nodes::Join
-    end
-
     # TODO: currently in Arel master, remove in time
     class Lateral < Arel::Nodes::Unary
     end

@@ -44,11 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_CrossJoin(o, collector)
-        collector << 'CROSS JOIN '
-        visit o.left, collector
-      end
-
       # TODO: currently in Arel master, remove in time
       def visit_Arel_Nodes_Lateral(o, collector)
         collector << 'LATERAL '
