@@ -1,9 +1,6 @@
 module Arel
   module Nodes
-    # TODO: `#` is bitwise xor, right? Check out:
-    # -> https://www.postgresql.org/docs/9.4/functions-math.html
-    # -> https://github.com/rails/rails/blob/master/activerecord/lib/arel/math.rb#L30
-    # Am I wrong, or is this a bug in Arel?
+    # https://github.com/mvgijssel/arel_toolkit/issues/45
     class BitwiseXor < InfixOperation
       def initialize(left, right)
         super('#', left, right)
