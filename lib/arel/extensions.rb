@@ -39,6 +39,7 @@ require 'arel/extensions/factorial'
 require 'arel/extensions/square_root'
 require 'arel/extensions/cube_root'
 require 'arel/extensions/modulo'
+require 'arel/extensions/absolute'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

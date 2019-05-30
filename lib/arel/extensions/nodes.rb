@@ -4,13 +4,6 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.4/functions-math.html
-    class Absolute < Arel::Nodes::UnaryOperation
-      def initialize(operand)
-        super('@', operand)
-      end
-    end
-
     # TODO: `#` is bitwise xor, right? Check out:
     # -> https://www.postgresql.org/docs/9.4/functions-math.html
     # -> https://github.com/rails/rails/blob/master/activerecord/lib/arel/math.rb#L30
