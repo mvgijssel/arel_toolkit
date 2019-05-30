@@ -44,14 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_NullIf(o, collector)
-        collector << 'NULLIF('
-        visit o.left, collector
-        collector << ', '
-        visit o.right, collector
-        collector << ')'
-      end
-
       def visit_Arel_Nodes_Similar(o, collector)
         visit o.left, collector
         collector << ' SIMILAR TO '

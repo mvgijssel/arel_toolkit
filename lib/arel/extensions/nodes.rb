@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    class NullIf < Arel::Nodes::Binary
-    end
-
     # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
     class Similar < Arel::Nodes::Matches
       def initialize(left, right, escape = nil)
