@@ -4,10 +4,6 @@
 
 module Arel
   module Nodes
-    # TODO: currently in Arel master, remove in time
-    class Lateral < Arel::Nodes::Unary
-    end
-
     # Only exists in Postgres https://www.postgresql.org/docs/9.4/sql-select.html
     class RangeFunction < Arel::Nodes::Unary
     end

@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      # TODO: currently in Arel master, remove in time
-      def visit_Arel_Nodes_Lateral(o, collector)
-        collector << 'LATERAL '
-        grouping_parentheses o, collector
-      end
-
       def visit_Arel_Nodes_RangeFunction(o, collector)
         collector << 'ROWS FROM ('
         visit o.expr, collector
@@ -411,18 +405,6 @@ module Arel
           collector << ' NULLS LAST'
         else
           collector
-        end
-      end
-
-      # TODO: currently in Arel master, remove in time
-      # Used by Lateral visitor to enclose select queries in parentheses
-      def grouping_parentheses(o, collector)
-        if o.expr.is_a? Nodes::SelectStatement
-          collector << '('
-          visit o.expr, collector
-          collector << ')'
-        else
-          visit o.expr, collector
         end
       end
     end
