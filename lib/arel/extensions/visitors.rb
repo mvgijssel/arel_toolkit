@@ -44,11 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_NaturalJoin(o, collector)
-        collector << 'NATURAL JOIN '
-        visit o.left, collector
-      end
-
       def visit_Arel_Nodes_CrossJoin(o, collector)
         collector << 'CROSS JOIN '
         visit o.left, collector

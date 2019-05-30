@@ -14,6 +14,7 @@ require 'arel/extensions/current_schema'
 require 'arel/extensions/array'
 require 'arel/extensions/indirection'
 require 'arel/extensions/bit_string'
+require 'arel/extensions/natural_join'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

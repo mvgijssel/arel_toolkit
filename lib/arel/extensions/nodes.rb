@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    class NaturalJoin < Arel::Nodes::Join
-    end
-
     class CrossJoin < Arel::Nodes::Join
     end
 
