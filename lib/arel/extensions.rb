@@ -24,6 +24,7 @@ require 'arel/extensions/row'
 require 'arel/extensions/ordering'
 require 'arel/extensions/all'
 require 'arel/extensions/any'
+require 'arel/extensions/array_subselect'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
