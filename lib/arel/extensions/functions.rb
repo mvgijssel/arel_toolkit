@@ -1,11 +1,5 @@
 module Arel
   module Nodes
-    class Least < Arel::Nodes::NamedFunction
-      def initialize(args)
-        super 'LEAST', args
-      end
-    end
-
     class Greatest < Arel::Nodes::NamedFunction
       def initialize(args)
         super 'GREATEST', args

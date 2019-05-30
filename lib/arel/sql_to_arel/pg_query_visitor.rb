@@ -12,6 +12,7 @@ module Arel
   module SqlToArel
     class PgQueryVisitor
       PG_CATALOG = 'pg_catalog'.freeze
+      MIN_MAX_EXPR = 'MinMaxExpr'.freeze
 
       attr_reader :object
 

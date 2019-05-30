@@ -208,6 +208,9 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'all', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
   visit 'all', 'SELECT 1 FOR KEY SHARE', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all',
+        'SELECT LEAST(1, "a", \'2\'), GREATEST($1, \'t\'::bool, NULL)',
+        'Arel::SqlToArel::PgQueryVisitor::MIN_MAX_EXPR'
   visit 'all', 'SELECT NULL', 'PgQuery::NULL'
   visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
   # visit 'pg', '???', 'PgQuery::OID_LIST'
