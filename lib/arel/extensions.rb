@@ -59,6 +59,7 @@ require 'arel/extensions/greatest'
 require 'arel/extensions/generate_series'
 require 'arel/extensions/rank'
 require 'arel/extensions/coalesce'
+require 'arel/extensions/not_equal'
 
 require 'arel/extensions/visitors'
 

@@ -96,7 +96,15 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
   visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
-  visit 'all', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
+  visit 'all',
+        'SELECT ' \
+        '1 IS TRUE, ' \
+        '"a" IS NOT TRUE, ' \
+        "'a' IS FALSE, " \
+        '$1 IS NOT FALSE, ' \
+        "'t'::bool IS UNKNOWN, " \
+        '9.0 IS NOT UNKNOWN',
+        'PgQuery::BOOLEAN_TEST'
   visit 'all',
         'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END',
         'PgQuery::CASE_EXPR'

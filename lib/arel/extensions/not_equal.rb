@@ -4,29 +4,23 @@
 module Arel
   module Visitors
     class ToSql
-      private
-
-      def visit_Arel_Nodes_Equality(o, collector)
+      def visit_Arel_Nodes_NotEqual(o, collector)
         right = o.right
 
         collector = visit o.left, collector
 
         case right
         when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
-          collector << ' IS '
+          collector << ' IS NOT '
           visit right, collector
 
         when NilClass
-          collector << ' IS NULL'
+          collector << ' IS NOT NULL'
 
         else
-          collector << ' = '
+          collector << ' != '
           visit right, collector
         end
-      end
-
-      def visit_Arel_Nodes_NamedFunction(o, collector)
-        aggregate(o.name, o, collector)
       end
     end
   end
