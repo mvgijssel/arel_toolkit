@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_BetweenSymmetric(o, collector)
-        collector = visit o.left, collector
-        collector << ' BETWEEN SYMMETRIC '
-        visit o.right, collector
-      end
-
       def visit_Arel_Nodes_NotBetweenSymmetric(o, collector)
         collector = visit o.left, collector
         collector << ' NOT BETWEEN SYMMETRIC '

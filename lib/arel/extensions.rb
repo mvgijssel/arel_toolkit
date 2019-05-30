@@ -32,6 +32,7 @@ require 'arel/extensions/null_if'
 require 'arel/extensions/similar'
 require 'arel/extensions/not_similar'
 require 'arel/extensions/not_between'
+require 'arel/extensions/between_symmetric'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

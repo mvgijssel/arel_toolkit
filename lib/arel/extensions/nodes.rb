@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    # postgres only: https://www.postgresql.org/docs/9.1/functions-comparison.html
-    class BetweenSymmetric < Arel::Nodes::Between
-    end
 
     # postgres only: https://www.postgresql.org/docs/9.1/functions-comparison.html
     class NotBetweenSymmetric < Arel::Nodes::BetweenSymmetric
