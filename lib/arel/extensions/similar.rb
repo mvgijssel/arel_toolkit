@@ -24,7 +24,6 @@ module Arel
           collector
         end
       end
-
     end
   end
 end
