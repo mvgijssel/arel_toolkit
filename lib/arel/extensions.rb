@@ -4,6 +4,7 @@ require 'arel/extensions/current_time'
 require 'arel/extensions/current_date'
 require 'arel/extensions/current_timestamp'
 require 'arel/extensions/local_time'
+require 'arel/extensions/local_timestamp'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

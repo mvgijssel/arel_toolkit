@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class LocalTimeStamp < TimeWithPrecision
-    end
-
     class CurrentRole < Arel::Nodes::Node
     end
 

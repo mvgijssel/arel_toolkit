@@ -6,12 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_LocalTimeStamp(o, collector)
-        collector << 'localtimestamp'
-        collector << "(#{o.precision.to_i})" if o.precision
-        collector
-      end
-
       def visit_Arel_Nodes_CurrentRole(_o, collector)
         collector << 'current_role'
       end
