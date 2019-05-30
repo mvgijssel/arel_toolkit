@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    arel_toolkit (0.1.0)
+    arel_toolkit (0.2.0)
       arel (~> 9.0.0)
       pg_query (~> 1.1.0)
 
