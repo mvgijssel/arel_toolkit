@@ -4,8 +4,6 @@
 module Arel
   module Visitors
     class ToSql
-      private
-
       def visit_Arel_Nodes_NamedFunction(o, collector)
         aggregate(o.name, o, collector)
       end

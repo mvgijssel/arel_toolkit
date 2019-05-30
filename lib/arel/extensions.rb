@@ -61,8 +61,7 @@ require 'arel/extensions/rank'
 require 'arel/extensions/coalesce'
 require 'arel/extensions/not_equal'
 require 'arel/extensions/equality'
-
-require 'arel/extensions/visitors'
+require 'arel/extensions/named_function'
 
 module Arel
   module Extensions
