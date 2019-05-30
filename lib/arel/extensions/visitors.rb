@@ -6,12 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_CurrentTime(o, collector)
-        collector << 'current_time'
-        collector << "(#{o.precision.to_i})" if o.precision
-        collector
-      end
-
       def visit_Arel_Nodes_CurrentDate(_o, collector)
         collector << 'current_date'
       end

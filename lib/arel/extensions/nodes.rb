@@ -39,16 +39,6 @@ module Arel
     class CurrentDate < Arel::Nodes::Node
     end
 
-    class TimeWithPrecision < Arel::Nodes::Node
-      attr_reader :precision
-
-      def initialize(precision: nil)
-        super()
-
-        @precision = precision
-      end
-    end
-
     class CurrentTimestamp < TimeWithPrecision
     end
 
