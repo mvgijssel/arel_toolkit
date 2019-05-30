@@ -4,9 +4,6 @@
 
 module Arel
   module Nodes
-    class Unknown < Arel::Nodes::Node
-    end
-
     class Array < Arel::Nodes::Node
       attr_reader :items
 

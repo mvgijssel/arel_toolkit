@@ -113,10 +113,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_Unknown(_o, collector)
-        collector << 'UNKNOWN'
-      end
-
       def visit_Arel_Nodes_NaturalJoin(o, collector)
         collector << 'NATURAL JOIN '
         visit o.left, collector

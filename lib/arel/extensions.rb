@@ -1,3 +1,5 @@
+require 'arel/extensions/unknown'
+
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
 require 'arel/extensions/visitors'
