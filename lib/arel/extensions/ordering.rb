@@ -28,6 +28,17 @@ module Arel
         old_visit_Arel_Nodes_Descending(o, collector)
         apply_ordering_nulls(o, collector)
       end
+
+      def apply_ordering_nulls(o, collector)
+        case o.nulls
+        when 1
+          collector << ' NULLS FIRST'
+        when 2
+          collector << ' NULLS LAST'
+        else
+          collector
+        end
+      end
     end
   end
 end
