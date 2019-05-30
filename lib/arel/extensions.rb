@@ -23,6 +23,7 @@ require 'arel/extensions/table'
 require 'arel/extensions/row'
 require 'arel/extensions/ordering'
 require 'arel/extensions/all'
+require 'arel/extensions/any'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

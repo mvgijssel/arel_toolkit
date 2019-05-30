@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_Any(o, collector)
-        collector << 'ANY('
-        visit o.expr, collector
-        collector << ')'
-      end
-
       def visit_Arel_Nodes_ArraySubselect(o, collector)
         collector << 'ARRAY('
         visit o.expr, collector

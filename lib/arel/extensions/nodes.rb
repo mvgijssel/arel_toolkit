@@ -5,10 +5,6 @@
 module Arel
   module Nodes
     # postgres only: https://www.postgresql.org/docs/9.1/functions-comparisons.html
-    class Any < Arel::Nodes::Unary
-    end
-
-    # postgres only: https://www.postgresql.org/docs/9.1/functions-comparisons.html
     class ArraySubselect < Arel::Nodes::Unary
     end
 
