@@ -6,10 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_CurrentUser(_o, collector)
-        collector << 'current_user'
-      end
-
       def visit_Arel_Nodes_SessionUser(_o, collector)
         collector << 'session_user'
       end
