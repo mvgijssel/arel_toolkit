@@ -37,6 +37,7 @@ require 'arel/extensions/not_between_symmetric'
 require 'arel/extensions/function'
 require 'arel/extensions/factorial'
 require 'arel/extensions/square_root'
+require 'arel/extensions/cube_root'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
