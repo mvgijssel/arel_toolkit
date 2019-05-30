@@ -4,18 +4,6 @@
 
 module Arel
   module Nodes
-    class Indirection < Arel::Nodes::Node
-      attr_reader :arg
-      attr_reader :indirection
-
-      def initialize(arg, indirection)
-        super()
-
-        @arg = arg
-        @indirection = indirection
-      end
-    end
-
     class BitString < Arel::Nodes::Node
       attr_reader :str
 

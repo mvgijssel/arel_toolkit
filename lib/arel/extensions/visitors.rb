@@ -6,13 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_Indirection(o, collector)
-        visit(o.arg, collector)
-        collector << '['
-        visit(o.indirection, collector)
-        collector << ']'
-      end
-
       def visit_Arel_Nodes_BitString(o, collector)
         collector << "B'#{o.str[1..-1]}'"
       end
