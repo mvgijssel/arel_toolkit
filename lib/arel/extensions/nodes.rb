@@ -5,14 +5,6 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    class DefaultValues < Arel::Nodes::Node
-    end
-
-    # https://www.postgresql.org/docs/9.5/sql-insert.html
-    class DefaultValues < Arel::Nodes::Node
-    end
-
-    # https://www.postgresql.org/docs/9.5/sql-insert.html
     class Conflict < Arel::Nodes::Node
       attr_accessor :action
       attr_accessor :infer

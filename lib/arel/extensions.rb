@@ -47,6 +47,7 @@ require 'arel/extensions/contained_by'
 require 'arel/extensions/overlap'
 require 'arel/extensions/select_statement'
 require 'arel/extensions/insert_statement'
+require 'arel/extensions/default_values'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

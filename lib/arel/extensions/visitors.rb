@@ -48,10 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      def visit_Arel_Nodes_DefaultValues(_o, collector)
-        collector << 'DEFAULT VALUES'
-      end
-
       # rubocop:disable Metrics/AbcSize
       def visit_Arel_Nodes_Conflict(o, collector)
         collector << ' ON CONFLICT '
