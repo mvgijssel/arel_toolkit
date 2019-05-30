@@ -5,13 +5,6 @@
 module Arel
   module Nodes
     # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
-    class Similar < Arel::Nodes::Matches
-      def initialize(left, right, escape = nil)
-        super(left, right, escape, false)
-      end
-    end
-
-    # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
     class NotSimilar < Arel::Nodes::Similar
     end
 

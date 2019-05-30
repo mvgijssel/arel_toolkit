@@ -44,18 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_Similar(o, collector)
-        visit o.left, collector
-        collector << ' SIMILAR TO '
-        visit o.right, collector
-        if o.escape
-          collector << ' ESCAPE '
-          visit o.escape, collector
-        else
-          collector
-        end
-      end
-
       def visit_Arel_Nodes_NotSimilar(o, collector)
         visit o.left, collector
         collector << ' NOT SIMILAR TO '
