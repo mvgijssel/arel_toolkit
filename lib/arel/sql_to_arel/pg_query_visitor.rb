@@ -21,7 +21,7 @@ module Arel
         raise 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
         @object = tree.first
-        visit object
+        visit object, :top
       end
 
       private
@@ -292,14 +292,14 @@ module Arel
       )
         relation = visit(relation)
 
-        delete_statement = Arel::Nodes::DeleteStatement.new
+        delete_manager = Arel::DeleteManager.new
+        delete_statement = delete_manager.ast
         delete_statement.relation = relation
         delete_statement.using = visit(using_clause) if using_clause
         delete_statement.wheres = where_clause ? [visit(where_clause)] : []
         delete_statement.with = visit(with_clause) if with_clause
         delete_statement.returning = visit(returning_list, :select)
-
-        delete_statement
+        delete_manager
       end
 
       def visit_Float(str:)
@@ -404,7 +404,8 @@ module Arel
         end
         select_stmt = visit(select_stmt) if select_stmt
 
-        insert_statement = Arel::Nodes::InsertStatement.new
+        insert_manager = Arel::InsertManager.new
+        insert_statement = insert_manager.ast
         insert_statement.relation = relation
         insert_statement.columns = cols
         insert_statement.override = override
@@ -418,7 +419,7 @@ module Arel
 
         insert_statement.returning = visit(returning_list, :select)
         insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
-        insert_statement
+        insert_manager
       end
 
       def visit_Integer(ival:)
@@ -544,8 +545,8 @@ module Arel
         )
       end
 
-      def visit_RawStmt(stmt:)
-        visit(stmt)
+      def visit_RawStmt(context, stmt:)
+        visit(stmt, context)
       end
 
       def visit_ResTarget(context, val: nil, name: nil)
@@ -575,6 +576,7 @@ module Arel
       end
 
       def visit_SelectStmt(
+        context = nil,
         from_clause: nil,
         limit_count: nil,
         target_list: nil,
@@ -593,8 +595,9 @@ module Arel
         larg: nil,
         rarg: nil
       )
-
-        select_core = Arel::Nodes::SelectCore.new
+        select_manager = Arel::SelectManager.new
+        select_core = select_manager.ast.cores.last
+        select_statement = select_manager.ast
 
         froms, join_sources = generate_sources(from_clause)
         select_core.from = froms if froms
@@ -616,7 +619,6 @@ module Arel
           raise "Unknown distinct clause `#{distinct_clause}`"
         end
 
-        select_statement = Arel::Nodes::SelectStatement.new [select_core]
         select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
         select_statement.offset = ::Arel::Nodes::Offset.new visit(limit_offset) if limit_offset
         select_statement.orders = visit(sort_clause.to_a)
@@ -673,7 +675,11 @@ module Arel
           select_statement.union = union
         end
 
-        select_statement
+        if context == :top
+          select_manager
+        else
+          select_statement
+        end
       end
 
       def visit_SetToDefault(_args)
@@ -769,15 +775,15 @@ module Arel
         relation = visit(relation)
         target_list = visit(target_list, :update)
 
-        update_statement = Arel::Nodes::UpdateStatement.new
+        update_manager = Arel::UpdateManager.new
+        update_statement = update_manager.ast
         update_statement.relation = relation
         update_statement.froms = visit(from_clause)
         update_statement.values = target_list
         update_statement.wheres = where_clause ? [visit(where_clause)] : []
         update_statement.with = visit(with_clause) if with_clause
         update_statement.returning = visit(returning_list, :select)
-
-        update_statement
+        update_manager
       end
 
       def visit_WindowDef(
