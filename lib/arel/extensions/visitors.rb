@@ -44,15 +44,6 @@ module Arel
         end
       end
 
-      alias old_visit_Arel_Table visit_Arel_Table
-      def visit_Arel_Table(o, collector)
-        collector << 'ONLY ' if o.only
-
-        collector << "\"#{o.schema_name}\"." if o.schema_name
-
-        old_visit_Arel_Table(o, collector)
-      end
-
       def visit_Arel_Nodes_Row(o, collector)
         collector << 'ROW('
         visit o.expr, collector
