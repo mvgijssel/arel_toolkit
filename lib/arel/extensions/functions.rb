@@ -1,11 +1,5 @@
 module Arel
   module Nodes
-    class Greatest < Arel::Nodes::NamedFunction
-      def initialize(args)
-        super 'GREATEST', args
-      end
-    end
-
     class GenerateSeries < Arel::Nodes::NamedFunction
       def initialize(args)
         super 'GENERATE_SERIES', args
