@@ -48,10 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      def visit_Arel_Nodes_SetToDefault(_o, collector)
-        collector << 'DEFAULT'
-      end
-
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/PerceivedComplexity
