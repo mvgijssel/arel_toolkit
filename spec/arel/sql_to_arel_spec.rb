@@ -330,6 +330,42 @@ describe 'Arel.sql_to_arel' do
         'PgQuery::WINDOW_DEF'
   visit 'all', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"', 'PgQuery::WITH_CLAUSE'
 
+  it 'returns an Arel::SelectManager for only the top level SELECT' do
+    sql = 'SELECT 1, (SELECT 2)'
+    arel = Arel.sql_to_arel(sql)
+
+    expect(arel.class).to eq Arel::SelectManager
+
+    subquery_grouping = arel.projections[1]
+
+    expect(subquery_grouping.class).to eq Arel::Nodes::Grouping
+
+    subquery = subquery_grouping.expr
+
+    expect(subquery.class).to eq Arel::Nodes::SelectStatement
+  end
+
+  it 'returns an Arel::InsertManager' do
+    sql = 'INSERT INTO a ("b") VALUES (1)'
+    arel = Arel.sql_to_arel(sql)
+
+    expect(arel.class).to eq Arel::InsertManager
+  end
+
+  it 'returns an Arel::UpdateManager' do
+    sql = 'UPDATE "some_table" SET "some_column" = 2.0'
+    arel = Arel.sql_to_arel(sql)
+
+    expect(arel.class).to eq Arel::UpdateManager
+  end
+
+  it 'returns an Arel::DeleteManager' do
+    sql = 'DELETE FROM "some_table"'
+    arel = Arel.sql_to_arel(sql)
+
+    expect(arel.class).to eq Arel::DeleteManager
+  end
+
   it 'implements all operators' do
     sql = 'SELECT ' \
           '11 + 11, ' \
