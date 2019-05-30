@@ -4,10 +4,6 @@
 
 module Arel
   module Nodes
-    # postgres only: https://www.postgresql.org/docs/9/functions-matching.html
-    class NotSimilar < Arel::Nodes::Similar
-    end
-
     class NotBetween < Arel::Nodes::Between
     end
 
