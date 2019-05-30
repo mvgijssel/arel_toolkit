@@ -44,18 +44,6 @@ module Arel
         end
       end
 
-      alias old_visit_Arel_Nodes_Ascending visit_Arel_Nodes_Ascending
-      def visit_Arel_Nodes_Ascending(o, collector)
-        old_visit_Arel_Nodes_Ascending(o, collector)
-        apply_ordering_nulls(o, collector)
-      end
-
-      alias old_visit_Arel_Nodes_Descending visit_Arel_Nodes_Descending
-      def visit_Arel_Nodes_Descending(o, collector)
-        old_visit_Arel_Nodes_Descending(o, collector)
-        apply_ordering_nulls(o, collector)
-      end
-
       def visit_Arel_Nodes_All(o, collector)
         collector << 'ALL('
         visit o.expr, collector

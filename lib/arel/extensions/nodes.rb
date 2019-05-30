@@ -4,17 +4,6 @@
 
 module Arel
   module Nodes
-    Arel::Nodes::Ordering.class_eval do
-      # postgres only: https://www.postgresql.org/docs/9.4/queries-order.html
-      attr_accessor :nulls
-
-      def initialize(expr, nulls = 0)
-        super(expr)
-
-        @nulls = nulls
-      end
-    end
-
     # postgres only: https://www.postgresql.org/docs/8.1/sql-select.html
     class All < Arel::Nodes::Unary
     end
