@@ -17,6 +17,7 @@ require 'arel/extensions/bit_string'
 require 'arel/extensions/natural_join'
 require 'arel/extensions/cross_join'
 require 'arel/extensions/lateral'
+require 'arel/extensions/range_function'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

@@ -4,10 +4,6 @@
 
 module Arel
   module Nodes
-    # Only exists in Postgres https://www.postgresql.org/docs/9.4/sql-select.html
-    class RangeFunction < Arel::Nodes::Unary
-    end
-
     # postgres only: https://paquier.xyz/postgresql-2/postgres-9-4-feature-highlight-with-ordinality/
     class WithOrdinality < Arel::Nodes::Unary
     end

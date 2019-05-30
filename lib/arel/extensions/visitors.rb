@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_RangeFunction(o, collector)
-        collector << 'ROWS FROM ('
-        visit o.expr, collector
-        collector << ')'
-      end
-
       def visit_Arel_Nodes_WithOrdinality(o, collector)
         visit o.expr, collector
         collector << ' WITH ORDINALITY'
