@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class CurrentDate < Arel::Nodes::Node
-    end
-
     class CurrentTimestamp < TimeWithPrecision
     end
 
