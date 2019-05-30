@@ -4,16 +4,6 @@
 
 module Arel
   module Nodes
-    class BitString < Arel::Nodes::Node
-      attr_reader :str
-
-      def initialize(str)
-        super()
-
-        @str = str
-      end
-    end
-
     class NaturalJoin < Arel::Nodes::Join
     end
 

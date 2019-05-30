@@ -6,10 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_BitString(o, collector)
-        collector << "B'#{o.str[1..-1]}'"
-      end
-
       def visit_Arel_Nodes_NotEqual(o, collector)
         right = o.right
 

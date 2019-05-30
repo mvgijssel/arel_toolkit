@@ -13,6 +13,7 @@ require 'arel/extensions/current_catalog'
 require 'arel/extensions/current_schema'
 require 'arel/extensions/array'
 require 'arel/extensions/indirection'
+require 'arel/extensions/bit_string'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
