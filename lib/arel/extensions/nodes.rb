@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class SessionUser < Arel::Nodes::Node
-    end
-
     class User < Arel::Nodes::Node
     end
 
