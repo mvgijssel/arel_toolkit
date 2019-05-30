@@ -4,10 +4,6 @@
 
 module Arel
   module Nodes
-    # postgres only: https://paquier.xyz/postgresql-2/postgres-9-4-feature-highlight-with-ordinality/
-    class WithOrdinality < Arel::Nodes::Unary
-    end
-
     Arel::Table.class_eval do
       # postgres only: https://www.postgresql.org/docs/9.5/sql-select.html
       attr_accessor :only

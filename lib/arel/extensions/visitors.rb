@@ -44,11 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_WithOrdinality(o, collector)
-        visit o.expr, collector
-        collector << ' WITH ORDINALITY'
-      end
-
       alias old_visit_Arel_Table visit_Arel_Table
       def visit_Arel_Table(o, collector)
         collector << 'ONLY ' if o.only
