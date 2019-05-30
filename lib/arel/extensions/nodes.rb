@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class User < Arel::Nodes::Node
-    end
-
     class CurrentCatalog < Arel::Nodes::Node
     end
 

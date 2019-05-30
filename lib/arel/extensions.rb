@@ -8,6 +8,7 @@ require 'arel/extensions/local_timestamp'
 require 'arel/extensions/current_role'
 require 'arel/extensions/current_user'
 require 'arel/extensions/session_user'
+require 'arel/extensions/user'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
