@@ -5,12 +5,6 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    class Infer < Arel::Nodes::Node
-      attr_accessor :name
-      attr_accessor :indexes
-    end
-
-    # https://www.postgresql.org/docs/9.5/sql-insert.html
     class SetToDefault < Arel::Nodes::Node
     end
 

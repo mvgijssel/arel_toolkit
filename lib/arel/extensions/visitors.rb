@@ -48,22 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      def visit_Arel_Nodes_Infer(o, collector)
-        if o.name
-          collector << 'ON CONSTRAINT '
-          collector << o.name
-          collector << SPACE
-        end
-
-        if o.indexes
-          collector << '('
-          inject_join o.indexes, collector, ', '
-          collector << ') '
-        end
-
-        collector
-      end
-
       def visit_Arel_Nodes_SetToDefault(_o, collector)
         collector << 'DEFAULT'
       end
