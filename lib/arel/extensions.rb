@@ -35,6 +35,7 @@ require 'arel/extensions/not_between'
 require 'arel/extensions/between_symmetric'
 require 'arel/extensions/not_between_symmetric'
 require 'arel/extensions/function'
+require 'arel/extensions/factorial'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

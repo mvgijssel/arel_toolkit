@@ -48,16 +48,6 @@ module Arel
         aggregate(o.name, o, collector)
       end
 
-      def visit_Arel_Nodes_Factorial(o, collector)
-        if o.prefix
-          collector << '!! '
-          visit o.expr, collector
-        else
-          visit o.expr, collector
-          collector << ' !'
-        end
-      end
-
       def visit_Arel_Nodes_DefaultValues(_o, collector)
         collector << 'DEFAULT VALUES'
       end
