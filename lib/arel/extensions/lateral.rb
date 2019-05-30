@@ -3,21 +3,20 @@
 
 module Arel
   module Nodes
-    # TODO: currently in Arel master, remove in time
+    # https://github.com/mvgijssel/arel_toolkit/issues/46
     class Lateral < Arel::Nodes::Unary
     end
   end
 
   module Visitors
     class ToSql
-      # TODO: currently in Arel master, remove in time
+      # https://github.com/mvgijssel/arel_toolkit/issues/46
       def visit_Arel_Nodes_Lateral(o, collector)
         collector << 'LATERAL '
         grouping_parentheses o, collector
       end
 
-      # TODO: currently in Arel master, remove in time
-      # Used by Lateral visitor to enclose select queries in parentheses
+      # https://github.com/mvgijssel/arel_toolkit/issues/46
       def grouping_parentheses(o, collector)
         if o.expr.is_a? Nodes::SelectStatement
           collector << '('

@@ -18,7 +18,9 @@ module Arel
 
       def accept(sql)
         tree = PgQuery.parse(sql).tree
-        @object = tree.first # TODO: handle multiple entries
+        raise 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
+
+        @object = tree.first
         visit object
       end
 
@@ -70,7 +72,7 @@ module Arel
           Arel::Nodes::NullIf.new(left, right)
 
         when PgQuery::AEXPR_OF
-          raise '?'
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/34'
 
         when PgQuery::AEXPR_IN
           left = visit(lexpr)
@@ -162,7 +164,7 @@ module Arel
           Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_PAREN
-          raise '?'
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/35'
 
         else
           raise "Unknown Expr type `#{kind}`"
@@ -511,11 +513,11 @@ module Arel
       end
 
       def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)
-        raise 'i dunno' unless is_rowsfrom
+        raise 'https://github.com/mvgijssel/arel_toolkit/issues/36' unless is_rowsfrom == true
 
         functions = functions.map do |function_array|
           function, empty_value = function_array
-          raise 'i dunno' unless empty_value.nil?
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/37' unless empty_value.nil?
 
           visit(function)
         end
@@ -589,7 +591,7 @@ module Arel
         values_lists: nil
       )
 
-        raise "Unknown op `#{op}`" unless op.zero?
+        raise 'https://github.com/mvgijssel/arel_toolkit/issues/38' unless op.zero?
 
         select_core = Arel::Nodes::SelectCore.new
 
@@ -693,7 +695,9 @@ module Arel
         testexpr = visit(testexpr) if testexpr
         operator = if oper_name
                      operator = visit(oper_name, :operator)
-                     raise "dunno how to handle `#{operator.length}`" if operator.length > 1
+                     if operator.length > 1
+                       raise 'https://github.com/mvgijssel/arel_toolkit/issues/39'
+                     end
 
                      operator.first
                    end
@@ -715,8 +719,8 @@ module Arel
 
         names = names.reject { |name| name == PG_CATALOG }
 
-        raise "Don't know how to handle typemod `#{typemod}`" if typemod != -1
-        raise "Don't know how to handle `#{names.length}` names" if names.length > 1
+        raise 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
+        raise 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
 
         names.first
       end
@@ -932,19 +936,19 @@ module Arel
           generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
 
         when PgQuery::SUBLINK_TYPE_ROWCOMPARE
-          raise '?'
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/42'
 
         when PgQuery::SUBLINK_TYPE_EXPR
           Arel::Nodes::Grouping.new(subselect)
 
         when PgQuery::SUBLINK_TYPE_MULTIEXPR
-          raise '?'
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/43'
 
         when PgQuery::SUBLINK_TYPE_ARRAY
           Arel::Nodes::ArraySubselect.new(subselect)
 
         when PgQuery::SUBLINK_TYPE_CTE
-          raise '?'
+          raise 'https://github.com/mvgijssel/arel_toolkit/issues/44'
 
         else
           raise "Unknown sublinktype: #{type}"
