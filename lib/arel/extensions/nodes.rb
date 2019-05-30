@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class CurrentRole < Arel::Nodes::Node
-    end
-
     class CurrentUser < Arel::Nodes::Node
     end
 

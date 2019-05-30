@@ -5,6 +5,7 @@ require 'arel/extensions/current_date'
 require 'arel/extensions/current_timestamp'
 require 'arel/extensions/local_time'
 require 'arel/extensions/local_timestamp'
+require 'arel/extensions/current_role'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
