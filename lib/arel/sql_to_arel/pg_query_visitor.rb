@@ -588,10 +588,11 @@ module Arel
         locking_clause: nil,
         op:,
         window_clause: nil,
-        values_lists: nil
+        values_lists: nil,
+        all: nil,
+        larg: nil,
+        rarg: nil
       )
-
-        raise 'https://github.com/mvgijssel/arel_toolkit/issues/38' unless op.zero?
 
         select_core = Arel::Nodes::SelectCore.new
 
@@ -640,6 +641,38 @@ module Arel
           end
           select_statement.values_lists = Arel::Nodes::ValuesList.new(values_lists)
         end
+
+        union = case op
+                when 0
+                  nil
+                when 1
+                  if all
+                    Arel::Nodes::UnionAll.new(visit(larg), visit(rarg))
+                  else
+                    Arel::Nodes::Union.new(visit(larg), visit(rarg))
+                  end
+                when 2
+                  if all
+                    Arel::Nodes::IntersectAll.new(visit(larg), visit(rarg))
+                  else
+                    Arel::Nodes::Intersect.new(visit(larg), visit(rarg))
+                  end
+                when 3
+                  if all
+                    Arel::Nodes::ExceptAll.new(visit(larg), visit(rarg))
+                  else
+                    Arel::Nodes::Except.new(visit(larg), visit(rarg))
+                  end
+                else
+                  # https://www.postgresql.org/docs/10/queries-union.html
+                  raise "Unknown combining queries op `#{op}`"
+                end
+
+        unless union.nil?
+          select_statement.cores = []
+          select_statement.union = union
+        end
+
         select_statement
       end
 

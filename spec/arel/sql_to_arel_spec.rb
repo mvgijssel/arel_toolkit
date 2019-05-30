@@ -241,13 +241,16 @@ describe 'Arel.sql_to_arel' do
         'CREATE RULE some_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table',
         'PgQuery::RULE_STMT'
   visit 'all',
-        'SELECT ' \
-        "DISTINCT 'id', (SELECT DISTINCT ON ( 'a' ) 'a'), " \
-        '1 FROM "a" ' \
+        '( ( SELECT ' \
+        "DISTINCT 'id', (SELECT DISTINCT ON ( 'a' ) 'a'), 1 " \
+        'FROM "a" ' \
         "WHERE 't'::bool " \
         'GROUP BY 1 ' \
         'HAVING "a" > 1 ' \
         'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC) ' \
+        'UNION ( ( SELECT 1 UNION ALL SELECT 2.0 ) ' \
+        'INTERSECT ( SELECT "a" INTERSECT ALL SELECT $1 ) ) ) ' \
+        "EXCEPT ( SELECT 'b' EXCEPT ALL SELECT 't'::bool ) ) " \
         'ORDER BY 1 ASC ' \
         'LIMIT 10 ' \
         'OFFSET 2 ' \
