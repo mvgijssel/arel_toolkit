@@ -1,0 +1,20 @@
+# rubocop:disable Naming/MethodName
+# rubocop:disable Naming/UncommunicativeMethodParamName
+
+module Arel
+  module Nodes
+    class CurrentSchema < Arel::Nodes::Node
+    end
+  end
+
+  module Visitors
+    class ToSql
+      def visit_Arel_Nodes_CurrentSchema(_o, collector)
+        collector << 'current_schema'
+      end
+    end
+  end
+end
+
+# rubocop:enable Naming/MethodName
+# rubocop:enable Naming/UncommunicativeMethodParamName

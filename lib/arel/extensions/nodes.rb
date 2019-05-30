@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class CurrentSchema < Arel::Nodes::Node
-    end
-
     class NaturalJoin < Arel::Nodes::Join
     end
 

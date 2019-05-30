@@ -6,10 +6,6 @@ module Arel
     class ToSql
       private
 
-      def visit_Arel_Nodes_CurrentSchema(_o, collector)
-        collector << 'current_schema'
-      end
-
       def visit_Arel_Nodes_Array(o, collector)
         collector << 'ARRAY['
         inject_join(o.items, collector, ', ')
