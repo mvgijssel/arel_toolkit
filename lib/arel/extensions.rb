@@ -56,6 +56,7 @@ require 'arel/extensions/current_of_expression'
 require 'arel/extensions/delete_statement'
 require 'arel/extensions/least'
 require 'arel/extensions/greatest'
+require 'arel/extensions/generate_series'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/visitors'
