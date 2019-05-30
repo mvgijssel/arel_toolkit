@@ -26,6 +26,7 @@ require 'arel/extensions/all'
 require 'arel/extensions/any'
 require 'arel/extensions/array_subselect'
 require 'arel/extensions/type_cast'
+require 'arel/extensions/distinct_from'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

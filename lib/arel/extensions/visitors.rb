@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_DistinctFrom(o, collector)
-        visit o.left, collector
-        collector << ' IS DISTINCT FROM '
-        visit o.right, collector
-      end
-
       def visit_Arel_Nodes_NotDistinctFrom(o, collector)
         visit o.left, collector
         collector << ' IS NOT DISTINCT FROM '
