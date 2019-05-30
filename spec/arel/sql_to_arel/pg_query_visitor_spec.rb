@@ -40,14 +40,6 @@ describe Arel::SqlToArel::PgQueryVisitor do
     end
   end
 
-  describe 'visit_SelectStmt' do
-    it 'raises an exception if op is not zero' do
-      expect do
-        described_class.new.send(:visit_SelectStmt, op: 1)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/38')
-    end
-  end
-
   describe 'visit_SubLink' do
     it 'raises an exception when typemod is not -1' do
       oper_name = [

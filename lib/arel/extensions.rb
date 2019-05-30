@@ -62,6 +62,8 @@ require 'arel/extensions/coalesce'
 require 'arel/extensions/not_equal'
 require 'arel/extensions/equality'
 require 'arel/extensions/named_function'
+require 'arel/extensions/intersect_all'
+require 'arel/extensions/except_all'
 
 module Arel
   module Extensions
