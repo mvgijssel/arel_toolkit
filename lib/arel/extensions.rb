@@ -31,6 +31,7 @@ require 'arel/extensions/not_distinct_from'
 require 'arel/extensions/null_if'
 require 'arel/extensions/similar'
 require 'arel/extensions/not_similar'
+require 'arel/extensions/not_between'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
