@@ -12,6 +12,7 @@ module Arel
   module SqlToArel
     class PgQueryVisitor
       PG_CATALOG = 'pg_catalog'.freeze
+      MIN_MAX_EXPR = 'MinMaxExpr'.freeze
 
       attr_reader :object
 
@@ -665,8 +666,8 @@ module Arel
           -> { Arel::Nodes::CurrentTimestamp.new(precision: typmod) },
           -> { Arel::Nodes::LocalTime.new },
           -> { Arel::Nodes::LocalTime.new(precision: typmod) },
-          -> { Arel::Nodes::LocalTimeStamp.new },
-          -> { Arel::Nodes::LocalTimeStamp.new(precision: typmod) },
+          -> { Arel::Nodes::LocalTimestamp.new },
+          -> { Arel::Nodes::LocalTimestamp.new(precision: typmod) },
           -> { Arel::Nodes::CurrentRole.new },
           -> { Arel::Nodes::CurrentUser.new },
           -> { Arel::Nodes::User.new },

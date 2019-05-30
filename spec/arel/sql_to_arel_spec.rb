@@ -96,7 +96,15 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
   visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
-  visit 'all', 'SELECT 1 WHERE 1 IS TRUE', 'PgQuery::BOOLEAN_TEST'
+  visit 'all',
+        'SELECT ' \
+        '1 IS TRUE, ' \
+        '"a" IS NOT TRUE, ' \
+        "'a' IS FALSE, " \
+        '$1 IS NOT FALSE, ' \
+        "'t'::bool IS UNKNOWN, " \
+        '9.0 IS NOT UNKNOWN',
+        'PgQuery::BOOLEAN_TEST'
   visit 'all',
         'SELECT CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END',
         'PgQuery::CASE_EXPR'
@@ -208,6 +216,9 @@ describe 'Arel.sql_to_arel' do
   visit 'all', 'SELECT 1 FOR NO KEY UPDATE NOWAIT', 'PgQuery::LOCKING_CLAUSE'
   visit 'all', 'SELECT 1 FOR SHARE SKIP LOCKED', 'PgQuery::LOCKING_CLAUSE'
   visit 'all', 'SELECT 1 FOR KEY SHARE', 'PgQuery::LOCKING_CLAUSE'
+  visit 'all',
+        'SELECT LEAST(1, "a", \'2\'), GREATEST($1, \'t\'::bool, NULL)',
+        'Arel::SqlToArel::PgQueryVisitor::MIN_MAX_EXPR'
   visit 'all', 'SELECT NULL', 'PgQuery::NULL'
   visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
   # visit 'pg', '???', 'PgQuery::OID_LIST'
