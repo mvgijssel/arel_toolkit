@@ -4,17 +4,6 @@
 
 module Arel
   module Nodes
-    # postgres only: https://www.postgresql.org/docs/9.2/sql-expressions.html
-    class Row < Arel::Nodes::Unary
-      attr_reader :row_format
-
-      def initialize(args, row_format)
-        super(args)
-
-        @row_format = row_format
-      end
-    end
-
     Arel::Nodes::Ordering.class_eval do
       # postgres only: https://www.postgresql.org/docs/9.4/queries-order.html
       attr_accessor :nulls

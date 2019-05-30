@@ -44,12 +44,6 @@ module Arel
         end
       end
 
-      def visit_Arel_Nodes_Row(o, collector)
-        collector << 'ROW('
-        visit o.expr, collector
-        collector << ')'
-      end
-
       alias old_visit_Arel_Nodes_Ascending visit_Arel_Nodes_Ascending
       def visit_Arel_Nodes_Ascending(o, collector)
         old_visit_Arel_Nodes_Ascending(o, collector)
