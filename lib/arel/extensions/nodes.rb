@@ -36,9 +36,6 @@ module Arel
       end
     end
 
-    class CurrentCatalog < Arel::Nodes::Node
-    end
-
     class CurrentSchema < Arel::Nodes::Node
     end
 

@@ -9,6 +9,7 @@ require 'arel/extensions/current_role'
 require 'arel/extensions/current_user'
 require 'arel/extensions/session_user'
 require 'arel/extensions/user'
+require 'arel/extensions/current_catalog'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'
