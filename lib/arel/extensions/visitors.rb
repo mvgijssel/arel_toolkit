@@ -233,46 +233,6 @@ module Arel
       end
       # rubocop:enable Metrics/AbcSize
 
-      # rubocop:disable Metrics/PerceivedComplexity
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/AbcSize
-      def aggregate(name, o, collector)
-        collector << "#{name}("
-        collector << 'DISTINCT ' if o.distinct
-        collector << 'VARIADIC ' if o.variardic
-
-        collector = inject_join(o.expressions, collector, ', ')
-
-        if o.within_group
-          collector << ')'
-          collector << ' WITHIN GROUP ('
-        end
-
-        if o.orders.any?
-          collector << SPACE unless o.within_group
-          collector << 'ORDER BY '
-          collector = inject_join o.orders, collector, ', '
-        end
-
-        collector << ')'
-
-        if o.filter
-          collector << ' FILTER(WHERE '
-          visit o.filter, collector
-          collector << ')'
-        end
-
-        if o.alias
-          collector << ' AS '
-          visit o.alias, collector
-        else
-          collector
-        end
-      end
-      # rubocop:enable Metrics/PerceivedComplexity
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
-
       def apply_ordering_nulls(o, collector)
         case o.nulls
         when 1
