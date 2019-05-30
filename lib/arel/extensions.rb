@@ -58,8 +58,8 @@ require 'arel/extensions/least'
 require 'arel/extensions/greatest'
 require 'arel/extensions/generate_series'
 require 'arel/extensions/rank'
+require 'arel/extensions/coalesce'
 
-require 'arel/extensions/functions'
 require 'arel/extensions/visitors'
 
 module Arel
