@@ -36,12 +36,6 @@ module Arel
       end
     end
 
-    class CurrentTimestamp < TimeWithPrecision
-    end
-
-    class CurrentTime < TimeWithPrecision
-    end
-
     class LocalTime < TimeWithPrecision
     end
 
