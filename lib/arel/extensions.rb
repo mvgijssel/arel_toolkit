@@ -45,6 +45,7 @@ require 'arel/extensions/exponentiation'
 require 'arel/extensions/contains'
 require 'arel/extensions/contained_by'
 require 'arel/extensions/overlap'
+require 'arel/extensions/select_statement'
 
 require 'arel/extensions/functions'
 require 'arel/extensions/nodes'

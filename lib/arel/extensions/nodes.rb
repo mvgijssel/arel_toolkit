@@ -4,11 +4,6 @@
 
 module Arel
   module Nodes
-    Arel::Nodes::SelectStatement.class_eval do
-      # For INSERT statements
-      attr_accessor :values_lists
-    end
-
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     Arel::Nodes::InsertStatement.class_eval do
       attr_accessor :with
