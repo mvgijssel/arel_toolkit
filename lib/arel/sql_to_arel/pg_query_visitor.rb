@@ -15,13 +15,15 @@ module Arel
       MIN_MAX_EXPR = 'MinMaxExpr'.freeze
 
       attr_reader :object
+      attr_reader :binds
 
-      def accept(sql, models = [])
+      def accept(sql, models = [], binds = [])
         tree = PgQuery.parse(sql).tree
         raise 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
         @object = tree.first
         @model_mapping = create_model_mapping(models)
+        @binds = binds
         visit object, :top
       end
 
@@ -537,8 +539,10 @@ module Arel
         conflict
       end
 
-      def visit_ParamRef(_args)
-        Arel::Nodes::BindParam.new(nil)
+      def visit_ParamRef(number:)
+        value = (binds[number - 1] unless binds.empty?)
+
+        Arel::Nodes::BindParam.new(value)
       end
 
       def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)

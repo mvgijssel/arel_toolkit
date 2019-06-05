@@ -6,8 +6,8 @@ module Arel
         @internal_models = internal_models
       end
 
-      def execute(sql)
-        arel = Arel.sql_to_arel(sql, models: internal_models)
+      def execute(sql, binds)
+        arel = Arel.sql_to_arel(sql, models: internal_models, binds: binds)
 
         internal_middleware.each do |middleware_item|
           arel = middleware_item.call(arel)

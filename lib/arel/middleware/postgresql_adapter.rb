@@ -11,8 +11,7 @@ module Arel
 
           alias_method :execute_and_clear_without_arel_middleware, :execute_and_clear
           def execute_and_clear(sql, name, binds, prepare: false, &block)
-            binding.pry
-            sql = Arel::Middleware.current_chain.execute(sql)
+            sql = Arel::Middleware.current_chain.execute(sql, binds)
             execute_and_clear_without_arel_middleware(sql, name, binds, prepare: prepare, &block)
           end
         end
