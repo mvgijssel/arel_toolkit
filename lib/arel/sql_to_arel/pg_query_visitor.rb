@@ -16,59 +16,62 @@ module Arel
 
       attr_reader :object
 
-      def accept(sql)
+      def accept(sql, models = [])
         tree = PgQuery.parse(sql).tree
         raise 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
         @object = tree.first
+        @model_mapping = create_model_mapping(models)
         visit object, :top
       end
 
       private
 
+      attr_reader :model_mapping
+
       def visit_A_ArrayExpr(elements:)
         Arel::Nodes::Array.new visit(elements)
       end
 
-      def visit_A_Const(val:)
-        visit(val, :const)
+      def visit_A_Const(context = :const, val:)
+        visit(val, context)
       end
 
       def visit_A_Expr(kind:, lexpr: nil, rexpr: nil, name:)
         case kind
         when PgQuery::AEXPR_OP
           left = visit(lexpr) if lexpr
-          right = visit(rexpr) if rexpr
+          right = visit(rexpr, left) if rexpr
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_OP_ANY
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           right = Arel::Nodes::Any.new right
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_OP_ALL
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           right = Arel::Nodes::All.new right
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
 
         when PgQuery::AEXPR_DISTINCT
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::DistinctFrom.new(left, right)
 
         when PgQuery::AEXPR_NOT_DISTINCT
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::NotDistinctFrom.new(left, right)
 
         when PgQuery::AEXPR_NULLIF
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::NullIf.new(left, right)
 
         when PgQuery::AEXPR_OF
@@ -76,7 +79,7 @@ module Arel
 
         when PgQuery::AEXPR_IN
           left = visit(lexpr)
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           operator = visit(name[0], :operator)
 
           if operator == '<>'
@@ -87,7 +90,7 @@ module Arel
 
         when PgQuery::AEXPR_LIKE
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           escape = nil
 
           if right.is_a?(Array)
@@ -106,7 +109,7 @@ module Arel
 
         when PgQuery::AEXPR_ILIKE
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           escape = nil
 
           if right.is_a?(Array)
@@ -125,7 +128,7 @@ module Arel
 
         when PgQuery::AEXPR_SIMILAR
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           escape = nil
 
           if right.is_a?(Array)
@@ -145,22 +148,22 @@ module Arel
 
         when PgQuery::AEXPR_BETWEEN
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_NOT_BETWEEN
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::NotBetween.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_BETWEEN_SYM
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::BetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_NOT_BETWEEN_SYM
           left = visit(lexpr) if lexpr
-          right = visit(rexpr)
+          right = visit(rexpr, left)
           Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_PAREN
@@ -194,29 +197,23 @@ module Arel
       def visit_BoolExpr(context = false, args:, boolop:)
         args = visit(args, context || true)
 
-        result = case boolop
-                 when PgQuery::BOOL_EXPR_AND
-                   Arel::Nodes::And.new(args)
+        case boolop
+        when PgQuery::BOOL_EXPR_AND
+          Arel::Nodes::And.new(args)
 
-                 when PgQuery::BOOL_EXPR_OR
-                   generate_boolean_expression(args, Arel::Nodes::Or)
+        when PgQuery::BOOL_EXPR_OR
+          generate_boolean_expression(args, Arel::Nodes::Or)
 
-                 when PgQuery::BOOL_EXPR_NOT
-                   Arel::Nodes::Not.new(args)
+        when PgQuery::BOOL_EXPR_NOT
+          Arel::Nodes::Not.new(args)
 
-                 else
-                   raise "? Boolop -> #{boolop}"
-                 end
-
-        if context
-          Arel::Nodes::Grouping.new(result)
         else
-          result
+          raise "? Boolop -> #{boolop}"
         end
       end
 
       def visit_BooleanTest(arg:, booltesttype:)
-        arg = visit(arg)
+        arg = visit(arg, :projection)
 
         case booltesttype
         when PgQuery::BOOLEAN_TEST_TRUE
@@ -269,8 +266,22 @@ module Arel
         Arel::Nodes::Coalesce.new args
       end
 
-      def visit_ColumnRef(context = nil, fields:)
-        UnboundColumnReference.new visit(fields, context).join('.')
+      def visit_ColumnRef(fields:)
+        visited_fields = visit(fields)
+
+        if fields.length == 2
+          table_reference, column_reference = fields
+          table_reference = visit(table_reference, :operator)
+          model = model_mapping[table_reference]
+
+          return UnboundColumnReference.new(visited_fields.join('.')) if model.nil?
+
+          column_reference = visit(column_reference, :operator)
+          table = model.arel_table
+          table[column_reference]
+        else
+          UnboundColumnReference.new visited_fields.join('.')
+        end
       end
 
       def visit_CommonTableExpr(ctename:, ctequery:)
@@ -302,8 +313,13 @@ module Arel
         delete_manager
       end
 
-      def visit_Float(str:)
-        Arel::Nodes::SqlLiteral.new str
+      def visit_Float(context, str:)
+        case context
+        when Arel::Attributes::Attribute
+          generate_bind_attribute(context, str.to_f)
+        else
+          Arel::Nodes::SqlLiteral.new str
+        end
       end
 
       # https://github.com/postgres/postgres/blob/REL_10_1/src/include/nodes/parsenodes.h
@@ -422,8 +438,13 @@ module Arel
         insert_manager
       end
 
-      def visit_Integer(ival:)
-        ival
+      def visit_Integer(context, ival:)
+        case context
+        when Arel::Attributes::Attribute
+          generate_bind_attribute(context, ival.to_i)
+        else
+          ival
+        end
       end
 
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
@@ -477,9 +498,9 @@ module Arel
       def visit_MinMaxExpr(op:, args:)
         case op
         when 0
-          Arel::Nodes::Greatest.new visit(args)
+          Arel::Nodes::Greatest.new visit(args, :projection)
         when 1
-          Arel::Nodes::Least.new visit(args)
+          Arel::Nodes::Least.new visit(args, :projection)
         else
           raise "Unknown Op -> #{op}"
         end
@@ -536,13 +557,19 @@ module Arel
       end
 
       def visit_RangeVar(aliaz: nil, relname:, inh: false, relpersistence:, schemaname: nil)
-        Arel::Table.new(
-          relname,
-          as: (visit(aliaz) if aliaz),
-          only: !inh,
-          relpersistence: relpersistence,
-          schema_name: schemaname,
-        )
+        model = model_mapping[relname]
+
+        arel_table = if model.nil?
+                       Arel::Table.new(relname)
+                     else
+                       model.arel_table
+                     end
+
+        arel_table.table_alias = visit(aliaz) if aliaz
+        arel_table.only = !inh
+        arel_table.relpersistence = relpersistence
+        arel_table.schema_name = schemaname
+        arel_table
       end
 
       def visit_RawStmt(context, stmt:)
@@ -552,7 +579,7 @@ module Arel
       def visit_ResTarget(context, val: nil, name: nil)
         case context
         when :select
-          val = visit(val)
+          val = visit(val, :projection)
 
           if name
             Arel::Nodes::As.new(val, Arel.sql(name))
@@ -600,11 +627,23 @@ module Arel
         select_statement = select_manager.ast
 
         froms, join_sources = generate_sources(from_clause)
-        select_core.from = froms if froms
+        if froms
+          froms = froms.first if froms.length == 1
+          select_core.froms = froms
+        end
         select_core.source.right = join_sources
 
         select_core.projections = visit(target_list, :select) if target_list
-        select_core.wheres = [visit(where_clause)] if where_clause
+        if where_clause
+          where_clause = visit(where_clause)
+          where_clause = if where_clause.is_a?(Arel::Nodes::And)
+                           where_clause
+                         else
+                           Arel::Nodes::And.new(where_clause)
+                         end
+
+          select_core.wheres = [where_clause]
+        end
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
@@ -625,7 +664,7 @@ module Arel
         select_statement.with = visit(with_clause) if with_clause
         select_statement.lock = visit(locking_clause) if locking_clause
         if values_lists
-          values_lists = visit(values_lists).map do |values_list|
+          values_lists = visit(values_lists, :insert).map do |values_list|
             values_list.map do |value|
               case value
               when String
@@ -724,6 +763,8 @@ module Arel
           str
         when :const
           Arel.sql "'#{str}'"
+        when Arel::Attributes::Attribute
+          generate_bind_attribute(context, maybe_cast_to_float(str))
         else
           "\"#{str}\""
         end
@@ -744,11 +785,17 @@ module Arel
         generate_sublink(sub_link_type, subselect, testexpr, operator)
       end
 
-      def visit_TypeCast(arg:, type_name:)
-        arg = visit(arg)
-        type_name = visit(type_name)
-
-        Arel::Nodes::TypeCast.new(arg, type_name)
+      def visit_TypeCast(context, arg:, type_name:)
+        case context
+        when Arel::Attributes::Attribute
+          arg = visit(arg, :operator)
+          generate_bind_attribute(context, cast_value_for_bind_attribute(arg))
+        else
+          binding.pry
+          arg = visit(arg, context)
+          type_name = visit(type_name)
+          Arel::Nodes::TypeCast.new(arg, type_name)
+        end
       end
 
       def visit_TypeName(names:, typemod:)
@@ -992,6 +1039,40 @@ module Arel
         else
           raise "Unknown sublinktype: #{type}"
         end
+      end
+
+      def generate_bind_attribute(attribute, value)
+        model = model_mapping[attribute.relation.name]
+        table_metadata = ActiveRecord::TableMetadata.new(model, model.arel_table)
+        builder = ActiveRecord::PredicateBuilder.new(table_metadata)
+        builder.build_bind_attribute(attribute.name, value)
+      end
+
+      def cast_value_for_bind_attribute(value)
+        case value
+        when 't'
+          true
+        when 'f'
+          false
+        else
+          raise "Unknown value for casting `#{value}`"
+        end
+      end
+
+      def maybe_cast_to_float(value)
+        Float(value)
+      rescue ArgumentError => e
+        return value if e.message.match?(/invalid value for Float/)
+
+        raise e
+      end
+
+      def create_model_mapping(models)
+        mapping = {}
+        models.each do |model|
+          mapping[model.arel_table.name] = model
+        end
+        mapping
       end
     end
   end
