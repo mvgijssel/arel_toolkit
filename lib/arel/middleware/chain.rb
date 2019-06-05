@@ -29,6 +29,10 @@ module Arel
         continue_chain(middleware, internal_models, internal_context, &block)
       end
 
+      def only(middleware, &block)
+        continue_chain(middleware, internal_models, internal_context, &block)
+      end
+
       def except(without_middleware, &block)
         new_middleware = internal_middleware.reject do |middleware|
           middleware == without_middleware

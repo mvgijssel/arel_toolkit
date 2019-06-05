@@ -137,6 +137,15 @@ describe 'Arel.middleware' do
   end
 
   it 'allows only running specified middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.only([OtherMiddleware]) do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([OtherMiddleware])
   end
 
   it 'allows execution without any middleware' do
