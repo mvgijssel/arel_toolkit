@@ -161,6 +161,15 @@ describe 'Arel.middleware' do
   end
 
   it 'persists middleware across multiple database connections' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Post.connection_pool.with_connection do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([SomeMiddleware])
   end
 
   it 'does not change the current middleware when changing the current middleware' do
