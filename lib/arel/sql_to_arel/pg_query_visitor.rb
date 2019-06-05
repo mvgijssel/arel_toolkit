@@ -34,6 +34,13 @@ module Arel
       end
 
       def visit_A_Const(context = :const, val:)
+        context = case context
+                  when Arel::Attributes::Attribute
+                    context
+                  else
+                    :const
+                  end
+
         visit(val, context)
       end
 
@@ -468,7 +475,7 @@ module Arel
         larg = visit(larg)
         rarg = visit(rarg)
 
-        quals = Arel::Nodes::On.new visit(quals) if quals
+        quals = Arel::Nodes::On.new visit(quals, :const) if quals
 
         join = join_class.new(rarg, quals)
 
@@ -639,6 +646,12 @@ module Arel
           where_clause = if where_clause.is_a?(Arel::Nodes::And)
                            where_clause
                          else
+                           where_clause = if where_clause.is_a?(Array)
+                                            where_clause
+                                          else
+                                            [where_clause]
+                                          end
+
                            Arel::Nodes::And.new(where_clause)
                          end
 
@@ -785,13 +798,12 @@ module Arel
         generate_sublink(sub_link_type, subselect, testexpr, operator)
       end
 
-      def visit_TypeCast(context, arg:, type_name:)
+      def visit_TypeCast(context = nil, arg:, type_name:)
         case context
         when Arel::Attributes::Attribute
           arg = visit(arg, :operator)
           generate_bind_attribute(context, cast_value_for_bind_attribute(arg))
         else
-          binding.pry
           arg = visit(arg, context)
           type_name = visit(type_name)
           Arel::Nodes::TypeCast.new(arg, type_name)
@@ -1050,9 +1062,9 @@ module Arel
 
       def cast_value_for_bind_attribute(value)
         case value
-        when 't'
+        when "'t'"
           true
-        when 'f'
+        when "'f'"
           false
         else
           raise "Unknown value for casting `#{value}`"

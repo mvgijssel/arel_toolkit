@@ -438,14 +438,14 @@ describe 'Arel.sql_to_arel' do
     expect(query.arel.to_sql).to eq parsed_arel.to_sql
   end
 
-  it 'translates an ActiveRecord for a single wherr argument' do
+  it 'translates an ActiveRecord for a single where argument' do
     query = Post.where(id: 7)
-    sql = query.arel.to_sql
+    sql = query.to_sql
 
     parsed_arel = Arel.sql_to_arel(sql, models: [Post])
 
     # TODO: why doesn't eq work for a SelectManager?
     expect(query.arel.ast).to eq parsed_arel.ast
-    expect(sql).to eq parsed_arel.to_sql
+    expect(query.arel.to_sql).to eq parsed_arel.to_sql
   end
 end
