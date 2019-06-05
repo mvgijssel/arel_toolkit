@@ -149,9 +149,15 @@ describe 'Arel.middleware' do
   end
 
   it 'allows execution without any middleware' do
-  end
+    middleware = nil
 
-  it 'throws an exception with the same middleware added twice' do
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.none do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([])
   end
 
   it 'persists middleware across multiple database connections' do
