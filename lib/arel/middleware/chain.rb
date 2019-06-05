@@ -18,7 +18,7 @@ module Arel
       end
 
       def current
-        internal_middleware
+        internal_middleware.dup
       end
 
       def models(models, &block)

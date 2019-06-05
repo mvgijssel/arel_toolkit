@@ -173,6 +173,14 @@ describe 'Arel.middleware' do
   end
 
   it 'does not change the current middleware when changing the current middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.current.push(OtherMiddleware)
+      middleware = Arel.middleware.current
+    end
+
+    expect(middleware).to eq([SomeMiddleware])
   end
 
   it 'handles removed bind values' do
