@@ -1,9 +1,10 @@
 module Arel
   module Middleware
     class Chain
-      def initialize(internal_middleware, internal_models)
+      def initialize(internal_middleware, internal_models, internal_context)
         @internal_middleware = internal_middleware
         @internal_models = internal_models
+        @internal_context = internal_context
       end
 
       def execute(sql, binds)
@@ -17,12 +18,27 @@ module Arel
       end
 
       def models(models, &block)
-        new_chain = Arel::Middleware::Chain.new(internal_middleware, models)
+        new_chain = Arel::Middleware::Chain.new(internal_middleware, models, internal_context)
         maybe_execute_block(new_chain, &block)
       end
 
       def apply(middleware, &block)
-        new_chain = Arel::Middleware::Chain.new(middleware, internal_models)
+        new_chain = Arel::Middleware::Chain.new(middleware, internal_models, internal_context)
+        maybe_execute_block(new_chain, &block)
+      end
+
+      def current
+        internal_middleware
+      end
+
+      def context(new_context = nil, &block)
+        if new_context.nil? && !block.nil?
+          raise 'You cannot do a block statement while calling context without arguments'
+        end
+
+        return internal_context if new_context.nil?
+
+        new_chain = Arel::Middleware::Chain.new(internal_middleware, internal_models, new_context)
         maybe_execute_block(new_chain, &block)
       end
 
@@ -30,6 +46,7 @@ module Arel
 
       attr_reader :internal_middleware
       attr_reader :internal_models
+      attr_reader :internal_context
 
       private
 

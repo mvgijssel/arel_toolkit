@@ -27,43 +27,31 @@ describe 'Arel.middleware' do
   end
 
   it 'allows to get the current applied middleware' do
+    current = nil
+
     Arel.middleware.apply([SomeMiddleware]) do
-      expect(Arel.middleware.current).to eq [SomeMiddleware]
+      current = Arel.middleware.current
     end
+
+    expect(current).to eq([SomeMiddleware])
   end
 
   it 'allows to get the current applied context' do
+    context = nil
+
     Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
-      expect(Arel.middleware.context).to eq(yes: :sir)
+      context = Arel.middleware.context
     end
+
+    expect(context).to eq(yes: :sir)
   end
 
   it 'allows to replace the context with a new context' do
     Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
       expect(Arel.middleware.context).to eq(yes: :sir)
 
-      Arel.middleware.context.replace(hello: :friend) do
-        expect(Arel.middleware.context).to eq(hello: :friend)
-      end
-    end
-  end
-
-  it 'allows to merge the existing context with new values' do
-    Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
-      expect(Arel.middleware.context).to eq(yes: :sir)
-
-      Arel.middleware.context.merge(hello: :friend) do
-        expect(Arel.middleware.context).to eq(hello: :friend, yes: :sir)
-      end
-    end
-  end
-
-  it 'allows to merge the existing context using a shorthand' do
-    Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
-      expect(Arel.middleware.context).to eq(yes: :sir)
-
       Arel.middleware.context(hello: :friend) do
-        expect(Arel.middleware.context).to eq(hello: :friend, yes: :sir)
+        expect(Arel.middleware.context).to eq(hello: :friend)
       end
     end
   end
