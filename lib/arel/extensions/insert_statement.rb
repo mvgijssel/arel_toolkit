@@ -9,6 +9,13 @@ module Arel
       attr_accessor :on_conflict
       attr_accessor :override
       attr_accessor :returning
+
+      alias_method :old_initialize, :initialize
+      def initialize
+        old_initialize
+
+        @returning = []
+      end
     end
   end
 
@@ -32,7 +39,7 @@ module Arel
         end
 
         case o.override
-        when 0
+        when nil, 0
           collector << ''
         when 1
           collector << ' OVERRIDING USER VALUE'
