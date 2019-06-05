@@ -101,6 +101,15 @@ describe 'Arel.middleware' do
   end
 
   it 'resets middleware after an exception' do
+    begin
+      Arel.middleware.apply([SomeMiddleware]) do
+        raise 'something'
+      end
+    rescue StandardError => e
+    end
+
+    expect(e.message).to eq 'something'
+    expect(Arel.middleware.current).to eq []
   end
 
   it 'allows middleware to be inserted before other middleware' do
