@@ -86,6 +86,18 @@ describe 'Arel.middleware' do
   end
 
   it 'resets middleware when exiting a middleware block' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware, OtherMiddleware]) do
+      Arel.middleware.except(SomeMiddleware) do
+        Post.select(:id).load
+      end
+
+      middleware = Arel.middleware.current
+    end
+
+    expect(Arel.middleware.current).to eq []
+    expect(middleware).to eq [SomeMiddleware, OtherMiddleware]
   end
 
   it 'resets middleware after an exception' do
