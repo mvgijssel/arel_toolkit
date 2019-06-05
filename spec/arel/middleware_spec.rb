@@ -5,6 +5,12 @@ describe 'Arel.middleware' do
     end
   end
 
+  class OtherMiddleware
+    def self.call(arel)
+      arel
+    end
+  end
+
   it 'calls the middleware before executing the SQL query' do
     query = Post.where(id: 7)
     arel = query.arel
@@ -56,7 +62,16 @@ describe 'Arel.middleware' do
     end
   end
 
-  it 'only executes applied middleware given for a block' do
+  it 'only applies middleware given for a block' do
+    current = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.apply([OtherMiddleware]) do
+        current = Arel.middleware.current
+      end
+    end
+
+    expect(current).to eq [OtherMiddleware]
   end
 
   it 'does not call middleware which is excluded' do
