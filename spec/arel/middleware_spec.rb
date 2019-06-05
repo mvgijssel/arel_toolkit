@@ -113,9 +113,27 @@ describe 'Arel.middleware' do
   end
 
   it 'allows middleware to be inserted before other middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.insert_before(OtherMiddleware, SomeMiddleware) do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([OtherMiddleware, SomeMiddleware])
   end
 
   it 'allows middleware to be appended after other middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.insert_after(OtherMiddleware, SomeMiddleware) do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([SomeMiddleware, OtherMiddleware])
   end
 
   it 'allows only running specified middleware' do

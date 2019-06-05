@@ -37,6 +37,18 @@ module Arel
         continue_chain(new_middleware, internal_models, internal_context, &block)
       end
 
+      def insert_before(new_middleware, existing_middleware, &block)
+        index = internal_middleware.index(existing_middleware)
+        updated_middleware = internal_middleware.insert(index, new_middleware)
+        continue_chain(updated_middleware, internal_models, internal_context, &block)
+      end
+
+      def insert_after(new_middleware, existing_middleware, &block)
+        index = internal_middleware.index(existing_middleware)
+        updated_middleware = internal_middleware.insert(index + 1, new_middleware)
+        continue_chain(updated_middleware, internal_models, internal_context, &block)
+      end
+
       def context(new_context = nil, &block)
         if new_context.nil? && !block.nil?
           raise 'You cannot do a block statement while calling context without arguments'
