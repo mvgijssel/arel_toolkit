@@ -17,14 +17,16 @@ module Arel
         arel.to_sql
       end
 
+      def current
+        internal_middleware
+      end
+
       def models(models, &block)
-        new_chain = Arel::Middleware::Chain.new(internal_middleware, models, internal_context)
-        maybe_execute_block(new_chain, &block)
+        continue_chain(internal_middleware, models, internal_context, &block)
       end
 
       def apply(middleware, &block)
-        new_chain = Arel::Middleware::Chain.new(middleware, internal_models, internal_context)
-        maybe_execute_block(new_chain, &block)
+        continue_chain(middleware, internal_models, internal_context, &block)
       end
 
       def except(without_middleware, &block)
@@ -32,12 +34,7 @@ module Arel
           middleware == without_middleware
         end
 
-        new_chain = Arel::Middleware::Chain.new(new_middleware, internal_models, internal_context)
-        maybe_execute_block(new_chain, &block)
-      end
-
-      def current
-        internal_middleware
+        continue_chain(new_middleware, internal_models, internal_context, &block)
       end
 
       def context(new_context = nil, &block)
@@ -47,8 +44,7 @@ module Arel
 
         return internal_context if new_context.nil?
 
-        new_chain = Arel::Middleware::Chain.new(internal_middleware, internal_models, new_context)
-        maybe_execute_block(new_chain, &block)
+        continue_chain(internal_middleware, internal_models, new_context, &block)
       end
 
       protected
@@ -58,6 +54,11 @@ module Arel
       attr_reader :internal_context
 
       private
+
+      def continue_chain(middleware, models, context, &block)
+        new_chain = Arel::Middleware::Chain.new(middleware, models, context)
+        maybe_execute_block(new_chain, &block)
+      end
 
       def maybe_execute_block(new_chain, &block)
         return new_chain if block.nil?
