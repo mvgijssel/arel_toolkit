@@ -27,6 +27,15 @@ module Arel
         maybe_execute_block(new_chain, &block)
       end
 
+      def except(without_middleware, &block)
+        new_middleware = internal_middleware.reject do |middleware|
+          middleware == without_middleware
+        end
+
+        new_chain = Arel::Middleware::Chain.new(new_middleware, internal_models, internal_context)
+        maybe_execute_block(new_chain, &block)
+      end
+
       def current
         internal_middleware
       end

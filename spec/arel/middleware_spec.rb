@@ -75,6 +75,14 @@ describe 'Arel.middleware' do
   end
 
   it 'does not call middleware which is excluded' do
+    expect(SomeMiddleware).to_not receive(:call)
+    expect(OtherMiddleware).to receive(:call).and_call_original
+
+    Arel.middleware.apply([SomeMiddleware, OtherMiddleware]) do
+      Arel.middleware.except(SomeMiddleware) do
+        Post.select(:id).load
+      end
+    end
   end
 
   it 'resets middleware when exiting a middleware block' do
