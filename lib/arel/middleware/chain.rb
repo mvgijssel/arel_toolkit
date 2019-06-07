@@ -83,10 +83,11 @@ module Arel
       def maybe_execute_block(new_chain, &block)
         return new_chain if block.nil?
 
+        previous_chain = Middleware.current_chain
         Arel::Middleware.current_chain = new_chain
         yield block
       ensure
-        Arel::Middleware.current_chain = self
+        Arel::Middleware.current_chain = previous_chain
       end
 
       def current_chain
