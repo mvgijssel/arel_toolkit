@@ -114,6 +114,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'CHECKPOINT', 'PgQuery::CHECK_POINT_STMT'
   visit 'pg', 'CLOSE cursor;', 'PgQuery::CLOSE_PORTAL_STMT'
   visit 'all', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
+  # https://github.com/mvgijssel/arel_toolkit/issues/54
   # visit 'pg', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
   visit 'pg', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
   visit 'all', 'SELECT "id"', 'PgQuery::COLUMN_REF'
