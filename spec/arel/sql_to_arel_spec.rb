@@ -224,6 +224,7 @@ describe 'Arel.sql_to_arel' do
         'Arel::SqlToArel::PgQueryVisitor::MIN_MAX_EXPR'
   visit 'all', 'SELECT NULL', 'PgQuery::NULL'
   visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
+  # https://github.com/mvgijssel/arel_toolkit/issues/57
   # visit 'pg', '???', 'PgQuery::OID_LIST'
   visit 'all', 'SELECT $1', 'PgQuery::PARAM_REF'
   visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
