@@ -201,6 +201,7 @@ describe 'Arel.sql_to_arel' do
   visit 'all',
         'INSERT INTO "t" VALUES (1) ON CONFLICT (a, b) DO UPDATE SET "a" = 1',
         'PgQuery::INSERT_STMT'
+  # https://github.com/mvgijssel/arel_toolkit/issues/56
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
   visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
