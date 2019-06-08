@@ -146,6 +146,7 @@ describe 'Arel.sql_to_arel' do
         'RETURNING *, "some_delete_query"."some_column"',
         'PgQuery::DELETE_STMT'
   visit 'all', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', 'PgQuery::DELETE_STMT'
+  # https://github.com/mvgijssel/arel_toolkit/issues/55
   # visit 'pg', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DO_STMT'
   visit 'pg', 'DROP TABLE some_tablr', 'PgQuery::DROP_STMT'
