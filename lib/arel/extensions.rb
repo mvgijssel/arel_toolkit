@@ -66,6 +66,7 @@ require 'arel/extensions/intersect_all'
 require 'arel/extensions/except_all'
 require 'arel/extensions/select_manager'
 require 'arel/extensions/insert_manager'
+require 'arel/extensions/update_manager'
 
 module Arel
   module Extensions
