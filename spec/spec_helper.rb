@@ -11,6 +11,8 @@ require 'arel_toolkit'
 require 'support/fake_record'
 Arel::Table.engine = FakeRecord::Base.new
 
+require 'support/active_record'
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'

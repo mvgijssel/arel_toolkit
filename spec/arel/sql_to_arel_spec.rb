@@ -87,8 +87,8 @@ describe 'Arel.sql_to_arel' do
         '20 BETWEEN SYMMETRIC 21 AND 19, ' \
         '22 NOT BETWEEN SYMMETRIC 24 AND 23',
         'PgQuery::A_EXPR'
-  visit 'all', 'SELECT field[1]', 'PgQuery::A_INDICES'
-  visit 'all', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
+  visit 'all', 'SELECT "field"[1]', 'PgQuery::A_INDICES'
+  visit 'all', 'SELECT "something"[1]', 'PgQuery::A_INDIRECTION'
   visit 'all', 'SELECT *', 'PgQuery::A_STAR'
   visit 'pg', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
   visit 'all', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
@@ -114,7 +114,6 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'CHECKPOINT', 'PgQuery::CHECK_POINT_STMT'
   visit 'pg', 'CLOSE cursor;', 'PgQuery::CLOSE_PORTAL_STMT'
   visit 'all', "SELECT COALESCE(\"a\", NULL, 2, 'b')", 'PgQuery::COALESCE_EXPR'
-  # https://github.com/mvgijssel/arel_toolkit/issues/54
   # visit 'pg', 'SELECT a COLLATE "C"', 'PgQuery::COLLATE_CLAUSE'
   visit 'pg', 'CREATE TABLE a (column_def_column text)', 'PgQuery::COLUMN_DEF'
   visit 'all', 'SELECT "id"', 'PgQuery::COLUMN_REF'
@@ -146,7 +145,6 @@ describe 'Arel.sql_to_arel' do
         'RETURNING *, "some_delete_query"."some_column"',
         'PgQuery::DELETE_STMT'
   visit 'all', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', 'PgQuery::DELETE_STMT'
-  # https://github.com/mvgijssel/arel_toolkit/issues/55
   # visit 'pg', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DO_STMT'
   visit 'pg', 'DROP TABLE some_tablr', 'PgQuery::DROP_STMT'
@@ -201,7 +199,6 @@ describe 'Arel.sql_to_arel' do
   visit 'all',
         'INSERT INTO "t" VALUES (1) ON CONFLICT (a, b) DO UPDATE SET "a" = 1',
         'PgQuery::INSERT_STMT'
-  # https://github.com/mvgijssel/arel_toolkit/issues/56
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'all', 'SELECT 1', 'PgQuery::INTEGER'
   visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
@@ -224,7 +221,6 @@ describe 'Arel.sql_to_arel' do
         'Arel::SqlToArel::PgQueryVisitor::MIN_MAX_EXPR'
   visit 'all', 'SELECT NULL', 'PgQuery::NULL'
   visit 'all', 'SELECT "a" IS NULL AND \'b\' IS NOT NULL', 'PgQuery::NULL_TEST'
-  # https://github.com/mvgijssel/arel_toolkit/issues/57
   # visit 'pg', '???', 'PgQuery::OID_LIST'
   visit 'all', 'SELECT $1', 'PgQuery::PARAM_REF'
   visit 'pg', 'PREPARE some_plan (integer) AS (SELECT $1)', 'PgQuery::PREPARE_STMT'
@@ -431,9 +427,25 @@ describe 'Arel.sql_to_arel' do
     expect(parsed_sql).to eq 'SELECT SUM("a")'
   end
 
-  # # NOTE: should run at the end
-  # children.each do |child|
-  #   sql, pg_query_node = child.metadata[:block].binding.local_variable_get(:args)
-  #   puts sql, pg_query_node
-  # end
+  it 'translates an ActiveRecord query ast into the same ast and sql' do
+    query = Post.select(:id).where(id: 7, title: 'kerk', content: 3.0, public: true)
+    sql = query.to_sql
+
+    parsed_arel = Arel.sql_to_arel(sql, models: [Post])
+
+    # TODO: why doesn't eq work for a SelectManager?
+    expect(query.arel.ast).to eq parsed_arel.ast
+    expect(query.arel.to_sql).to eq parsed_arel.to_sql
+  end
+
+  it 'translates an ActiveRecord for a single where argument' do
+    query = Post.where(id: 7)
+    sql = query.to_sql
+
+    parsed_arel = Arel.sql_to_arel(sql, models: [Post])
+
+    # TODO: why doesn't eq work for a SelectManager?
+    expect(query.arel.ast).to eq parsed_arel.ast
+    expect(query.arel.to_sql).to eq parsed_arel.to_sql
+  end
 end
