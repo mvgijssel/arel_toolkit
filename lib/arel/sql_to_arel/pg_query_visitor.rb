@@ -371,8 +371,14 @@ module Arel
                when [PG_CATALOG, 'similar_escape']
                  args
 
+               when [PG_CATALOG, 'timezone']
+                 timezone, expression = args
+                 [Arel::Nodes::AtTimeZone.new(expression, timezone)]
+
                else
-                 boom "Don't know how to handle `#{function_names}`" if function_names.length > 1
+                 if function_names.length > 1
+                   boom "Don't know how to handle function names `#{function_names}`"
+                 end
 
                  Arel::Nodes::NamedFunction.new(function_names.first, args)
                end

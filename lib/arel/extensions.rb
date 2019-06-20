@@ -70,6 +70,7 @@ require 'arel/extensions/select_manager'
 require 'arel/extensions/insert_manager'
 require 'arel/extensions/update_manager'
 require 'arel/extensions/delete_manager'
+require 'arel/extensions/at_time_zone'
 
 module Arel
   module Extensions

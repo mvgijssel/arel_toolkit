@@ -169,6 +169,7 @@ describe 'Arel.sql_to_arel' do
         'SUM("a") WITHIN GROUP (ORDER BY "a"), ' \
         'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
         'COUNT(DISTINCT "some_column"), ' \
+        "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
         'some_function("a", \'b\', 1)',
         'PgQuery::FUNC_CALL'
   visit 'pg',
