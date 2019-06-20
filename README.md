@@ -9,6 +9,7 @@
 - [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?type=total)
 - ![](http://ruby-gem-downloads-badge.herokuapp.com/arel_toolkit?label=downloads-current-version)
+- [Coverage report](https://mvgijssel.github.io/arel_toolkit/)
 
 ## Installation
 
