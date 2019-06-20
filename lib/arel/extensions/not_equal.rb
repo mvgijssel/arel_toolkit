@@ -6,15 +6,13 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_NotEqual(o, collector)
         right = o.right
-
         collector = visit o.left, collector
 
-        case right
-        when Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True
+        if [Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True].include?(right.class)
           collector << ' IS NOT '
           visit right, collector
 
-        when NilClass
+        elsif right.nil?
           collector << ' IS NOT NULL'
 
         else
