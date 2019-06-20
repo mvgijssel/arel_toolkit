@@ -930,6 +930,16 @@ module Arel
         when '>>='
           Arel::Nodes::ContainsEquals.new(left, right)
 
+        # https://www.postgresql.org/docs/9.4/functions-json.html
+        when '->'
+          Arel::Nodes::JsonGetObject.new(left, right)
+        when '->>'
+          Arel::Nodes::JsonGetField.new(left, right)
+        when '#>'
+          Arel::Nodes::JsonPathGetObject.new(left, right)
+        when '#>>'
+          Arel::Nodes::JsonPathGetField.new(left, right)
+
         else
           boom "Unknown operator `#{operator}`"
         end

@@ -409,7 +409,12 @@ describe 'Arel.sql_to_arel' do
           '3 || ARRAY[4, 5, 6], ' \
           'ARRAY[4, 5, 6] || 7, ' \
           "'192.168.1/24'::inet <<= '192.168.1/24'::inet, " \
-          "'192.168.1/24'::inet >>= '192.168.1/24::inet'"
+          '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2, ' \
+          '\'{"a": {"b":"foo"}}\'::json -> \'a\', ' \
+          "'[1,2,3]'::json ->> 2, " \
+          '\'{"a":1,"b":2}\'::json ->> \'b\', ' \
+          '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\', ' \
+          '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\''
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql

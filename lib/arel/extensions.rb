@@ -72,6 +72,10 @@ require 'arel/extensions/update_manager'
 require 'arel/extensions/delete_manager'
 require 'arel/extensions/at_time_zone'
 require 'arel/extensions/extract_from'
+require 'arel/extensions/json_get_object'
+require 'arel/extensions/json_get_field'
+require 'arel/extensions/json_path_get_object'
+require 'arel/extensions/json_path_get_field'
 
 module Arel
   module Extensions
