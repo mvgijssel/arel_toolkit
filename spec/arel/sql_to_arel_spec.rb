@@ -488,4 +488,15 @@ describe 'Arel.sql_to_arel' do
       Arel.sql_to_arel(sql)
     end.to raise_error(message)
   end
+
+  it 'comparison operators work with Arel::Nodes::Quoted' do
+    t = Post.arel_table
+    sql = t
+      .where(t[:id].eq(Arel::Nodes.build_quoted(nil)))
+      .where(t[:id].not_eq(Arel::Nodes.build_quoted(nil)))
+      .to_sql
+
+    expect(sql)
+      .to eq 'SELECT FROM "posts" WHERE "posts"."id" IS NULL AND "posts"."id" IS NOT NULL'
+  end
 end
