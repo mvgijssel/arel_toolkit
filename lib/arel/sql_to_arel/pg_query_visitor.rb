@@ -443,7 +443,7 @@ module Arel
         end
 
         insert_statement.returning = visit(returning_list, :select)
-        insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
+        insert_statement.conflict = visit(on_conflict_clause) if on_conflict_clause
         insert_manager
       end
 
