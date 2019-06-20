@@ -3,7 +3,7 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.3/functions-net.html
+    # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSON-OP-TABLE
     class JsonPathGetField < Arel::Nodes::Binary
     end
   end
