@@ -10,8 +10,8 @@ module Arel
 
   module Visitors
     class ToSql
-      def visit_Arel_Nodes_ContainsEquals o, collector
-        infix_value o, collector, " >>= "
+      def visit_Arel_Nodes_ContainsEquals(o, collector)
+        infix_value o, collector, ' >>= '
       end
     end
   end
