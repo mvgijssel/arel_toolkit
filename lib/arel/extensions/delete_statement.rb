@@ -8,6 +8,13 @@ module Arel
       attr_accessor :using
       attr_accessor :with
       attr_accessor :returning
+
+      alias_method :old_initialize, :initialize
+      def initialize(relation = nil, wheres = [])
+        old_initialize(relation, wheres)
+
+        @returning = []
+      end
     end
   end
 

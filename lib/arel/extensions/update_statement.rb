@@ -8,6 +8,14 @@ module Arel
       attr_accessor :with
       attr_accessor :froms
       attr_accessor :returning
+
+      alias_method :old_initialize, :initialize
+      def initialize
+        old_initialize
+
+        @froms = []
+        @returning = []
+      end
     end
   end
 

@@ -146,6 +146,7 @@ describe 'Arel.sql_to_arel' do
         'RETURNING *, "some_delete_query"."some_column"',
         'PgQuery::DELETE_STMT'
   visit 'all', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', 'PgQuery::DELETE_STMT'
+  visit 'all', 'DELETE FROM "a"', 'PgQuery::DELETE_STMT'
   # https://github.com/mvgijssel/arel_toolkit/issues/55
   # visit 'pg', 'DISCARD ALL', 'PgQuery::DISCARD_STMT'
   visit 'pg', 'DO $$ a $$', 'PgQuery::DO_STMT'
@@ -311,6 +312,7 @@ describe 'Arel.sql_to_arel' do
         'SET "b" = "query"."a", "c" = 1.0, "d" = \'e`\', "f" = \'t\'::bool ' \
         'WHERE CURRENT OF some_cursor',
         'PgQuery::UPDATE_STMT'
+  visit 'all', 'UPDATE "some_table" SET "b" = 3', 'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
