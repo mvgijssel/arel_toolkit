@@ -3,7 +3,7 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.2/functions-datetime.html#FUNCTIONS-DATETIME-ZONECONVERT
+    # https://www.postgresql.org/docs/9.1/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT
     class ExtractFrom < Arel::Nodes::Unary
       attr_reader :field
 
