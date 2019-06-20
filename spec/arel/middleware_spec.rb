@@ -207,10 +207,12 @@ describe 'Arel.middleware' do
     expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
       .to receive(:exec_no_cache_without_arel_middleware).twice.and_call_original
 
-    Post.where(id: [1, 2]).load # IN statements are not prepared
+    Arel.middleware.apply([SomeMiddleware]) do
+      Post.where(id: [1, 2]).load # IN statements are not prepared
 
-    ActiveRecord::Base.connection.unprepared_statement do
-      Post.where(id: 1).load
+      ActiveRecord::Base.connection.unprepared_statement do
+        Post.where(id: 1).load
+      end
     end
   end
 
@@ -221,6 +223,8 @@ describe 'Arel.middleware' do
     expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
       .to receive(:exec_cache_without_arel_middleware).and_call_original
 
-    Post.where(id: 1).load
+    Arel.middleware.apply([SomeMiddleware]) do
+      Post.where(id: 1).load
+    end
   end
 end
