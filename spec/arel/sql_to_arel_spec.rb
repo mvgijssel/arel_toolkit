@@ -401,7 +401,9 @@ describe 'Arel.sql_to_arel' do
           'ARRAY[1, 2, 3] || ARRAY[4, 5, 6], ' \
           'ARRAY[1] || ARRAY[ARRAY[4], ARRAY[7]], ' \
           '3 || ARRAY[4, 5, 6], ' \
-          'ARRAY[4, 5, 6] || 7'
+          'ARRAY[4, 5, 6] || 7, ' \
+          "'192.168.1/24'::inet <<= '192.168.1/24'::inet, " \
+          "'192.168.1/24'::inet >>= '192.168.1/24::inet'"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql

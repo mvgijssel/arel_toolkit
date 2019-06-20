@@ -3,18 +3,18 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.1/functions-array.html
-    class Contains < Arel::Nodes::Binary
+    # https://www.postgresql.org/docs/9.3/functions-net.html
+    class ContainedWithinEquals < Arel::Nodes::Binary
       def operator
-        :'@>'
+        :'<<='
       end
     end
   end
 
   module Visitors
     class ToSql
-      def visit_Arel_Nodes_Contains(o, collector)
-        infix_value o, collector, ' @> '
+      def visit_Arel_Nodes_ContainedWithinEquals(o, collector)
+        infix_value o, collector, ' <<= '
       end
     end
   end
