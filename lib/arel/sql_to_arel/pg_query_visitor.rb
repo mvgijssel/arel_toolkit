@@ -371,6 +371,10 @@ module Arel
                when [PG_CATALOG, 'similar_escape']
                  args
 
+               when [PG_CATALOG, 'date_part']
+                 field, expression = args
+                 [Arel::Nodes::ExtractFrom.new(expression, field)]
+
                when [PG_CATALOG, 'timezone']
                  timezone, expression = args
                  [Arel::Nodes::AtTimeZone.new(expression, timezone)]

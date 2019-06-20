@@ -71,6 +71,7 @@ require 'arel/extensions/insert_manager'
 require 'arel/extensions/update_manager'
 require 'arel/extensions/delete_manager'
 require 'arel/extensions/at_time_zone'
+require 'arel/extensions/extract_from'
 
 module Arel
   module Extensions
