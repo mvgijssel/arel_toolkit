@@ -5,9 +5,6 @@ module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/functions-array.html
     class Overlap < Arel::Nodes::Binary
-      def operator
-        '&&'
-      end
     end
   end
 

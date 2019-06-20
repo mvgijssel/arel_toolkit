@@ -5,9 +5,6 @@ module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.3/functions-net.html
     class ContainedWithinEquals < Arel::Nodes::Binary
-      def operator
-        :'<<='
-      end
     end
   end
 
