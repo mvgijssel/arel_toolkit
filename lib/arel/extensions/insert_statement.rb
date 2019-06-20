@@ -9,6 +9,13 @@ module Arel
       attr_accessor :on_conflict
       attr_accessor :override
       attr_accessor :returning
+
+      alias_method :old_initialize, :initialize
+      def initialize
+        old_initialize
+
+        @returning = []
+      end
     end
   end
 
