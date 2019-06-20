@@ -303,7 +303,7 @@ module Arel
         when 'savepoint_name'
           visit(arg)
         else
-          boom "Unknown defname `#{defname}`"
+          boom "Unknown defname `#{defname}` with defaction `#{defaction}`"
         end
       end
 
@@ -581,8 +581,8 @@ module Arel
         )
       end
 
-      def visit_RawStmt(context, stmt:, stmt_len: nil, stmt_location: nil)
-        visit(stmt, context)
+      def visit_RawStmt(context, **args)
+        visit(args.fetch(:stmt), context)
       end
 
       def visit_ResTarget(context, val: nil, name: nil)
@@ -957,10 +957,6 @@ module Arel
           Arel::Nodes::JsonPathGetField.new(left, right)
 
         # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSONB-OP-TABLE
-        when '@>'
-          Arel::Nodes::JsonbContains.new(left, right)
-        when '<@'
-          Arel::Nodes::JsonbContainedBy.new(left, right)
         when '?'
           Arel::Nodes::JsonbKeyExists.new(left, right)
         when '?|'

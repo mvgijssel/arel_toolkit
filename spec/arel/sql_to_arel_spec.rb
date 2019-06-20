@@ -322,7 +322,9 @@ describe 'Arel.sql_to_arel' do
         'SET "b" = "query"."a", "c" = 1.0, "d" = \'e`\', "f" = \'t\'::bool ' \
         'WHERE CURRENT OF some_cursor',
         'PgQuery::UPDATE_STMT'
-  visit 'all', 'UPDATE "some_table" SET "b" = 3', 'PgQuery::UPDATE_STMT'
+  visit 'all',
+        'UPDATE "some_table" SET "b" = \'t\'::bool, "c" = NULL, "d" = \'f\'::bool',
+        'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
@@ -420,6 +422,7 @@ describe 'Arel.sql_to_arel' do
           '3 || ARRAY[4, 5, 6], ' \
           'ARRAY[4, 5, 6] || 7, ' \
           "'192.168.1/24'::inet <<= '192.168.1/24'::inet, " \
+          "'192.168.1/24'::inet >>= '192.168.1/24'::inet, " \
           '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2, ' \
           '\'{"a": {"b":"foo"}}\'::json -> \'a\', ' \
           "'[1,2,3]'::json ->> 2, " \
