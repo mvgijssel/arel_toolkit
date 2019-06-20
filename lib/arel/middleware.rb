@@ -8,7 +8,7 @@ module Arel
     class << self
       def current_chain
         Thread.current[:arel_toolkit_middleware_current_chain] ||=
-          Arel::Middleware::Chain.new [], [], {}
+          Arel::Middleware::Chain.new
       end
 
       def current_chain=(new_chain)

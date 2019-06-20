@@ -1,14 +1,13 @@
 module Arel
   module Middleware
     class Chain
-      def initialize(internal_middleware, internal_models, internal_context)
+      def initialize(internal_middleware = [], internal_context = {})
         @internal_middleware = internal_middleware
-        @internal_models = internal_models
         @internal_context = internal_context
       end
 
       def execute(sql, binds)
-        arel = Arel.sql_to_arel(sql, models: internal_models, binds: binds)
+        arel = Arel.sql_to_arel(sql, binds: binds)
 
         internal_middleware.each do |middleware_item|
           arel = middleware_item.call(arel)
@@ -21,20 +20,16 @@ module Arel
         internal_middleware.dup
       end
 
-      def models(models, &block)
-        continue_chain(internal_middleware, models, internal_context, &block)
-      end
-
       def apply(middleware, &block)
-        continue_chain(middleware, internal_models, internal_context, &block)
+        continue_chain(middleware, internal_context, &block)
       end
 
       def only(middleware, &block)
-        continue_chain(middleware, internal_models, internal_context, &block)
+        continue_chain(middleware, internal_context, &block)
       end
 
       def none(&block)
-        continue_chain([], internal_models, internal_context, &block)
+        continue_chain([], internal_context, &block)
       end
 
       def except(without_middleware, &block)
@@ -42,19 +37,19 @@ module Arel
           middleware == without_middleware
         end
 
-        continue_chain(new_middleware, internal_models, internal_context, &block)
+        continue_chain(new_middleware, internal_context, &block)
       end
 
       def insert_before(new_middleware, existing_middleware, &block)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index, new_middleware)
-        continue_chain(updated_middleware, internal_models, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, &block)
       end
 
       def insert_after(new_middleware, existing_middleware, &block)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index + 1, new_middleware)
-        continue_chain(updated_middleware, internal_models, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, &block)
       end
 
       def context(new_context = nil, &block)
@@ -64,19 +59,18 @@ module Arel
 
         return internal_context if new_context.nil?
 
-        continue_chain(internal_middleware, internal_models, new_context, &block)
+        continue_chain(internal_middleware, new_context, &block)
       end
 
       protected
 
       attr_reader :internal_middleware
-      attr_reader :internal_models
       attr_reader :internal_context
 
       private
 
-      def continue_chain(middleware, models, context, &block)
-        new_chain = Arel::Middleware::Chain.new(middleware, models, context)
+      def continue_chain(middleware, context, &block)
+        new_chain = Arel::Middleware::Chain.new(middleware, context)
         maybe_execute_block(new_chain, &block)
       end
 

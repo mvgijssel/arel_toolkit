@@ -13,19 +13,18 @@ describe 'Arel.middleware' do
 
   it 'calls the middleware before executing the SQL query' do
     query = Post.where(id: 7)
-    arel = query.arel
+    query_arel = replace_active_record_arel(query.arel)
     middleware_sql = nil
 
     expect(SomeMiddleware)
       .to receive(:call)
       .and_wrap_original do |m, passed_arel|
-        # TODO: why doesn't eq work for a SelectManager?
-        expect(passed_arel.ast).to eq(arel.ast)
+        expect(passed_arel).to eq(query_arel)
 
         m.call(passed_arel)
       end
 
-    Arel.middleware.apply([SomeMiddleware]).models([Post]) do
+    Arel.middleware.apply([SomeMiddleware]) do
       middleware_sql = query.load.to_sql
     end
 
