@@ -333,7 +333,7 @@ describe 'Arel.sql_to_arel' do
         "SET TIME ZONE 'UTC'; " \
         'SET LOCAL TIME ZONE DEFAULT',
         'PgQuery::VARIABLE_SET_STMT'
-  visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
+  visit 'all', 'SHOW some_variable; SHOW TIME ZONE', 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
   visit 'all',
         'SELECT 1, ' \

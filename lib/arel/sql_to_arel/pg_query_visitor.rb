@@ -861,6 +861,10 @@ module Arel
         )
       end
 
+      def visit_VariableShowStmt(name:)
+        Arel::Nodes::VariableShow.new(name)
+      end
+
       def visit_WindowDef(
         partition_clause: [],
         order_clause: [],
