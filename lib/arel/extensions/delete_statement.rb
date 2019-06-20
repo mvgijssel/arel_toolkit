@@ -8,6 +8,13 @@ module Arel
       attr_accessor :using
       attr_accessor :with
       attr_accessor :returning
+
+      alias_method :old_initialize, :initialize
+      def initialize(relation = nil, wheres = [])
+        old_initialize(relation, wheres)
+
+        @returning = []
+      end
     end
   end
 
@@ -32,6 +39,8 @@ module Arel
           collector << WHERE
           collector = inject_join o.wheres, collector, AND
         end
+
+        binding.pry
 
         unless o.returning.empty?
           collector << ' RETURNING '
