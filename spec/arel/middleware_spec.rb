@@ -182,6 +182,14 @@ describe 'Arel.middleware' do
     expect(middleware).to eq([SomeMiddleware])
   end
 
+  it 'does not parse SQL when no middleware is present' do
+    expect(Arel).to_not receive(:sql_to_arel)
+
+    Arel.middleware.none do
+      Post.where(id: 1).load
+    end
+  end
+
   it 'calls PostgreSQLAdapter#execute' do
     expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
       .to receive(:execute).twice.and_call_original

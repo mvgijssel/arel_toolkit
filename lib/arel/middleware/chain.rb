@@ -6,7 +6,9 @@ module Arel
         @internal_context = internal_context
       end
 
-      def execute(sql, binds)
+      def execute(sql, binds = [])
+        return sql if internal_middleware.length.zero?
+
         arel = Arel.sql_to_arel(sql, binds: binds)
 
         internal_middleware.each do |middleware_item|
