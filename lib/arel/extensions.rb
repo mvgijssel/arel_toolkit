@@ -81,6 +81,7 @@ require 'arel/extensions/jsonb_contained_by'
 require 'arel/extensions/jsonb_key_exists'
 require 'arel/extensions/jsonb_any_key_exists'
 require 'arel/extensions/jsonb_all_key_exists'
+require 'arel/extensions/transaction'
 
 module Arel
   module Extensions

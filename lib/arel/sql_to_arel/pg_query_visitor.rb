@@ -311,6 +311,15 @@ module Arel
         Arel::Nodes::CurrentOfExpression.new(cursor_name)
       end
 
+      def visit_DefElem(defname:, arg:, defaction:)
+        case defname
+        when 'savepoint_name'
+          visit(arg)
+        else
+          boom "Unknown defname `#{defname}`"
+        end
+      end
+
       def visit_DeleteStmt(
         relation:,
         using_clause: nil,
@@ -798,6 +807,13 @@ module Arel
                    end
 
         generate_sublink(sub_link_type, subselect, testexpr, operator)
+      end
+
+      def visit_TransactionStmt(kind:, options: nil)
+        Arel::Nodes::Transaction.new(
+          kind,
+          (visit(options) if options),
+        )
       end
 
       def visit_TypeCast(arg:, type_name:)

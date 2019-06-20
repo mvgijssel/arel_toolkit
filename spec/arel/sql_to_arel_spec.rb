@@ -299,7 +299,14 @@ describe 'Arel.sql_to_arel' do
         'ARRAY(SELECT 1)' \
         '',
         'PgQuery::SUB_LINK'
-  visit 'pg', 'BEGIN; COMMIT', 'PgQuery::TRANSACTION_STMT'
+  visit 'all',
+        'BEGIN; ' \
+        'SAVEPOINT "my_savepoint"; ' \
+        'RELEASE SAVEPOINT "my_savepoint"; ' \
+        'ROLLBACK; ' \
+        'ROLLBACK TO "my_savepoint"; ' \
+        'COMMIT',
+        'PgQuery::TRANSACTION_STMT'
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
   visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
