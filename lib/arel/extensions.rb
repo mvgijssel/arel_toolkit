@@ -76,6 +76,11 @@ require 'arel/extensions/json_get_object'
 require 'arel/extensions/json_get_field'
 require 'arel/extensions/json_path_get_object'
 require 'arel/extensions/json_path_get_field'
+require 'arel/extensions/jsonb_contains'
+require 'arel/extensions/jsonb_contained_by'
+require 'arel/extensions/jsonb_key_exists'
+require 'arel/extensions/jsonb_any_key_exists'
+require 'arel/extensions/jsonb_all_key_exists'
 
 module Arel
   module Extensions

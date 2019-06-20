@@ -940,6 +940,18 @@ module Arel
         when '#>>'
           Arel::Nodes::JsonPathGetField.new(left, right)
 
+        # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSONB-OP-TABLE
+        when '@>'
+          Arel::Nodes::JsonbContains.new(left, right)
+        when '<@'
+          Arel::Nodes::JsonbContainedBy.new(left, right)
+        when '?'
+          Arel::Nodes::JsonbKeyExists.new(left, right)
+        when '?|'
+          Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+        when '?&'
+          Arel::Nodes::JsonbAllKeyExists.new(left, right)
+
         else
           boom "Unknown operator `#{operator}`"
         end

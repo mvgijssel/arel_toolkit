@@ -414,7 +414,12 @@ describe 'Arel.sql_to_arel' do
           "'[1,2,3]'::json ->> 2, " \
           '\'{"a":1,"b":2}\'::json ->> \'b\', ' \
           '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\', ' \
-          '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\''
+          '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\', ' \
+          '\'{"a":1, "b":2}\'::jsonb @> \'{"b":2}\'::jsonb, ' \
+          '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb, ' \
+          '\'{"a":1, "b":2}\'::jsonb ? \'b\', ' \
+          '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\'], ' \
+          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql
