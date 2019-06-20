@@ -40,8 +40,6 @@ module Arel
           collector = inject_join o.wheres, collector, AND
         end
 
-        binding.pry
-
         unless o.returning.empty?
           collector << ' RETURNING '
           collector = inject_join o.returning, collector, ', '
