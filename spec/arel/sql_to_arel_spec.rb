@@ -326,7 +326,13 @@ describe 'Arel.sql_to_arel' do
         'UPDATE "some_table" SET "b" = \'t\'::bool, "c" = NULL, "d" = \'f\'::bool',
         'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
-  visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
+  visit 'all',
+        'SET var1 TO 1; ' \
+        "SET LOCAL var2 TO 'some setting'; " \
+        'SET LOCAL var3 TO DEFAULT; ' \
+        "SET TIME ZONE 'UTC'; " \
+        'SET LOCAL TIME ZONE DEFAULT',
+        'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
   visit 'all',

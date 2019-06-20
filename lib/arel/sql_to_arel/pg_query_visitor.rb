@@ -852,6 +852,15 @@ module Arel
         update_manager
       end
 
+      def visit_VariableSetStmt(kind:, name:, args: [], is_local: false)
+        Arel::Nodes::VariableSet.new(
+          kind,
+          visit(args),
+          name,
+          is_local,
+        )
+      end
+
       def visit_WindowDef(
         partition_clause: [],
         order_clause: [],
