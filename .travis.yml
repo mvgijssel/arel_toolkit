@@ -23,6 +23,8 @@ deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
+  local_dir: ./coverage
   keep_history: true
-  # on:
-  #   branch: master
+  on:
+    all_branches: true
+    # branch: master
