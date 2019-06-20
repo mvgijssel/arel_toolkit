@@ -55,3 +55,5 @@ end
 
 class Post < ActiveRecord::Base
 end
+
+Arel::Middleware::Railtie.insert_postgresql
