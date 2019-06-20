@@ -27,11 +27,9 @@ module Arel
 
         Result.new visit(object, :top)
       rescue ::StandardError => e
-        if e.is_a?(Arel::SqlToArel::Error)
-          raise e.class, e.message, e.backtrace
-        else
-          boom e.message
-        end
+        raise e.class, e.message, e.backtrace if e.is_a?(Arel::SqlToArel::Error)
+
+        boom e.message
       end
 
       private
