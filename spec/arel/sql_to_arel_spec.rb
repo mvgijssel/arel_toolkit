@@ -87,8 +87,8 @@ describe 'Arel.sql_to_arel' do
         '20 BETWEEN SYMMETRIC 21 AND 19, ' \
         '22 NOT BETWEEN SYMMETRIC 24 AND 23',
         'PgQuery::A_EXPR'
-  visit 'all', 'SELECT field[1]', 'PgQuery::A_INDICES'
-  visit 'all', 'SELECT something[1]', 'PgQuery::A_INDIRECTION'
+  visit 'all', 'SELECT "field"[1]', 'PgQuery::A_INDICES'
+  visit 'all', 'SELECT "something"[1]', 'PgQuery::A_INDIRECTION'
   visit 'all', 'SELECT *', 'PgQuery::A_STAR'
   visit 'pg', 'GRANT INSERT, UPDATE ON mytable TO myuser', 'PgQuery::ACCESS_PRIV'
   visit 'all', 'SELECT 1 FROM "a" "b"', 'PgQuery::ALIAS'
@@ -431,9 +431,23 @@ describe 'Arel.sql_to_arel' do
     expect(parsed_sql).to eq 'SELECT SUM("a")'
   end
 
-  # # NOTE: should run at the end
-  # children.each do |child|
-  #   sql, pg_query_node = child.metadata[:block].binding.local_variable_get(:args)
-  #   puts sql, pg_query_node
-  # end
+  it 'translates an ActiveRecord query ast into the same ast and sql' do
+    query = Post.select(:id).where(public: true)
+    query_arel = replace_active_record_arel(query.arel)
+    sql = query_arel.to_sql
+    parsed_arel = Arel.sql_to_arel(sql)
+
+    expect(query_arel).to eq parsed_arel
+    expect(query_arel.to_sql).to eq parsed_arel.to_sql
+  end
+
+  it 'translates an ActiveRecord for a single where argument' do
+    query = Post.where(id: 7)
+    query_arel = replace_active_record_arel(query.arel)
+    sql = query_arel.to_sql
+    parsed_arel = Arel.sql_to_arel(sql)
+
+    expect(query_arel).to eq parsed_arel
+    expect(query_arel.to_sql).to eq parsed_arel.to_sql
+  end
 end
