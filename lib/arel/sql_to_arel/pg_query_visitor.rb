@@ -24,11 +24,8 @@ module Arel
         @object = tree
         @binds = binds
         @sql = sql
-        result = Result.new
 
-        visit(object, :top).each { |arel| result << arel }
-
-        result
+        Result.new visit(object, :top)
       end
 
       private
