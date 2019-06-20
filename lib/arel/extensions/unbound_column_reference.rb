@@ -1,5 +1,5 @@
 module Arel
-  module SqlToArel
+  module Nodes
     class UnboundColumnReference < ::Arel::Nodes::SqlLiteral; end
   end
 end

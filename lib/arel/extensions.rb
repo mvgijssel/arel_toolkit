@@ -82,6 +82,7 @@ require 'arel/extensions/jsonb_key_exists'
 require 'arel/extensions/jsonb_any_key_exists'
 require 'arel/extensions/jsonb_all_key_exists'
 require 'arel/extensions/transaction'
+require 'arel/extensions/unbound_column_reference'
 
 module Arel
   module Extensions

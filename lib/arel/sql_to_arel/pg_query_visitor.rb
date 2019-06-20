@@ -297,7 +297,7 @@ module Arel
           column_reference = visit(column_reference, :operator)
           table[column_reference]
         else
-          UnboundColumnReference.new visited_fields.join('.')
+          Arel::Nodes::UnboundColumnReference.new visited_fields.join('.')
         end
       end
 
