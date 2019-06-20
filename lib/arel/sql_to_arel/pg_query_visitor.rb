@@ -626,13 +626,7 @@ module Arel
           where_clause = if where_clause.is_a?(Arel::Nodes::And)
                            where_clause
                          else
-                           where_clause = if where_clause.is_a?(Array)
-                                            where_clause
-                                          else
-                                            [where_clause]
-                                          end
-
-                           Arel::Nodes::And.new(where_clause)
+                           Arel::Nodes::And.new([where_clause])
                          end
 
           select_core.wheres = [where_clause]
