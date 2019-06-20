@@ -16,13 +16,15 @@ module Arel
 
       attr_reader :object
       attr_reader :binds
+      attr_reader :sql
 
       def accept(sql, binds = [])
         tree = PgQuery.parse(sql).tree
-        raise 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
+        exception 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
         @object = tree.first
         @binds = binds
+        @sql = sql
         visit object, :top
       end
 
@@ -74,7 +76,7 @@ module Arel
           Arel::Nodes::NullIf.new(left, right)
 
         when PgQuery::AEXPR_OF
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/34'
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/34'
 
         when PgQuery::AEXPR_IN
           left = visit(lexpr)
@@ -93,7 +95,7 @@ module Arel
           escape = nil
 
           if right.is_a?(Array)
-            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+            exception "Don't know how to handle length `#{right.length}`" if right.length != 2
 
             right, escape = right
           end
@@ -112,7 +114,7 @@ module Arel
           escape = nil
 
           if right.is_a?(Array)
-            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+            exception "Don't know how to handle length `#{right.length}`" if right.length != 2
 
             right, escape = right
           end
@@ -131,7 +133,7 @@ module Arel
           escape = nil
 
           if right.is_a?(Array)
-            raise "Don't know how to handle length `#{right.length}`" if right.length != 2
+            exception "Don't know how to handle length `#{right.length}`" if right.length != 2
 
             right, escape = right
           end
@@ -166,10 +168,10 @@ module Arel
           Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
 
         when PgQuery::AEXPR_PAREN
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/35'
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/35'
 
         else
-          raise "Unknown Expr type `#{kind}`"
+          exception "Unknown Expr type `#{kind}`"
         end
       end
 
@@ -207,7 +209,7 @@ module Arel
                    Arel::Nodes::Not.new(args)
 
                  else
-                   raise "? Boolop -> #{boolop}"
+                   exception "? Boolop -> #{boolop}"
                  end
 
         if context
@@ -240,7 +242,7 @@ module Arel
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::Unknown.new)
 
         else
-          raise '?'
+          exception '?'
         end
       end
 
@@ -370,7 +372,7 @@ module Arel
                  args
 
                else
-                 raise "Don't know how to handle `#{function_names}`" if function_names.length > 1
+                 exception "Don't know how to handle `#{function_names}`" if function_names.length > 1
 
                  Arel::Nodes::NamedFunction.new(function_names.first, args)
                end
@@ -396,8 +398,8 @@ module Arel
       end
 
       def visit_IndexElem(name:, ordering:, nulls_ordering:)
-        raise "Unknown ordering `#{ordering}`" unless ordering.zero?
-        raise "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
+        exception "Unknown ordering `#{ordering}`" unless ordering.zero?
+        exception "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
 
         Arel.sql(name)
       end
@@ -494,7 +496,7 @@ module Arel
         when 1
           Arel::Nodes::Least.new visit(args)
         else
-          raise "Unknown Op -> #{op}"
+          exception "Unknown Op -> #{op}"
         end
       end
 
@@ -529,11 +531,11 @@ module Arel
       end
 
       def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)
-        raise 'https://github.com/mvgijssel/arel_toolkit/issues/36' unless is_rowsfrom == true
+        exception 'https://github.com/mvgijssel/arel_toolkit/issues/36' unless is_rowsfrom == true
 
         functions = functions.map do |function_array|
           function, empty_value = function_array
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/37' unless empty_value.nil?
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/37' unless empty_value.nil?
 
           visit(function)
         end
@@ -582,7 +584,7 @@ module Arel
             visit(val),
           )
         else
-          raise "Unknown context `#{context}`"
+          exception "Unknown context `#{context}`"
         end
       end
 
@@ -647,7 +649,7 @@ module Arel
         elsif distinct_clause.nil?
           select_core.set_quantifier = nil
         else
-          raise "Unknown distinct clause `#{distinct_clause}`"
+          exception "Unknown distinct clause `#{distinct_clause}`"
         end
 
         select_statement.limit = ::Arel::Nodes::Limit.new visit(limit_count) if limit_count
@@ -668,7 +670,7 @@ module Arel
               when Arel::Nodes::BindParam
                 value
               else
-                raise "Unknown value `#{value}`"
+                exception "Unknown value `#{value}`"
               end
             end
           end
@@ -698,7 +700,7 @@ module Arel
                   end
                 else
                   # https://www.postgresql.org/docs/10/queries-union.html
-                  raise "Unknown combining queries op `#{op}`"
+                  exception "Unknown combining queries op `#{op}`"
                 end
 
         unless union.nil?
@@ -766,7 +768,7 @@ module Arel
         operator = if oper_name
                      operator = visit(oper_name, :operator)
                      if operator.length > 1
-                       raise 'https://github.com/mvgijssel/arel_toolkit/issues/39'
+                       exception 'https://github.com/mvgijssel/arel_toolkit/issues/39'
                      end
 
                      operator.first
@@ -789,8 +791,8 @@ module Arel
 
         names = names.reject { |name| name == PG_CATALOG }
 
-        raise 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
-        raise 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
+        exception 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
+        exception 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
 
         names.first
       end
@@ -919,7 +921,7 @@ module Arel
           Arel::Nodes::ContainsEquals.new(left, right)
 
         else
-          raise "Unknown operator `#{operator}`"
+          exception "Unknown operator `#{operator}`"
         end
       end
 
@@ -1012,23 +1014,37 @@ module Arel
           generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
 
         when PgQuery::SUBLINK_TYPE_ROWCOMPARE
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/42'
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/42'
 
         when PgQuery::SUBLINK_TYPE_EXPR
           Arel::Nodes::Grouping.new(subselect)
 
         when PgQuery::SUBLINK_TYPE_MULTIEXPR
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/43'
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/43'
 
         when PgQuery::SUBLINK_TYPE_ARRAY
           Arel::Nodes::ArraySubselect.new(subselect)
 
         when PgQuery::SUBLINK_TYPE_CTE
-          raise 'https://github.com/mvgijssel/arel_toolkit/issues/44'
+          exception 'https://github.com/mvgijssel/arel_toolkit/issues/44'
 
         else
-          raise "Unknown sublinktype: #{type}"
+          exception "Unknown sublinktype: #{type}"
         end
+      end
+
+      def exception(message)
+        new_message = <<~STRING
+
+
+          SQL: #{sql}
+          AST: #{object}
+          BINDS: #{binds}
+          message: #{message}
+
+        STRING
+
+        raise new_message
       end
     end
   end
