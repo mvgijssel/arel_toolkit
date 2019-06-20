@@ -515,7 +515,9 @@ describe 'Arel.sql_to_arel' do
 
     expect do
       Arel.sql_to_arel(sql)
-    end.to raise_error(message)
+    end.to raise_error do |error|
+      expect(message).to eq error.message
+    end
   end
 
   it 'comparison operators work with Arel::Nodes::Quoted' do

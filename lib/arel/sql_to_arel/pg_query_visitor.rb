@@ -26,8 +26,12 @@ module Arel
         @sql = sql
 
         Result.new visit(object, :top)
-      rescue StandardError => e
-        boom e.message
+      rescue ::StandardError => e
+        if e.is_a?(Arel::SqlToArel::Error)
+          raise e.class, e.message, e.backtrace
+        else
+          boom e.message
+        end
       end
 
       private
@@ -1095,7 +1099,7 @@ module Arel
 
         STRING
 
-        raise new_message
+        raise Arel::SqlToArel::Error, new_message
       end
     end
   end

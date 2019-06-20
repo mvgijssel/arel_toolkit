@@ -21,7 +21,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
       expect do
         parser.accept(sql)
-      end.to raise_error(message)
+      end.to raise_error do |error|
+        expect(error.message).to eq message
+      end
     end
   end
 
