@@ -172,7 +172,8 @@ describe 'Arel.sql_to_arel' do
         "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
         'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
         'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
-        'some_function("a", \'b\', 1)',
+        'some_function("a", \'b\', 1), ' \
+        "position('content'::text in 'some content')",
         'PgQuery::FUNC_CALL'
   visit 'pg',
         "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
@@ -333,7 +334,7 @@ describe 'Arel.sql_to_arel' do
         "SET TIME ZONE 'UTC'; " \
         'SET LOCAL TIME ZONE DEFAULT',
         'PgQuery::VARIABLE_SET_STMT'
-  visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
+  visit 'all', 'SHOW some_variable; SHOW TIME ZONE', 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
   visit 'all',
         'SELECT 1, ' \
@@ -439,7 +440,11 @@ describe 'Arel.sql_to_arel' do
           '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb, ' \
           '\'{"a":1, "b":2}\'::jsonb ? \'b\', ' \
           '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\'], ' \
-          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
+          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\'], ' \
+          "'thomas' ~ '.*thomas.*', " \
+          "'thomas' ~* '.*Thomas.*', " \
+          "'thomas' !~ '.*Thomas.*', " \
+          "'thomas' !~* '.*vadim.*'"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql

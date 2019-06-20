@@ -392,6 +392,10 @@ module Arel
                  timezone, expression = args
                  [Arel::Nodes::AtTimeZone.new(expression, timezone)]
 
+               when [PG_CATALOG, 'position']
+                 string, substring = args
+                 [Arel::Nodes::Position.new(substring, string)]
+
                else
                  if function_names.length > 1
                    boom "Don't know how to handle function names `#{function_names}`"
@@ -861,6 +865,10 @@ module Arel
         )
       end
 
+      def visit_VariableShowStmt(name:)
+        Arel::Nodes::VariableShow.new(name)
+      end
+
       def visit_WindowDef(
         partition_clause: [],
         order_clause: [],
@@ -926,7 +934,11 @@ module Arel
         when '#'
           Arel::Nodes::BitwiseXor.new(left, right)
         when '~'
-          Arel::Nodes::BitwiseNot.new(right)
+          if left.nil?
+            Arel::Nodes::BitwiseNot.new(right)
+          else
+            Arel::Nodes::Regexp.new(left, right, true)
+          end
         when '<<'
           Arel::Nodes::BitwiseShiftLeft.new(left, right)
         when '>>'
@@ -979,6 +991,14 @@ module Arel
           Arel::Nodes::JsonbAnyKeyExists.new(left, right)
         when '?&'
           Arel::Nodes::JsonbAllKeyExists.new(left, right)
+
+        # https://www.postgresql.org/docs/9.3/functions-matching.html#FUNCTIONS-POSIX-TABLE
+        when '~*'
+          Arel::Nodes::Regexp.new(left, right, false)
+        when '!~'
+          Arel::Nodes::NotRegexp.new(left, right, true)
+        when '!~*'
+          Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
           boom "Unknown operator `#{operator}`"
