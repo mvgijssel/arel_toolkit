@@ -6,7 +6,7 @@
 # rubocop:disable Metrics/ParameterLists
 
 require 'pg_query'
-require_relative './frame_options'
+require_relative './pg_query_visitor/frame_options'
 
 module Arel
   module SqlToArel
