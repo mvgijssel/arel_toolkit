@@ -1011,7 +1011,11 @@ module Arel
           generate_operator(testexpr, Arel::Nodes::All.new(subselect), operator)
 
         when PgQuery::SUBLINK_TYPE_ANY
-          generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
+          if operator.nil?
+            Arel::Nodes::In.new(testexpr, subselect)
+          else
+            generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
+          end
 
         when PgQuery::SUBLINK_TYPE_ROWCOMPARE
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/42'

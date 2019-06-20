@@ -288,6 +288,7 @@ describe 'Arel.sql_to_arel' do
         'EXISTS (SELECT 1 = 1), ' \
         '"column" > ALL(SELECT AVG("amount") FROM "some_table"), ' \
         '"column" = ANY(SELECT "a" FROM "b"), ' \
+        '"column" IN (SELECT "a" FROM "b"), ' \
         '' \
         '1 < (SELECT 1), ' \
         '' \
