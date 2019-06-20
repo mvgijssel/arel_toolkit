@@ -598,10 +598,11 @@ module Arel
         when :insert
           name
         when :update
-          Arel::Nodes::Equality.new(
-            Arel.sql(visit_String(str: name)),
-            visit(val),
-          )
+          relation = nil
+          column = Arel::Attribute.new(relation, name)
+          value = visit(val)
+
+          Nodes::Assignment.new(Nodes::UnqualifiedColumn.new(column), value)
         else
           boom "Unknown context `#{context}`"
         end
