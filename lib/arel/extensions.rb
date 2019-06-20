@@ -84,6 +84,7 @@ require 'arel/extensions/unbound_column_reference'
 require 'arel/extensions/assignment'
 require 'arel/extensions/variable_set'
 require 'arel/extensions/variable_show'
+require 'arel/extensions/position'
 
 module Arel
   module Extensions

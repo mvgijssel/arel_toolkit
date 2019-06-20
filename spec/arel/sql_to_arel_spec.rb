@@ -172,7 +172,8 @@ describe 'Arel.sql_to_arel' do
         "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
         'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
         'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
-        'some_function("a", \'b\', 1)',
+        'some_function("a", \'b\', 1), ' \
+        "position('content'::text in 'some content')",
         'PgQuery::FUNC_CALL'
   visit 'pg',
         "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",

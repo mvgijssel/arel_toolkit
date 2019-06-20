@@ -392,6 +392,10 @@ module Arel
                  timezone, expression = args
                  [Arel::Nodes::AtTimeZone.new(expression, timezone)]
 
+               when [PG_CATALOG, 'position']
+                 string, substring = args
+                 [Arel::Nodes::Position.new(substring, string)]
+
                else
                  if function_names.length > 1
                    boom "Don't know how to handle function names `#{function_names}`"
