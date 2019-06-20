@@ -926,7 +926,11 @@ module Arel
         when '#'
           Arel::Nodes::BitwiseXor.new(left, right)
         when '~'
-          Arel::Nodes::BitwiseNot.new(right)
+          if left.nil?
+            Arel::Nodes::BitwiseNot.new(right)
+          else
+            Arel::Nodes::Regexp.new(left, right, true)
+          end
         when '<<'
           Arel::Nodes::BitwiseShiftLeft.new(left, right)
         when '>>'
@@ -979,6 +983,14 @@ module Arel
           Arel::Nodes::JsonbAnyKeyExists.new(left, right)
         when '?&'
           Arel::Nodes::JsonbAllKeyExists.new(left, right)
+
+        # https://www.postgresql.org/docs/9.3/functions-matching.html#FUNCTIONS-POSIX-TABLE
+        when '~*'
+          Arel::Nodes::Regexp.new(left, right, false)
+        when '!~'
+          Arel::Nodes::NotRegexp.new(left, right, true)
+        when '!~*'
+          Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
           boom "Unknown operator `#{operator}`"

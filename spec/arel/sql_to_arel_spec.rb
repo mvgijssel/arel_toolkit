@@ -439,7 +439,11 @@ describe 'Arel.sql_to_arel' do
           '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb, ' \
           '\'{"a":1, "b":2}\'::jsonb ? \'b\', ' \
           '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\'], ' \
-          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
+          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\'], ' \
+          "'thomas' ~ '.*thomas.*', " \
+          "'thomas' ~* '.*Thomas.*', " \
+          "'thomas' !~ '.*Thomas.*', " \
+          "'thomas' !~* '.*vadim.*'"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql
