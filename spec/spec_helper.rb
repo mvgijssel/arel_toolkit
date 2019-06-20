@@ -1,7 +1,8 @@
 require 'simplecov'
 require 'simplecov-console'
-SimpleCov.formatter = SimpleCov::Formatter::Console
-SimpleCov.start
+SimpleCov.start do
+  add_filter %r{^/spec/}
+end
 
 require 'bundler/setup'
 require 'pry'

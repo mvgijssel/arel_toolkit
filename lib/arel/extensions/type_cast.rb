@@ -12,6 +12,10 @@ module Arel
         @arg = arg
         @type_name = type_name
       end
+
+      def ==(other)
+        arg == other.arg && type_name == other.type_name
+      end
     end
   end
 
