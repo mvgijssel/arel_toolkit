@@ -1,4 +1,30 @@
 describe Arel::SqlToArel::PgQueryVisitor do
+  describe 'accept' do
+    it 'raises nice exceptions for all unknown errors' do
+      sql = 'SELECT posts.id AS id FROM posts'
+
+      parser = described_class.new
+      ast = PgQuery.parse(sql).tree
+      message = <<~STRING
+
+
+        SQL: #{sql}
+        AST: #{ast}
+        BINDS: []
+        message: uh oh
+
+      STRING
+
+      expect(parser).to receive(:visit_ResTarget).and_wrap_original do |_m, *_args|
+        raise 'uh oh'
+      end
+
+      expect do
+        parser.accept(sql)
+      end.to raise_error(message)
+    end
+  end
+
   describe 'visit_A_Expr' do
     it 'raises an exception with a PgQuery::AEXPR_OF statement' do
       expect do

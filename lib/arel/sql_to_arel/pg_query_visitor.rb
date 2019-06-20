@@ -26,6 +26,8 @@ module Arel
         @sql = sql
 
         Result.new visit(object, :top)
+      rescue StandardError => e
+        boom e.message
       end
 
       private
