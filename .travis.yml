@@ -9,19 +9,20 @@ notifications:
   email: false
 rvm:
   - 2.5.3
-jobs:
-  include:
-    - stage: deploy
-      script:
-        - dpl --verbose --provider=pages --github-token=A_TOKEN --local-dir=coverage
-    - stage: test
-      before_script:
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-      before_install:
-        - gem install bundler -v 2.0.1
-      script:
-        - bundle exec rspec spec
-      after_script:
-        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+before_install:
+  - gem install bundler -v 2.0.1
+script:
+  - bundle exec rspec spec
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  keep_history: true
+  # on:
+  #   branch: master
