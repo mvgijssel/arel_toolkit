@@ -9,10 +9,16 @@ module Arel
             execute_without_arel_middleware(sql, name)
           end
 
-          alias_method :execute_and_clear_without_arel_middleware, :execute_and_clear
-          def execute_and_clear(sql, name, binds, prepare: false, &block)
+          alias_method :exec_no_cache_without_arel_middleware, :exec_no_cache
+          def exec_no_cache(sql, name, binds)
             sql = Arel::Middleware.current_chain.execute(sql, binds)
-            execute_and_clear_without_arel_middleware(sql, name, binds, prepare: prepare, &block)
+            exec_no_cache_without_arel_middleware(sql, name, binds)
+          end
+
+          alias_method :exec_cache_without_arel_middleware, :exec_cache
+          def exec_cache(sql, name, binds)
+            sql = Arel::Middleware.current_chain.execute(sql, binds)
+            exec_cache_without_arel_middleware(sql, name, binds)
           end
         end
       end

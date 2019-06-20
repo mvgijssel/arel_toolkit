@@ -182,6 +182,37 @@ describe 'Arel.middleware' do
     expect(middleware).to eq([SomeMiddleware])
   end
 
-  it 'handles removed bind values' do
+  it 'calls PostgreSQLAdapter#execute' do
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:execute).twice.and_call_original
+
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:execute_without_arel_middleware).twice.and_call_original
+
+    Post.create!
+  end
+
+  it 'calls PostgreSQLAdapter#exec_no_cache' do
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:exec_no_cache).twice.and_call_original
+
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:exec_no_cache_without_arel_middleware).twice.and_call_original
+
+    Post.where(id: [1, 2]).load # IN statements are not prepared
+
+    ActiveRecord::Base.connection.unprepared_statement do
+      Post.where(id: 1).load
+    end
+  end
+
+  it 'calls PostgreSQLAdapter#exec_cache' do
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:exec_cache).and_call_original
+
+    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+      .to receive(:exec_cache_without_arel_middleware).and_call_original
+
+    Post.where(id: 1).load
   end
 end
