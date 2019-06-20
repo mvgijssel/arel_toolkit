@@ -11,6 +11,9 @@ rvm:
   - 2.5.3
 jobs:
   include:
+    - stage: deploy
+      script:
+        - dpl --verbose --provider=pages --github-token=A_TOKEN --local-dir=coverage
     - stage: test
       before_script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -22,6 +25,3 @@ jobs:
         - bundle exec rspec spec
       after_script:
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-    - stage: deploy
-      script:
-        echo "kerk"
