@@ -20,7 +20,7 @@ module Arel
       def visit_Arel_Nodes_AtTimeZone(o, collector)
         visit o.expr, collector
         collector << ' AT TIME ZONE '
-        collector << o.timezone
+        visit o.timezone, collector
       end
     end
   end

@@ -9,7 +9,8 @@ module Arel
         when Arel::Nodes::TypeCast,
              Arel::Nodes::SetToDefault,
              Arel::Nodes::Grouping,
-             Arel::Nodes::Row
+             Arel::Nodes::Row,
+             Arel::Nodes::Quoted
 
           collector = visit o.left, collector
           collector << ' = '

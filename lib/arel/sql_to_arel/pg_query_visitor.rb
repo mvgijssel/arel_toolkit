@@ -695,6 +695,8 @@ module Arel
                 Arel.sql(value.to_sql)
               when Arel::Nodes::BindParam
                 value
+              when Arel::Nodes::Quoted
+                value.value
               else
                 boom "Unknown value `#{value}`"
               end
@@ -782,7 +784,7 @@ module Arel
         when :operator
           str
         when :const
-          Arel.sql "'#{str}'"
+          Arel::Nodes.build_quoted str
         else
           "\"#{str}\""
         end

@@ -493,6 +493,13 @@ describe 'Arel.sql_to_arel' do
     expect(query.arel.to_sql).to eq parsed_arel.to_sql
   end
 
+  it 'translates double single quotes correctly' do
+    sql = "SELECT 1 FROM \"posts\" WHERE \"id\" = 'a''bc123'"
+    result = Arel.sql_to_arel(sql)
+
+    expect(result.to_sql).to eq sql
+  end
+
   it 'throws a nice error message' do
     sql = 'SELECT 1=1'
     result = PgQuery.parse(sql)
