@@ -428,24 +428,22 @@ describe 'Arel.sql_to_arel' do
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
-    query = Post.select(:id).where(id: 7, title: 'kerk', content: 3.0, public: true)
-    sql = query.to_sql
+    query = Post.select(:id).where(public: true)
+    query_arel = replace_active_record_arel(query.arel)
+    sql = query_arel.to_sql
+    parsed_arel = Arel.sql_to_arel(sql)
 
-    parsed_arel = Arel.sql_to_arel(sql, models: [Post])
-
-    # TODO: why doesn't eq work for a SelectManager?
-    expect(query.arel.ast).to eq parsed_arel.ast
-    expect(query.arel.to_sql).to eq parsed_arel.to_sql
+    expect(query_arel).to eq parsed_arel
+    expect(query_arel.to_sql).to eq parsed_arel.to_sql
   end
 
   it 'translates an ActiveRecord for a single where argument' do
     query = Post.where(id: 7)
-    sql = query.to_sql
+    query_arel = replace_active_record_arel(query.arel)
+    sql = query_arel.to_sql
+    parsed_arel = Arel.sql_to_arel(sql)
 
-    parsed_arel = Arel.sql_to_arel(sql, models: [Post])
-
-    # TODO: why doesn't eq work for a SelectManager?
-    expect(query.arel.ast).to eq parsed_arel.ast
-    expect(query.arel.to_sql).to eq parsed_arel.to_sql
+    expect(query_arel).to eq parsed_arel
+    expect(query_arel.to_sql).to eq parsed_arel.to_sql
   end
 end

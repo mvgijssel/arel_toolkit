@@ -176,7 +176,7 @@ module Arel
       end
 
       def visit_A_Indirection(arg:, indirection:)
-        Arel::Nodes::Indirection.new(visit(arg, :operator), visit(indirection, :operator))
+        Arel::Nodes::Indirection.new(visit(arg), visit(indirection, :operator))
       end
 
       def visit_A_Star
@@ -270,7 +270,18 @@ module Arel
       end
 
       def visit_ColumnRef(context = nil, fields:)
-        UnboundColumnReference.new visit(fields, context).join('.')
+        visited_fields = visit(fields)
+
+        if fields.length == 2
+          table_reference, column_reference = fields
+          table_reference = visit(table_reference, :operator)
+          table = Arel::Table.new(table_reference)
+
+          column_reference = visit(column_reference, :operator)
+          table[column_reference]
+        else
+          UnboundColumnReference.new visited_fields.join('.')
+        end
       end
 
       def visit_CommonTableExpr(ctename:, ctequery:)
@@ -600,11 +611,33 @@ module Arel
         select_statement = select_manager.ast
 
         froms, join_sources = generate_sources(from_clause)
+        if froms
+          froms = froms.first if froms.length == 1
+          select_core.froms = froms
+        end
+
         select_core.from = froms if froms
         select_core.source.right = join_sources
 
         select_core.projections = visit(target_list, :select) if target_list
-        select_core.wheres = [visit(where_clause)] if where_clause
+
+        if where_clause
+          where_clause = visit(where_clause)
+          where_clause = if where_clause.is_a?(Arel::Nodes::And)
+                           where_clause
+                         else
+                           where_clause = if where_clause.is_a?(Array)
+                                            where_clause
+                                          else
+                                            [where_clause]
+                                          end
+
+                           Arel::Nodes::And.new(where_clause)
+                         end
+
+          select_core.wheres = [where_clause]
+        end
+
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
