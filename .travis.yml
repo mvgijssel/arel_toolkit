@@ -26,5 +26,4 @@ deploy:
   local_dir: ./coverage
   keep_history: true
   on:
-    all_branches: true
-    # branch: master
+    branch: master
