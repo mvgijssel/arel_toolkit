@@ -6,7 +6,7 @@
 # rubocop:disable Metrics/ParameterLists
 
 require 'pg_query'
-require_relative './frame_options'
+require_relative './pg_query_visitor/frame_options'
 
 module Arel
   module SqlToArel
@@ -20,12 +20,16 @@ module Arel
 
       def accept(sql, binds = [])
         tree = PgQuery.parse(sql).tree
-        boom 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
-        @object = tree.first
+        @object = tree
         @binds = binds
         @sql = sql
-        visit object, :top
+
+        Result.new visit(object, :top)
+      rescue ::StandardError => e
+        raise e.class, e.message, e.backtrace if e.is_a?(Arel::SqlToArel::Error)
+
+        boom e.message
       end
 
       private
@@ -284,7 +288,7 @@ module Arel
           column_reference = visit(column_reference, :operator)
           table[column_reference]
         else
-          UnboundColumnReference.new visited_fields.join('.')
+          Arel::Nodes::UnboundColumnReference.new visited_fields.join('.')
         end
       end
 
@@ -296,6 +300,15 @@ module Arel
 
       def visit_CurrentOfExpr(cursor_name:)
         Arel::Nodes::CurrentOfExpression.new(cursor_name)
+      end
+
+      def visit_DefElem(defname:, arg:, defaction:)
+        case defname
+        when 'savepoint_name'
+          visit(arg)
+        else
+          boom "Unknown defname `#{defname}` with defaction `#{defaction}`"
+        end
       end
 
       def visit_DeleteStmt(
@@ -371,8 +384,18 @@ module Arel
                when [PG_CATALOG, 'similar_escape']
                  args
 
+               when [PG_CATALOG, 'date_part']
+                 field, expression = args
+                 [Arel::Nodes::ExtractFrom.new(expression, field)]
+
+               when [PG_CATALOG, 'timezone']
+                 timezone, expression = args
+                 [Arel::Nodes::AtTimeZone.new(expression, timezone)]
+
                else
-                 boom "Don't know how to handle `#{function_names}`" if function_names.length > 1
+                 if function_names.length > 1
+                   boom "Don't know how to handle function names `#{function_names}`"
+                 end
 
                  Arel::Nodes::NamedFunction.new(function_names.first, args)
                end
@@ -433,7 +456,7 @@ module Arel
         end
 
         insert_statement.returning = visit(returning_list, :select)
-        insert_statement.on_conflict = visit(on_conflict_clause) if on_conflict_clause
+        insert_statement.conflict = visit(on_conflict_clause) if on_conflict_clause
         insert_manager
       end
 
@@ -562,8 +585,8 @@ module Arel
         )
       end
 
-      def visit_RawStmt(context, stmt:)
-        visit(stmt, context)
+      def visit_RawStmt(context, **args)
+        visit(args.fetch(:stmt), context)
       end
 
       def visit_ResTarget(context, val: nil, name: nil)
@@ -579,10 +602,11 @@ module Arel
         when :insert
           name
         when :update
-          Arel::Nodes::Equality.new(
-            Arel.sql(visit_String(str: name)),
-            visit(val),
-          )
+          relation = nil
+          column = Arel::Attribute.new(relation, name)
+          value = visit(val)
+
+          Nodes::Assignment.new(Nodes::UnqualifiedColumn.new(column), value)
         else
           boom "Unknown context `#{context}`"
         end
@@ -669,6 +693,8 @@ module Arel
                 Arel.sql(value.to_sql)
               when Arel::Nodes::BindParam
                 value
+              when Arel::Nodes::Quoted
+                value.value
               else
                 boom "Unknown value `#{value}`"
               end
@@ -756,7 +782,7 @@ module Arel
         when :operator
           str
         when :const
-          Arel.sql "'#{str}'"
+          Arel::Nodes.build_quoted str
         else
           "\"#{str}\""
         end
@@ -775,6 +801,13 @@ module Arel
                    end
 
         generate_sublink(sub_link_type, subselect, testexpr, operator)
+      end
+
+      def visit_TransactionStmt(kind:, options: nil)
+        Arel::Nodes::Transaction.new(
+          kind,
+          (visit(options) if options),
+        )
       end
 
       def visit_TypeCast(arg:, type_name:)
@@ -817,6 +850,15 @@ module Arel
         update_statement.with = visit(with_clause) if with_clause
         update_statement.returning = visit(returning_list, :select)
         update_manager
+      end
+
+      def visit_VariableSetStmt(kind:, name:, args: [], is_local: false)
+        Arel::Nodes::VariableSet.new(
+          kind,
+          visit(args),
+          name,
+          is_local,
+        )
       end
 
       def visit_WindowDef(
@@ -919,6 +961,24 @@ module Arel
           Arel::Nodes::ContainedWithinEquals.new(left, right)
         when '>>='
           Arel::Nodes::ContainsEquals.new(left, right)
+
+        # https://www.postgresql.org/docs/9.4/functions-json.html
+        when '->'
+          Arel::Nodes::JsonGetObject.new(left, right)
+        when '->>'
+          Arel::Nodes::JsonGetField.new(left, right)
+        when '#>'
+          Arel::Nodes::JsonPathGetObject.new(left, right)
+        when '#>>'
+          Arel::Nodes::JsonPathGetField.new(left, right)
+
+        # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSONB-OP-TABLE
+        when '?'
+          Arel::Nodes::JsonbKeyExists.new(left, right)
+        when '?|'
+          Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+        when '?&'
+          Arel::Nodes::JsonbAllKeyExists.new(left, right)
 
         else
           boom "Unknown operator `#{operator}`"
@@ -1048,7 +1108,7 @@ module Arel
 
         STRING
 
-        raise new_message
+        raise Arel::SqlToArel::Error, new_message
       end
     end
   end

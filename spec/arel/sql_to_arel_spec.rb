@@ -169,6 +169,9 @@ describe 'Arel.sql_to_arel' do
         'SUM("a") WITHIN GROUP (ORDER BY "a"), ' \
         'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
         'COUNT(DISTINCT "some_column"), ' \
+        "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
+        'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
+        'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
         'some_function("a", \'b\', 1)',
         'PgQuery::FUNC_CALL'
   visit 'pg',
@@ -296,7 +299,14 @@ describe 'Arel.sql_to_arel' do
         'ARRAY(SELECT 1)' \
         '',
         'PgQuery::SUB_LINK'
-  visit 'pg', 'BEGIN; COMMIT', 'PgQuery::TRANSACTION_STMT'
+  visit 'all',
+        'BEGIN; ' \
+        'SAVEPOINT "my_savepoint"; ' \
+        'RELEASE SAVEPOINT "my_savepoint"; ' \
+        'ROLLBACK; ' \
+        'ROLLBACK TO "my_savepoint"; ' \
+        'COMMIT',
+        'PgQuery::TRANSACTION_STMT'
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
   visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
@@ -312,9 +322,17 @@ describe 'Arel.sql_to_arel' do
         'SET "b" = "query"."a", "c" = 1.0, "d" = \'e`\', "f" = \'t\'::bool ' \
         'WHERE CURRENT OF some_cursor',
         'PgQuery::UPDATE_STMT'
-  visit 'all', 'UPDATE "some_table" SET "b" = 3', 'PgQuery::UPDATE_STMT'
+  visit 'all',
+        'UPDATE "some_table" SET "b" = \'t\'::bool, "c" = NULL, "d" = \'f\'::bool',
+        'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
-  visit 'pg', 'SET LOCAL some_variable TO some_value', 'PgQuery::VARIABLE_SET_STMT'
+  visit 'all',
+        'SET var1 TO 1; ' \
+        "SET LOCAL var2 TO 'some setting'; " \
+        'SET LOCAL var3 TO DEFAULT; ' \
+        "SET TIME ZONE 'UTC'; " \
+        'SET LOCAL TIME ZONE DEFAULT',
+        'PgQuery::VARIABLE_SET_STMT'
   visit 'pg', 'SHOW some_variable', 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'pg', 'CREATE VIEW some_view AS (SELECT 1)', 'PgQuery::VIEW_STMT'
   visit 'all',
@@ -339,7 +357,8 @@ describe 'Arel.sql_to_arel' do
 
   it 'returns an Arel::SelectManager for only the top level SELECT' do
     sql = 'SELECT 1, (SELECT 2)'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::SelectManager
 
@@ -354,21 +373,24 @@ describe 'Arel.sql_to_arel' do
 
   it 'returns an Arel::InsertManager' do
     sql = 'INSERT INTO a ("b") VALUES (1)'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::InsertManager
   end
 
   it 'returns an Arel::UpdateManager' do
     sql = 'UPDATE "some_table" SET "some_column" = 2.0'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::UpdateManager
   end
 
   it 'returns an Arel::DeleteManager' do
     sql = 'DELETE FROM "some_table"'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::DeleteManager
   end
@@ -406,7 +428,18 @@ describe 'Arel.sql_to_arel' do
           '3 || ARRAY[4, 5, 6], ' \
           'ARRAY[4, 5, 6] || 7, ' \
           "'192.168.1/24'::inet <<= '192.168.1/24'::inet, " \
-          "'192.168.1/24'::inet >>= '192.168.1/24::inet'"
+          "'192.168.1/24'::inet >>= '192.168.1/24'::inet, " \
+          '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2, ' \
+          '\'{"a": {"b":"foo"}}\'::json -> \'a\', ' \
+          "'[1,2,3]'::json ->> 2, " \
+          '\'{"a":1,"b":2}\'::json ->> \'b\', ' \
+          '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\', ' \
+          '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\', ' \
+          '\'{"a":1, "b":2}\'::jsonb @> \'{"b":2}\'::jsonb, ' \
+          '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb, ' \
+          '\'{"a":1, "b":2}\'::jsonb ? \'b\', ' \
+          '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\'], ' \
+          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql
@@ -440,7 +473,8 @@ describe 'Arel.sql_to_arel' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
     sql = query_arel.to_sql
-    parsed_arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    parsed_arel = result.first
 
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
@@ -450,7 +484,8 @@ describe 'Arel.sql_to_arel' do
     query = Post.where(id: 7)
     query_arel = replace_active_record_arel(query.arel)
     sql = query_arel.to_sql
-    parsed_arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    parsed_arel = result.first
 
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
@@ -462,6 +497,13 @@ describe 'Arel.sql_to_arel' do
     parsed_arel = Arel.sql_to_arel(sql, binds: binds)
 
     expect(query.arel.to_sql).to eq parsed_arel.to_sql
+  end
+
+  it 'translates double single quotes correctly' do
+    sql = "SELECT 1 FROM \"posts\" WHERE \"id\" = 'a''bc123'"
+    result = Arel.sql_to_arel(sql)
+
+    expect(result.to_sql).to eq sql
   end
 
   it 'throws a nice error message' do
@@ -478,7 +520,7 @@ describe 'Arel.sql_to_arel' do
 
 
       SQL: SELECT 1=1
-      AST: #{ast}
+      AST: [#{ast}]
       BINDS: []
       message: Unknown Expr type `-1`
 
@@ -486,7 +528,9 @@ describe 'Arel.sql_to_arel' do
 
     expect do
       Arel.sql_to_arel(sql)
-    end.to raise_error(message)
+    end.to raise_error do |error|
+      expect(message).to eq error.message
+    end
   end
 
   it 'comparison operators work with Arel::Nodes::Quoted' do

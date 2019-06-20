@@ -9,13 +9,15 @@ module Arel
       def execute(sql, binds = [])
         return sql if internal_middleware.length.zero?
 
-        arel = Arel.sql_to_arel(sql, binds: binds)
+        result = Arel.sql_to_arel(sql, binds: binds)
 
         internal_middleware.each do |middleware_item|
-          arel = middleware_item.call(arel)
+          result = result.map do |arel|
+            middleware_item.call(arel)
+          end
         end
 
-        arel.to_sql
+        result.to_sql
       end
 
       def current

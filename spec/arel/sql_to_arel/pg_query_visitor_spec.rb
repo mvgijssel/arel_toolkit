@@ -1,13 +1,28 @@
 describe Arel::SqlToArel::PgQueryVisitor do
   describe 'accept' do
-    it 'raises an exception with more than 1 SQL statement' do
-      sql = <<~SQL
-        SELECT 1; -- statement 1
-        SELECT 2; -- statement 2
-      SQL
+    it 'raises nice exceptions for all unknown errors' do
+      sql = 'SELECT posts.id AS id FROM posts'
 
-      expect { described_class.new.accept(sql) }.to raise_error do |error|
-        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/33')
+      parser = described_class.new
+      ast = PgQuery.parse(sql).tree
+      message = <<~STRING
+
+
+        SQL: #{sql}
+        AST: #{ast}
+        BINDS: []
+        message: uh oh
+
+      STRING
+
+      expect(parser).to receive(:visit_ResTarget).and_wrap_original do |_m, *_args|
+        raise 'uh oh'
+      end
+
+      expect do
+        parser.accept(sql)
+      end.to raise_error do |error|
+        expect(error.message).to eq message
       end
     end
   end

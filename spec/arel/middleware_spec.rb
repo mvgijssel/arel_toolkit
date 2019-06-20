@@ -227,4 +227,59 @@ describe 'Arel.middleware' do
       Post.where(id: 1).load
     end
   end
+
+  it 'has the same SQL before and after middleware for UPDATE' do
+    post = Post.create!(title: 'some title', content: 'some content', public: false)
+
+    expect(ActiveRecord::Base.connection)
+      .to receive(:exec_no_cache)
+      .and_wrap_original do |m, sql, name, binds|
+
+      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
+
+      expect(middleware_sql).to eq(sql)
+
+      m.call(sql, name, binds)
+    end
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      post.update title: nil, content: nil, public: true
+    end
+  end
+
+  it 'has the same SQL before and after middleware for INSERT' do
+    expect(ActiveRecord::Base.connection)
+      .to receive(:exec_no_cache)
+      .and_wrap_original do |m, sql, name, binds|
+
+      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
+
+      expect(middleware_sql).to eq(sql)
+
+      m.call(sql, name, binds)
+    end
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      Post.create!(title: 'some title', content: 'some content')
+    end
+  end
+
+  it 'has the same SQL before and after middleware for DELETE' do
+    post = Post.create!(title: 'some title', content: 'some content')
+
+    expect(ActiveRecord::Base.connection)
+      .to receive(:exec_no_cache)
+      .and_wrap_original do |m, sql, name, binds|
+
+      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
+
+      expect(middleware_sql).to eq(sql)
+
+      m.call(sql, name, binds)
+    end
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      post.destroy!
+    end
+  end
 end

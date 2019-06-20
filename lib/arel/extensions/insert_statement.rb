@@ -6,7 +6,7 @@ module Arel
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     Arel::Nodes::InsertStatement.class_eval do
       attr_accessor :with
-      attr_accessor :on_conflict
+      attr_accessor :conflict
       attr_accessor :override
       attr_accessor :returning
 
@@ -62,7 +62,7 @@ module Arel
           collector = inject_join o.returning, collector, ', '
         end
 
-        visit(o.on_conflict, collector) if o.on_conflict
+        visit(o.conflict, collector) if o.conflict
         collector
       end
       # rubocop:enable Metrics/CyclomaticComplexity
