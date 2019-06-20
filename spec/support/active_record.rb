@@ -1,4 +1,4 @@
-# TODO: replace this with proper arel transformer
+# https://github.com/mvgijssel/arel_toolkit/issues/63
 def replace_active_record_arel(arel)
   arel.ast.each do |node|
     case node
