@@ -1,3 +1,4 @@
+require 'arel/sql_to_arel/result'
 require 'arel/sql_to_arel/pg_query_visitor'
 
 module Arel
