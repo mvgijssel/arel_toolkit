@@ -452,4 +452,12 @@ describe 'Arel.sql_to_arel' do
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
   end
+
+  it 'handles binds from ActiveRecord' do
+    query = Post.where(id: 7)
+    sql, binds = ActiveRecord::Base.connection.send(:to_sql_and_binds, query)
+    parsed_arel = Arel.sql_to_arel(sql, binds: binds)
+
+    expect(query.arel.to_sql).to eq parsed_arel.to_sql
+  end
 end
