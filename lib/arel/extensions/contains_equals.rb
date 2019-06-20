@@ -3,15 +3,15 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.1/functions-array.html
-    class Overlap < Arel::Nodes::Binary
+    # https://www.postgresql.org/docs/9.3/functions-net.html
+    class ContainsEquals < Arel::Nodes::Binary
     end
   end
 
   module Visitors
     class ToSql
-      def visit_Arel_Nodes_Overlap(o, collector)
-        infix_value o, collector, ' && '
+      def visit_Arel_Nodes_ContainsEquals(o, collector)
+        infix_value o, collector, ' >>= '
       end
     end
   end

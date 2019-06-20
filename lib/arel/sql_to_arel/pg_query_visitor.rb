@@ -912,6 +912,12 @@ module Arel
         when '||'
           Arel::Nodes::Concat.new(left, right)
 
+        # https://www.postgresql.org/docs/9.3/functions-net.html
+        when '<<='
+          Arel::Nodes::ContainedWithinEquals.new(left, right)
+        when '>>='
+          Arel::Nodes::ContainsEquals.new(left, right)
+
         else
           raise "Unknown operator `#{operator}`"
         end
