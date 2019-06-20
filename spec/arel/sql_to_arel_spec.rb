@@ -467,7 +467,7 @@ describe 'Arel.sql_to_arel' do
     ast = result.tree.first
 
     # Make the AST invalid
-    ast["RawStmt"]["stmt"]["SelectStmt"]["targetList"][0]["ResTarget"]["val"]["A_Expr"]["kind"] = -1
+    ast['RawStmt']['stmt']['SelectStmt']['targetList'][0]['ResTarget']['val']['A_Expr']['kind'] = -1
 
     expect(PgQuery).to receive(:parse).with(sql).and_return(result)
 
