@@ -6,8 +6,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
         SELECT 2; -- statement 2
       SQL
 
-      expect { described_class.new.accept(sql) }
-        .to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/33')
+      expect { described_class.new.accept(sql) }.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/33')
+      end
     end
   end
 
@@ -15,13 +16,17 @@ describe Arel::SqlToArel::PgQueryVisitor do
     it 'raises an exception with a PgQuery::AEXPR_OF statement' do
       expect do
         described_class.new.send(:visit_A_Expr, kind: PgQuery::AEXPR_OF, name: 'name')
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/34')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/34')
+      end
     end
 
     it 'raises an exception with a PgQuery::AEXPR_PAREN statement' do
       expect do
         described_class.new.send(:visit_A_Expr, kind: PgQuery::AEXPR_PAREN, name: 'name')
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/35')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/35')
+      end
     end
   end
 
@@ -29,14 +34,18 @@ describe Arel::SqlToArel::PgQueryVisitor do
     it 'raises an exception when is_rowsfrom is not true' do
       expect do
         described_class.new.send(:visit_RangeFunction, is_rowsfrom: false, functions: [])
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/36')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/36')
+      end
     end
 
     it 'raises an exception when functions does not contain nil' do
       functions = [%w[some_function something_else]]
       expect do
         described_class.new.send(:visit_RangeFunction, is_rowsfrom: true, functions: functions)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/37')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/37')
+      end
     end
   end
 
@@ -53,7 +62,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
           sub_link_type: 1,
           oper_name: oper_name,
         )
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/39')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/39')
+      end
     end
   end
 
@@ -61,7 +72,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
     it 'raises an exception when typemod is not -1' do
       expect do
         described_class.new.send(:visit_TypeName, names: [], typemod: 1)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/40')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/40')
+      end
     end
 
     it 'raises an exception when names contains more than 2 items' do
@@ -73,7 +86,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
       expect do
         described_class.new.send(:visit_TypeName, names: names, typemod: -1)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/41')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/41')
+      end
     end
   end
 
@@ -81,19 +96,25 @@ describe Arel::SqlToArel::PgQueryVisitor do
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_ROWCOMPARE' do
       expect do
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_ROWCOMPARE, nil, nil, nil)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/42')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/42')
+      end
     end
 
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_MULTIEXPR' do
       expect do
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_MULTIEXPR, nil, nil, nil)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/43')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/43')
+      end
     end
 
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_ROWCOMPARE' do
       expect do
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_CTE, nil, nil, nil)
-      end.to raise_error('https://github.com/mvgijssel/arel_toolkit/issues/44')
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/44')
+      end
     end
   end
 end

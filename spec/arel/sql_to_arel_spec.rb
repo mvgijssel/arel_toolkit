@@ -460,4 +460,29 @@ describe 'Arel.sql_to_arel' do
 
     expect(query.arel.to_sql).to eq parsed_arel.to_sql
   end
+
+  it 'throws a nice error message' do
+    sql = 'SELECT 1=1'
+    result = PgQuery.parse(sql)
+    ast = result.tree.first
+
+    # Make the AST invalid
+    ast['RawStmt']['stmt']['SelectStmt']['targetList'][0]['ResTarget']['val']['A_Expr']['kind'] = -1
+
+    expect(PgQuery).to receive(:parse).with(sql).and_return(result)
+
+    message = <<~STRING
+
+
+      SQL: SELECT 1=1
+      AST: #{ast}
+      BINDS: []
+      message: Unknown Expr type `-1`
+
+    STRING
+
+    expect do
+      Arel.sql_to_arel(sql)
+    end.to raise_error(message)
+  end
 end
