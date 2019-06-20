@@ -342,7 +342,8 @@ describe 'Arel.sql_to_arel' do
 
   it 'returns an Arel::SelectManager for only the top level SELECT' do
     sql = 'SELECT 1, (SELECT 2)'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::SelectManager
 
@@ -357,21 +358,24 @@ describe 'Arel.sql_to_arel' do
 
   it 'returns an Arel::InsertManager' do
     sql = 'INSERT INTO a ("b") VALUES (1)'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::InsertManager
   end
 
   it 'returns an Arel::UpdateManager' do
     sql = 'UPDATE "some_table" SET "some_column" = 2.0'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::UpdateManager
   end
 
   it 'returns an Arel::DeleteManager' do
     sql = 'DELETE FROM "some_table"'
-    arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
 
     expect(arel.class).to eq Arel::DeleteManager
   end
@@ -453,7 +457,8 @@ describe 'Arel.sql_to_arel' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
     sql = query_arel.to_sql
-    parsed_arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    parsed_arel = result.first
 
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
@@ -463,7 +468,8 @@ describe 'Arel.sql_to_arel' do
     query = Post.where(id: 7)
     query_arel = replace_active_record_arel(query.arel)
     sql = query_arel.to_sql
-    parsed_arel = Arel.sql_to_arel(sql)
+    result = Arel.sql_to_arel(sql)
+    parsed_arel = result.first
 
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
@@ -491,7 +497,7 @@ describe 'Arel.sql_to_arel' do
 
 
       SQL: SELECT 1=1
-      AST: #{ast}
+      AST: [#{ast}]
       BINDS: []
       message: Unknown Expr type `-1`
 

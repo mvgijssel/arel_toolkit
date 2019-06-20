@@ -1,17 +1,4 @@
 describe Arel::SqlToArel::PgQueryVisitor do
-  describe 'accept' do
-    it 'raises an exception with more than 1 SQL statement' do
-      sql = <<~SQL
-        SELECT 1; -- statement 1
-        SELECT 2; -- statement 2
-      SQL
-
-      expect { described_class.new.accept(sql) }.to raise_error do |error|
-        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/33')
-      end
-    end
-  end
-
   describe 'visit_A_Expr' do
     it 'raises an exception with a PgQuery::AEXPR_OF statement' do
       expect do

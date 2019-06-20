@@ -10,6 +10,16 @@ require_relative './frame_options'
 
 module Arel
   module SqlToArel
+    class Result < Array
+      def to_sql
+        map(&:to_sql).join('; ')
+      end
+
+      def map(&block)
+        Result.new super
+      end
+    end
+
     class PgQueryVisitor
       PG_CATALOG = 'pg_catalog'.freeze
       MIN_MAX_EXPR = 'MinMaxExpr'.freeze
@@ -20,12 +30,15 @@ module Arel
 
       def accept(sql, binds = [])
         tree = PgQuery.parse(sql).tree
-        boom 'https://github.com/mvgijssel/arel_toolkit/issues/33' if tree.length > 1
 
-        @object = tree.first
+        @object = tree
         @binds = binds
         @sql = sql
-        visit object, :top
+        result = Result.new
+
+        visit(object, :top).each { |arel| result << arel }
+
+        result
       end
 
       private
@@ -572,7 +585,7 @@ module Arel
         )
       end
 
-      def visit_RawStmt(context, stmt:)
+      def visit_RawStmt(context, stmt:, stmt_len: nil, stmt_location: nil)
         visit(stmt, context)
       end
 
