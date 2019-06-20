@@ -32,7 +32,7 @@ module Arel
         end
 
         case o.override
-        when 0
+        when nil, 0
           collector << ''
         when 1
           collector << ' OVERRIDING USER VALUE'
