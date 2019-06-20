@@ -269,7 +269,7 @@ module Arel
         Arel::Nodes::Coalesce.new args
       end
 
-      def visit_ColumnRef(context = nil, fields:)
+      def visit_ColumnRef(fields:)
         visited_fields = visit(fields)
 
         if fields.length == 2
