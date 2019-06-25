@@ -392,6 +392,7 @@ module Arel
                  timezone, expression = args
                  [Arel::Nodes::AtTimeZone.new(expression, timezone)]
 
+               # https://www.postgresql.org/docs/10/functions-string.html
                when [PG_CATALOG, 'position']
                  string, substring = args
                  [Arel::Nodes::Position.new(substring, string)]

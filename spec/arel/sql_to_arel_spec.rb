@@ -332,7 +332,7 @@ describe 'Arel.sql_to_arel' do
         'WHERE CURRENT OF some_cursor',
         'PgQuery::UPDATE_STMT'
   visit 'all',
-        'UPDATE "some_table" SET "b" = \'t\'::bool, "c" = NULL, "d" = \'f\'::bool',
+        'UPDATE "some_table" SET "b" = 1 - 1, "c" = 2 + 2, "d" = COALESCE(NULL, 1)',
         'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'all',
