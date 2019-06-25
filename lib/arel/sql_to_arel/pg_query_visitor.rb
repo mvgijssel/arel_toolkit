@@ -1022,7 +1022,7 @@ module Arel
           Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
-          boom "Unknown operator `#{operator}`"
+          Arel::Nodes::Operator.new(operator, left, right)
         end
       end
 
