@@ -485,6 +485,7 @@ module Arel
         insert_manager
       end
 
+      # TODO: make sure all scalars are quoted nodes?
       def visit_Integer(ival:)
         ival
       end
@@ -838,6 +839,14 @@ module Arel
       def visit_TypeCast(arg:, type_name:)
         arg = visit(arg)
         type_name = visit(type_name)
+
+        # TODO: when the arg is "complex" we need to add parenthesis
+        arg = case arg
+              when Arel::Nodes::Binary
+                Arel::Nodes::Grouping.new(arg)
+              else
+                arg
+              end
 
         Arel::Nodes::TypeCast.new(arg, type_name)
       end

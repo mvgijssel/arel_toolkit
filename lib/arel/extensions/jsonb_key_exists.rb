@@ -10,6 +10,8 @@ module Arel
 
   module Visitors
     class ToSql
+      # TODO: extend operators from < InfixOperation
+      # then we have a free visitor method!
       def visit_Arel_Nodes_JsonbKeyExists(o, collector)
         infix_value o, collector, ' ? '
       end
