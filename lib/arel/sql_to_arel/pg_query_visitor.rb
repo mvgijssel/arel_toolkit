@@ -396,6 +396,26 @@ module Arel
                  string, substring = args
                  [Arel::Nodes::Position.new(substring, string)]
 
+               when [PG_CATALOG, 'overlay']
+                 string, substring, start, length = args
+                 [Arel::Nodes::Overlay.new(string, substring, start, length)]
+
+               when [PG_CATALOG, 'ltrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('leading', substring, string)]
+
+               when [PG_CATALOG, 'rtrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('trailing', substring, string)]
+
+               when [PG_CATALOG, 'btrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('both', substring, string)]
+
+               when [PG_CATALOG, 'substring']
+                 string, pattern, escape = args
+                 [Arel::Nodes::Substring.new(string, pattern, escape)]
+
                else
                  if function_names.length > 1
                    boom "Don't know how to handle function names `#{function_names}`"

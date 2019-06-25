@@ -173,7 +173,15 @@ describe 'Arel.sql_to_arel' do
         'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
         'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
         'some_function("a", \'b\', 1), ' \
-        "position('content'::text in 'some content')",
+        "position('content'::text in 'some content'), " \
+        "overlay('Txxxxas' placing 'hom' from 2 for 4), " \
+        "overlay('stuff' placing 'ing' from 3), " \
+        "substring('Thomas' from 2 for 3), " \
+        "substring('Thomas' from '...$'), " \
+        "substring('Thomas' from '%#\"o_a#\"_' for '#'), " \
+        "trim(both 'xyz' from 'yxTomxx'), " \
+        "trim(leading 'yx' from 'yxTomxx'), " \
+        "trim(trailing 'xx' from 'yxTomxx')",
         'PgQuery::FUNC_CALL'
   visit 'pg',
         "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
