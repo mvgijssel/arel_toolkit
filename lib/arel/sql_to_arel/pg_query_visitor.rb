@@ -390,7 +390,8 @@ module Arel
 
                when [PG_CATALOG, 'timezone']
                  timezone, expression = args
-                 [Arel::Nodes::AtTimeZone.new(expression, timezone)]
+
+                 [Arel::Nodes::AtTimeZone.new(maybe_add_grouping(expression), timezone)]
 
                # https://www.postgresql.org/docs/10/functions-string.html
                when [PG_CATALOG, 'position']
@@ -840,15 +841,7 @@ module Arel
         arg = visit(arg)
         type_name = visit(type_name)
 
-        # TODO: when the arg is "complex" we need to add parenthesis
-        arg = case arg
-              when Arel::Nodes::Binary
-                Arel::Nodes::Grouping.new(arg)
-              else
-                arg
-              end
-
-        Arel::Nodes::TypeCast.new(arg, type_name)
+        Arel::Nodes::TypeCast.new(maybe_add_grouping(arg), type_name)
       end
 
       def visit_TypeName(names:, typemod:)
@@ -1144,6 +1137,15 @@ module Arel
 
         else
           boom "Unknown sublinktype: #{type}"
+        end
+      end
+
+      def maybe_add_grouping(node)
+        case node
+        when Arel::Nodes::Binary
+          Arel::Nodes::Grouping.new(node)
+        else
+          node
         end
       end
 

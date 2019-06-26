@@ -170,6 +170,7 @@ describe 'Arel.sql_to_arel' do
         'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
         'COUNT(DISTINCT "some_column"), ' \
         "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
+        "(1 - 1) AT TIME ZONE 'Etc/UTC', " \
         'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
         'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
         'some_function("a", \'b\', 1), ' \
