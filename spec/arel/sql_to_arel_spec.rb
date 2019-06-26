@@ -179,7 +179,7 @@ describe 'Arel.sql_to_arel' do
         "substring('Thomas' from 2 for 3), " \
         "substring('Thomas' from '...$'), " \
         "substring('Thomas' from '%#\"o_a#\"_' for '#'), " \
-        "trim(both 'xyz' from 'yxTomxx'), " \
+        "trim(both 'xyz'), " \
         "trim(leading 'yx' from 'yxTomxx'), " \
         "trim(trailing 'xx' from 'yxTomxx')",
         'PgQuery::FUNC_CALL'

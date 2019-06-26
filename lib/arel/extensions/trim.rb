@@ -21,8 +21,10 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_Trim(o, collector)
         collector << "trim(#{o.type} "
-        visit o.substring, collector
-        collector << ' from '
+        if o.substring
+          visit o.substring, collector
+          collector << ' from '
+        end
         visit o.string, collector
         collector << ')'
       end
