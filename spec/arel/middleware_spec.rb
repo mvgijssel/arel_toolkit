@@ -1,12 +1,12 @@
 describe 'Arel.middleware' do
   class SomeMiddleware
-    def self.call(arel)
+    def self.call(arel, _context)
       arel
     end
   end
 
   class OtherMiddleware
-    def self.call(arel)
+    def self.call(arel, _context)
       arel
     end
   end
@@ -18,10 +18,10 @@ describe 'Arel.middleware' do
 
     expect(SomeMiddleware)
       .to receive(:call)
-      .and_wrap_original do |m, passed_arel|
+      .and_wrap_original do |m, passed_arel, context|
         expect(passed_arel).to eq(query_arel)
 
-        m.call(passed_arel)
+        m.call(passed_arel, context)
       end
 
     Arel.middleware.apply([SomeMiddleware]) do
@@ -46,6 +46,13 @@ describe 'Arel.middleware' do
 
     Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
       context = Arel.middleware.context
+
+      expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, passed_context|
+        expect(passed_context).to include(yes: :sir)
+        m.call(arel, passed_context)
+      end
+
+      Post.where(id: 1).load
     end
 
     expect(context).to eq(yes: :sir)
@@ -59,6 +66,30 @@ describe 'Arel.middleware' do
         expect(Arel.middleware.context).to eq(hello: :friend)
       end
     end
+  end
+
+  it 'sets the original sql in the context' do
+    class ChangeMiddleware
+      def self.call(arel, _context)
+        Post.select(:title)
+      end
+    end
+
+    expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, context|
+      expect(arel.to_sql)
+        .to eq "SELECT \"posts\".\"title\" FROM \"posts\""
+      expect(context[:original_sql])
+        .to eq "SELECT \"posts\".\"content\" FROM \"posts\""
+
+      m.call(arel, context)
+    end
+
+    Arel.middleware.apply([ChangeMiddleware, SomeMiddleware]) do
+      Post.select(:content).load
+    end
+  end
+
+  it 'does not allow overriding the original sql in the context' do
   end
 
   it 'only applies middleware given for a block' do

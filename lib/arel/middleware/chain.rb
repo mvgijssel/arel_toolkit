@@ -10,10 +10,11 @@ module Arel
         return sql if internal_middleware.length.zero?
 
         result = Arel.sql_to_arel(sql, binds: binds)
+        updated_context = context.merge(original_sql: sql)
 
         internal_middleware.each do |middleware_item|
           result = result.map do |arel|
-            middleware_item.call(arel)
+            middleware_item.call(arel, updated_context)
           end
         end
 
