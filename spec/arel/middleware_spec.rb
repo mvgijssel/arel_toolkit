@@ -191,37 +191,31 @@ describe 'Arel.middleware' do
   end
 
   it 'calls PostgreSQLAdapter#execute' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:execute).twice.and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:execute_without_arel_middleware).twice.and_call_original
+    expect(connection).to receive(:execute).twice.and_call_original
 
     Post.create!
   end
 
   it 'calls PostgreSQLAdapter#exec_no_cache' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_no_cache).twice.and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_no_cache_without_arel_middleware).twice.and_call_original
+    expect(connection).to receive(:exec_no_cache).twice.and_call_original
 
     Arel.middleware.apply([SomeMiddleware]) do
       Post.where(id: [1, 2]).load # IN statements are not prepared
 
-      ActiveRecord::Base.connection.unprepared_statement do
+      connection.unprepared_statement do
         Post.where(id: 1).load
       end
     end
   end
 
   it 'calls PostgreSQLAdapter#exec_cache' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_cache).and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_cache_without_arel_middleware).and_call_original
+    expect(connection).to receive(:exec_cache).and_call_original
 
     Arel.middleware.apply([SomeMiddleware]) do
       Post.where(id: 1).load
@@ -281,5 +275,18 @@ describe 'Arel.middleware' do
     Arel.middleware.apply([SomeMiddleware]) do
       post.destroy!
     end
+  end
+
+  it 'does not use middleware when configuring a connection to prevent endless checkouts' do
+    # New thread makes sure we're not reusing the same connection
+    Thread.new do
+      # Apply middleware in the new thread otherwise it won't be picked up
+      Arel.middleware.apply([SomeMiddleware]) do
+        # Force checkout a new connection
+        ActiveRecord::Base.connection_pool.with_connection do
+          Post.create!(title: 'some title', content: 'some content')
+        end
+      end
+    end.join
   end
 end
