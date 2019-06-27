@@ -459,7 +459,8 @@ describe 'Arel.sql_to_arel' do
           "'thomas' ~ '.*thomas.*', " \
           "'thomas' ~* '.*Thomas.*', " \
           "'thomas' !~ '.*Thomas.*', " \
-          "'thomas' !~* '.*vadim.*'"
+          "'thomas' !~* '.*vadim.*', " \
+          "to_tsvector('fat cats ate rats') @@ to_tsquery('cat & rat')"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql

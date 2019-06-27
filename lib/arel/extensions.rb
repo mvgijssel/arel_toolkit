@@ -88,7 +88,6 @@ require 'arel/extensions/position'
 require 'arel/extensions/overlay'
 require 'arel/extensions/substring'
 require 'arel/extensions/trim'
-require 'arel/extensions/operator'
 
 module Arel
   module Extensions

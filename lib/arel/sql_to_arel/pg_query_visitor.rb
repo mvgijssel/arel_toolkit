@@ -1024,7 +1024,7 @@ module Arel
           Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
-          Arel::Nodes::Operator.new(operator, left, right)
+          Arel::Nodes::InfixOperation.new(operator, left, right)
         end
       end
 
