@@ -925,6 +925,9 @@ module Arel
       end
 
       def generate_operator(left, right, operator)
+        left = maybe_add_grouping(left)
+        right = maybe_add_grouping(right)
+
         case operator
 
         # https://www.postgresql.org/docs/10/functions-math.html
@@ -1140,6 +1143,7 @@ module Arel
         end
       end
 
+      # TODO: This should probably be a concern of the to_sql visistor
       def maybe_add_grouping(node)
         case node
         when Arel::Nodes::Binary

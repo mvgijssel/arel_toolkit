@@ -413,11 +413,11 @@ describe 'Arel.sql_to_arel' do
 
   it 'implements all operators' do
     sql = 'SELECT ' \
-          '11 + 11, ' \
+          '11 + (11 + 5), ' \
           '12 - 12, ' \
           '10 * 10, ' \
           '13 / 13, ' \
-          '13 % 2' \
+          '13 % 2, ' \
           '2.0 ^ 3.0, ' \
           ' |/ 16, ' \
           ' ||/ 17, ' \
@@ -460,7 +460,7 @@ describe 'Arel.sql_to_arel' do
           "'thomas' ~* '.*Thomas.*', " \
           "'thomas' !~ '.*Thomas.*', " \
           "'thomas' !~* '.*vadim.*', " \
-          "to_tsvector('fat cats ate rats') @@ to_tsquery('cat & rat')"
+          "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql
