@@ -29,7 +29,7 @@ module Arel
       rescue ::StandardError => e
         raise e.class, e.message, e.backtrace if e.is_a?(Arel::SqlToArel::Error)
 
-        boom e.message
+        boom e.message, e.backtrace
       end
 
       private
@@ -1153,7 +1153,7 @@ module Arel
         end
       end
 
-      def boom(message)
+      def boom(message, backtrace = nil)
         new_message = <<~STRING
 
 
@@ -1163,6 +1163,8 @@ module Arel
           message: #{message}
 
         STRING
+
+        raise(Arel::SqlToArel::Error, new_message, backtrace) if backtrace
 
         raise Arel::SqlToArel::Error, new_message
       end
