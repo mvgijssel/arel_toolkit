@@ -1156,7 +1156,6 @@ module Arel
 
 
           SQL: #{sql}
-          AST: #{object}
           BINDS: #{binds}
           message: #{message}
 

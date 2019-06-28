@@ -4,12 +4,10 @@ describe Arel::SqlToArel::PgQueryVisitor do
       sql = 'SELECT posts.id AS id FROM posts'
 
       parser = described_class.new
-      ast = PgQuery.parse(sql).tree
       message = <<~STRING
 
 
         SQL: #{sql}
-        AST: #{ast}
         BINDS: []
         message: uh oh
 

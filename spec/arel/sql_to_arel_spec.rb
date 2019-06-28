@@ -541,7 +541,6 @@ describe 'Arel.sql_to_arel' do
 
 
       SQL: SELECT 1=1
-      AST: [#{ast}]
       BINDS: []
       message: Unknown Expr type `-1`
 
