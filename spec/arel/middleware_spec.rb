@@ -70,16 +70,16 @@ describe 'Arel.middleware' do
 
   it 'sets the original sql in the context' do
     class ChangeMiddleware
-      def self.call(arel, _context)
+      def self.call(_arel, _context)
         Post.select(:title)
       end
     end
 
     expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, context|
       expect(arel.to_sql)
-        .to eq "SELECT \"posts\".\"title\" FROM \"posts\""
+        .to eq 'SELECT "posts"."title" FROM "posts"'
       expect(context[:original_sql])
-        .to eq "SELECT \"posts\".\"content\" FROM \"posts\""
+        .to eq 'SELECT "posts"."content" FROM "posts"'
 
       m.call(arel, context)
     end
@@ -131,14 +131,12 @@ describe 'Arel.middleware' do
   end
 
   it 'resets middleware after an exception' do
-    begin
+    expect do
       Arel.middleware.apply([SomeMiddleware]) do
         raise 'something'
       end
-    rescue StandardError => e
-    end
+    end.to raise_error('something')
 
-    expect(e.message).to eq 'something'
     expect(Arel.middleware.current).to eq []
   end
 
