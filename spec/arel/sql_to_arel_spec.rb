@@ -490,6 +490,41 @@ describe 'Arel.sql_to_arel' do
     expect(parsed_sql).to eq 'SELECT SUM("a")'
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-FUNC-TABLE' do
+    sql = <<~SQL
+      SELECT
+       abs(-17.4),
+      cbrt(27.0),
+      ceil(-42.8),
+      ceiling(-95.3),
+      degrees(0.5),
+      div(9, 4),
+      exp(1.0),
+      floor(-42.8),
+      ln(2.0),
+      log(100.0),
+      log(2.0, 64.0),
+      mod(9, 4),
+      pi(),
+      power(9.0, 3.0),
+      power(9.0, 3.0),
+      radians(45.0),
+      round(42.4),
+      round(42.4382, 2),
+      scale(8.41),
+      sign(-8.4),
+      sqrt(2.0),
+      trunc(42.8),
+      trunc(42.4382, 2),
+      width_bucket(5.35, 0.024, 10.06, 5),
+      width_bucket(5.35, 0.024, 10.06, 5),
+      width_bucket(now(), ARRAY['yesterday', 'today', 'tomorrow']::timestamptz[])
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)

@@ -843,7 +843,8 @@ module Arel
         Arel::Nodes::TypeCast.new(maybe_add_grouping(arg), type_name)
       end
 
-      def visit_TypeName(names:, typemod:)
+      def visit_TypeName(names:, typemod:, array_bounds: [])
+        array_bounds = visit(array_bounds)
         names = names.map do |name|
           visit(name, :operator)
         end
@@ -852,8 +853,12 @@ module Arel
 
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
+        # TODO: add issue here
+        boom '' if array_bounds != [] && array_bounds != [-1]
 
-        names.first
+        type_name = names.first
+        type_name << '[]' if array_bounds == [-1]
+        type_name
       end
 
       def visit_UpdateStmt(
