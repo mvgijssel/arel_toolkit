@@ -486,7 +486,6 @@ module Arel
         insert_manager
       end
 
-      # TODO: make sure all scalars are quoted nodes?
       def visit_Integer(ival:)
         ival
       end
@@ -1143,7 +1142,6 @@ module Arel
         end
       end
 
-      # TODO: This should probably be a concern of the to_sql visistor
       def maybe_add_grouping(node)
         case node
         when Arel::Nodes::Binary
