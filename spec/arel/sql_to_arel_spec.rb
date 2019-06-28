@@ -95,7 +95,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
-  visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
+  visit 'all', 'SELECT 1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', 'PgQuery::BOOL_EXPR'
   visit 'all',
         'SELECT ' \
         '1 IS TRUE, ' \
