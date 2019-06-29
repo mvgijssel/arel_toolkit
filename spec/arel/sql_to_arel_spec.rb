@@ -647,7 +647,10 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  # rubocop:disable LineLength
   it 'https://www.postgresql.org/docs/10/functions-binarystring.html#FUNCTIONS-BINARYSTRING-OTHER' do
+    # rubocop:enable LineLength
+
     sql = <<~SQL
       SELECT
        btrim('\\000trim\\001'::bytea, '\\000\\001'::bytea),
@@ -689,6 +692,55 @@ describe 'Arel.sql_to_arel' do
       to_date('05 Dec 2000', 'DD Mon YYYY'),
       to_number('12,454.8-', '99G999D9S'),
       to_timestamp('05 Dec 2000', 'DD Mon YYYY')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-formatting.html#FUNCTIONS-FORMATTING-EXAMPLES-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       to_char(current_timestamp, 'Day, DD  HH12:MI:SS'),
+      to_char(current_timestamp, 'FMDay, FMDD  HH12:MI:SS'),
+      to_char(-0.1, '99.99'),
+      to_char(-0.1, 'FM9.99'),
+      to_char(0.1, '0.9'),
+      to_char(12, '9990999.9'),
+      to_char(12, 'FM9990999.9'),
+      to_char(485, '999'),
+      to_char(-485, '999'),
+      to_char(485, '9 9 9'),
+      to_char(1485, '9,999'),
+      to_char(1485, '9G999'),
+      to_char(148.5, '999.999'),
+      to_char(148.5, 'FM999.999'),
+      to_char(148.5, 'FM999.990'),
+      to_char(148.5, '999D999'),
+      to_char(3148.5, '9G999D999'),
+      to_char(-485, '999S'),
+      to_char(-485, '999MI'),
+      to_char(485, '999MI'),
+      to_char(485, 'FM999MI'),
+      to_char(485, 'PL999'),
+      to_char(485, 'SG999'),
+      to_char(-485, 'SG999'),
+      to_char(-485, '9SG99'),
+      to_char(-485, '999PR'),
+      to_char(485, 'L999'),
+      to_char(485, 'RN'),
+      to_char(485, 'FMRN'),
+      to_char(5.2, 'FMRN'),
+      to_char(482, '999th'),
+      to_char(485, '"Good number:"999'),
+      to_char(485.8, '"Pre:"999" Post:" .999'),
+      to_char(12, '99V999'),
+      to_char(12.4, '99V999'),
+      to_char(12.45, '99V9'),
+      to_char(0.0004859, '9.99EEEE')
     SQL
 
     result = Arel.sql_to_arel(sql)
