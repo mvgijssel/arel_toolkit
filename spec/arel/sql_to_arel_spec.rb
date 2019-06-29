@@ -27,6 +27,11 @@ describe 'Arel.sql_to_arel' do
       raise '?'
     end
   end
+
+  def strip_sql_comments(sql)
+    sql.gsub(/--.*?\n/m, '')
+  end
+
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/AbcSize
 
@@ -534,6 +539,46 @@ describe 'Arel.sql_to_arel' do
 
     result = Arel.sql_to_arel(sql)
     expect(result.to_formatted_sql).to eq(sql)
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-TRIG-TABLE' do
+    sql = <<~SQL
+      SELECT
+       acos("x"),
+      asin("x"),
+      atan("x"),
+      atan2("y", "x"),
+      cos("x"),
+      cot("x"),
+      sin("x"),
+      tan("x")
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-string.html#FUNCTIONS-STRING-SQL' do
+    sql = <<~SQL
+      SELECT
+       'Post' || 'greSQL',
+      'Value: ' || 42,
+      bit_length('jose'),
+      char_length('jose'),
+      lower('TOM'),
+      octet_length('jose'),
+      overlay('Txxxxas' placing 'hom' from 2 for 4),
+      position('om' in 'Thomas'),
+      substring('Thomas' from 2 for 3),
+      substring('Thomas' from '...$'),
+      substring('Thomas' from '%#"o_a#"_' for '#'),
+      trim(both 'xyz' from 'yxTomxx'),
+      -- trim(both from 'yxTomxx', 'xyz') will become trim(both 'xyz' from 'yxTomxx')
+      upper('tom')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
