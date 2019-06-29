@@ -17,7 +17,7 @@ module Arel
     end
   end
 
-  class SqlFormatter < Arel::Visitors::ToSql
+  class SqlFormatter < Arel::Visitors::PostgreSQL
     def accept(object, collector)
       super object, collector
       collector << "\n"
