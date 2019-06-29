@@ -647,6 +647,24 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-binarystring.html#FUNCTIONS-BINARYSTRING-OTHER' do
+    sql = <<~SQL
+      SELECT
+       btrim('\\000trim\\001'::bytea, '\\000\\001'::bytea),
+      decode('123\\000456', 'escape'),
+      encode('123\\000456'::bytea, 'escape'),
+      get_bit('Th\\000omas'::bytea, 45),
+      get_byte('Th\\000omas'::bytea, 4),
+      length('jo\\000se'::bytea),
+      md5('Th\\000omas'::bytea),
+      set_bit('Th\\000omas'::bytea, 45, 0),
+      set_byte('Th\\000omas'::bytea, 4, 64)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
