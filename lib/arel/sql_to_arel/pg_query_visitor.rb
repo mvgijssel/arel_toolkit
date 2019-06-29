@@ -857,6 +857,13 @@ module Arel
         boom '' if array_bounds != [] && array_bounds != [-1]
 
         type_name = names.first
+        type_name = case type_name
+                    when 'float4'
+                      'real'
+                    else
+                      type_name
+                    end
+
         type_name << '[]' if array_bounds == [-1]
         type_name
       end

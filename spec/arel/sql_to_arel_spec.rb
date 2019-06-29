@@ -678,6 +678,23 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-formatting.html#FUNCTIONS-FORMATTING-TABLE' do
+    sql = <<~SQL
+      SELECT
+       to_char(current_timestamp, 'HH12:MI:SS'),
+      to_char('15h 2m 12s'::interval, 'HH24:MI:SS'),
+      to_char(125, '999'),
+      to_char(125.8::real, '999D9'),
+      to_char(-125.8, '999D99S'),
+      to_date('05 Dec 2000', 'DD Mon YYYY'),
+      to_number('12,454.8-', '99G999D9S'),
+      to_timestamp('05 Dec 2000', 'DD Mon YYYY')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
