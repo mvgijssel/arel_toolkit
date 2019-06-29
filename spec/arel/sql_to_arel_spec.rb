@@ -325,7 +325,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
   visit 'all',
         'SELECT ' \
-        '1::int4, ' \
+        '1::integer, ' \
         '2::bool, ' \
         "'3'::text, " \
         "(date_trunc('hour', \"posts\".\"created_at\") || '-0')::timestamptz",
@@ -741,6 +741,34 @@ describe 'Arel.sql_to_arel' do
       to_char(12.4, '99V999'),
       to_char(12.45, '99V9'),
       to_char(0.0004859, '9.99EEEE')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#OPERATORS-DATETIME-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '2001-09-28'::date + '7'::integer,
+      '2001-09-28'::date + '1 hour'::interval,
+      '2001-09-28'::date + '03:00'::time,
+      '1 day'::interval + '1 hour'::interval,
+      '2001-09-28 01:00'::timestamp + '23 hours'::interval,
+      '01:00'::time + '3 hours'::interval,
+       - '23 hours'::interval,
+      '2001-10-01'::date - '2001-09-28'::date,
+      '2001-10-01'::date - '7'::integer,
+      '2001-09-28'::date - '1 hour'::interval,
+      '05:00'::time - '03:00'::time,
+      '05:00'::time - '2 hours'::interval,
+      '2001-09-28 23:00'::timestamp - '23 hours'::interval,
+      '1 day'::interval - '1 hour'::interval,
+      '2001-09-29 03:00'::timestamp - '2001-09-27 12:00'::timestamp,
+      900 * '1 second'::interval,
+      21 * '1 day'::interval,
+      '3.5'::double precision * '1 hour'::interval,
+      '1 hour'::interval / '1.5'::double precision
     SQL
 
     result = Arel.sql_to_arel(sql)

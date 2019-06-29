@@ -858,8 +858,12 @@ module Arel
 
         type_name = names.first
         type_name = case type_name
+                    when 'int4'
+                      'integer'
                     when 'float4'
                       'real'
+                    when 'float8'
+                      'double precision'
                     else
                       type_name
                     end
@@ -945,7 +949,11 @@ module Arel
         when '+'
           Arel::Nodes::Addition.new(left, right)
         when '-'
-          Arel::Nodes::Subtraction.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'-', right)
+          else
+            Arel::Nodes::Subtraction.new(left, right)
+          end
         when '*'
           Arel::Nodes::Multiplication.new(left, right)
         when '/'
