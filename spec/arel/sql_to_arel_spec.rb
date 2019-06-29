@@ -593,8 +593,7 @@ describe 'Arel.sql_to_arel' do
       convert_from('text_in_utf8', 'UTF8'),
       convert_to('some text', 'UTF8'),
       decode('MTIzAAE=', 'base64'),
-      encode('123', 'base64'),
-      -- previous statment cannot have NULL byte \<<REMOVE THIS>>0
+      encode('123\\000\\001', 'base64'),
       format('Hello %s, %1$s', 'World'),
       initcap('hi THOMAS'),
       left('abcde', 2),
