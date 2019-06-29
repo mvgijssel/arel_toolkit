@@ -174,7 +174,7 @@ describe 'Arel.sql_to_arel' do
         'SUM("a") WITHIN GROUP (ORDER BY "a"), ' \
         'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
         'COUNT(DISTINCT "some_column"), ' \
-        "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
+        "\"posts\".\"created_at\"::timestamp with time zone AT TIME ZONE 'Etc/UTC', " \
         "(1 - 1) AT TIME ZONE 'Etc/UTC', " \
         'extract(\'epoch\' from "posts"."created_at"), ' \
         'extract(\'hour\' from "posts"."updated_at"), ' \
@@ -330,7 +330,7 @@ describe 'Arel.sql_to_arel' do
         '1::integer, ' \
         '2::bool, ' \
         "'3'::text, " \
-        "(date_trunc('hour', \"posts\".\"created_at\") || '-0')::timestamptz",
+        "(date_trunc('hour', \"posts\".\"created_at\") || '-0')::timestamp with time zone",
         'PgQuery::TYPE_CAST'
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
   visit 'all',
@@ -525,7 +525,7 @@ describe 'Arel.sql_to_arel' do
       trunc(42.4382, 2),
       width_bucket(5.35, 0.024, 10.06, 5),
       width_bucket(5.35, 0.024, 10.06, 5),
-      width_bucket(now(), ARRAY['yesterday', 'today', 'tomorrow']::timestamptz[])
+      width_bucket(now(), ARRAY['yesterday', 'today', 'tomorrow']::timestamp with time zone[])
     SQL
 
     result = Arel.sql_to_arel(sql)
@@ -810,6 +810,21 @@ describe 'Arel.sql_to_arel' do
       timeofday(),
       transaction_timestamp(),
       to_timestamp(1284352323)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#FUNCTIONS-DATETIME-ZONECONVERT-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       '2001-02-16 20:38:40'::timestamp AT TIME ZONE 'America/Denver',
+      '2001-02-16 20:38:40-05'::timestamp with time zone AT TIME ZONE 'America/Denver',
+      '2001-02-16 20:38:40-05'::timezone AT TIME ZONE 'Asia/Tokyo' AT TIME ZONE 'America/Chicago'
     SQL
 
     result = Arel.sql_to_arel(sql)

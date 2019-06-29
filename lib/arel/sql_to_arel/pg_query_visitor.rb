@@ -875,6 +875,8 @@ module Arel
                       'real'
                     when 'float8'
                       'double precision'
+                    when 'timestamptz'
+                      'timestamp with time zone'
                     else
                       type_name
                     end
