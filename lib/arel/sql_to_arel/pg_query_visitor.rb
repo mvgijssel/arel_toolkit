@@ -418,6 +418,10 @@ module Arel
                  string, pattern, escape = args
                  [Arel::Nodes::Substring.new(string, pattern, escape)]
 
+               when [PG_CATALOG, 'overlaps']
+                 start1, end1, start2, end2 = args
+                 [Arel::Nodes::Overlaps.new(start1, end1, start2, end2)]
+
                else
                  if function_names.length > 1
                    boom "Don't know how to handle function names `#{function_names}`"

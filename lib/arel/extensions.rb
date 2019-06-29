@@ -87,6 +87,7 @@ require 'arel/extensions/variable_show'
 require 'arel/extensions/position'
 require 'arel/extensions/overlay'
 require 'arel/extensions/substring'
+require 'arel/extensions/overlaps'
 require 'arel/extensions/trim'
 require 'arel/extensions/named_argument'
 

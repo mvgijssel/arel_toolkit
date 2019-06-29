@@ -178,6 +178,8 @@ describe 'Arel.sql_to_arel' do
         "(1 - 1) AT TIME ZONE 'Etc/UTC', " \
         'extract(\'epoch\' from "posts"."created_at"), ' \
         'extract(\'hour\' from "posts"."updated_at"), ' \
+        "('2001-02-16'::date, '2001-12-21'::date) OVERLAPS " \
+        "('2001-10-30'::date, '2002-10-30'::date), " \
         'some_function("a", \'b\', 1), ' \
         "position('content'::text in 'some content'), " \
         "overlay('Txxxxas' placing 'hom' from 2 for 4), " \
