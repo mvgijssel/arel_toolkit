@@ -581,6 +581,58 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-string.html#FUNCTIONS-STRING-OTHER' do
+    sql = <<~SQL
+      SELECT
+       ascii('x'),
+      btrim('xyxtrimyyx', 'xyz'),
+      chr(65),
+      concat('abcde', 2, NULL, 22),
+      concat_ws(',', 'abcde', 2, NULL, 22),
+      convert('text_in_utf8', 'UTF8', 'LATIN1'),
+      convert_from('text_in_utf8', 'UTF8'),
+      convert_to('some text', 'UTF8'),
+      decode('MTIzAAE=', 'base64'),
+      encode('123', 'base64'),
+      -- previous statment cannot have NULL byte \<<REMOVE THIS>>0
+      format('Hello %s, %1$s', 'World'),
+      initcap('hi THOMAS'),
+      left('abcde', 2),
+      length('jose'),
+      length('jose', 'UTF8'),
+      lpad('hi', 5, 'xy'),
+      ltrim('zzzytest', 'xyz'),
+      md5('abc'),
+      parse_ident('"SomeSchema".someTable'),
+      pg_client_encoding(),
+      quote_ident('Foo bar'),
+      -- quote_literal(E'O\'Reilly'),
+      quote_literal(42.5),
+      quote_nullable(NULL),
+      quote_nullable(42.5),
+      regexp_match('foobarbequebaz', '(bar)(beque)'),
+      regexp_matches('foobarbequebaz', 'ba.', 'g'),
+      regexp_replace('Thomas', '.[mN]a.', 'M'),
+      regexp_split_to_array('hello world', '\s+'),
+      regexp_split_to_table('hello world', '\s+'),
+      repeat('Pg', 4),
+      replace('abcdefabcdef', 'cd', 'XX'),
+      reverse('abcde'),
+      right('abcde', 2),
+      rpad('hi', 5, 'xy'),
+      rtrim('testxxzx', 'xyz'),
+      split_part('abc~@~def~@~ghi', '~@~', 2),
+      strpos('high', 'ig'),
+      substr('alphabet', 3, 2),
+      to_ascii('Karel'),
+      to_hex(2147483647),
+      translate('12345', '143', 'ax')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
