@@ -176,8 +176,8 @@ describe 'Arel.sql_to_arel' do
         'COUNT(DISTINCT "some_column"), ' \
         "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
         "(1 - 1) AT TIME ZONE 'Etc/UTC', " \
-        'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
-        'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
+        'extract(\'epoch\' from "posts"."created_at"), ' \
+        'extract(\'hour\' from "posts"."updated_at"), ' \
         'some_function("a", \'b\', 1), ' \
         "position('content'::text in 'some content'), " \
         "overlay('Txxxxas' placing 'hom' from 2 for 4), " \
@@ -769,6 +769,45 @@ describe 'Arel.sql_to_arel' do
       21 * '1 day'::interval,
       '3.5'::double precision * '1 hour'::interval,
       '1 hour'::interval / '1.5'::double precision
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#FUNCTIONS-DATETIME-TABLE' do
+    sql = <<~SQL
+      SELECT
+       age('2001-04-10'::timestamp, '1957-06-13'::timestamp),
+      age('1957-06-13'::timestamp),
+      clock_timestamp(),
+      current_date,
+      current_time,
+      current_timestamp,
+      date_part('hour', '2001-02-16 20:38:40'::timestamp),
+      date_part('month', '2 years 3 months'::interval),
+      date_trunc('hour', '2001-02-16 20:38:40'::timestamp),
+      date_trunc('hour', '2 days 3 hours 40 minutes'::interval),
+      extract('hour' from '2001-02-16 20:38:40'::timestamp),
+      extract('month' from '2 years 3 months'::interval),
+      isfinite('2001-02-16'::date),
+      isfinite('2001-02-16 21:28:30'::timestamp),
+      isfinite('4 hours'::interval),
+      justify_days('35 days'::interval),
+      justify_hours('27 hours'::interval),
+      justify_interval('1 mon -1 hour'::interval),
+      localtime,
+      localtimestamp,
+      make_date(2013, 7, 15),
+      make_interval(days => 10),
+      make_time(8, 15, 23.5),
+      make_timestamp(2013, 7, 15, 8, 15, 23.5),
+      make_timestamptz(2013, 7, 15, 8, 15, 23.5),
+      now(),
+      statement_timestamp(),
+      timeofday(),
+      transaction_timestamp(),
+      to_timestamp(1284352323)
     SQL
 
     result = Arel.sql_to_arel(sql)

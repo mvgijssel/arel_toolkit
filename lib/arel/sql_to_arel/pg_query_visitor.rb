@@ -549,6 +549,13 @@ module Arel
         end
       end
 
+      def visit_NamedArgExpr(arg:, name:, argnumber:)
+        arg = visit(arg)
+        boom '' unless argnumber == -1
+
+        Arel::Nodes::NamedArgument.new(name, arg)
+      end
+
       def visit_Null(**_)
         Arel.sql 'NULL'
       end
