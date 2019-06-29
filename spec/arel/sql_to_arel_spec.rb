@@ -525,6 +525,17 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(sql)
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-RANDOM-TABLE' do
+    sql = <<~SQL
+      SELECT
+       random(),
+      setseed("dp")
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
