@@ -856,6 +856,7 @@ module Arel
 
       def visit_TypeName(names:, typemod:, array_bounds: [])
         array_bounds = visit(array_bounds)
+
         names = names.map do |name|
           visit(name, :operator)
         end
@@ -864,8 +865,9 @@ module Arel
 
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
-        # TODO: add issue here
-        boom '' if array_bounds != [] && array_bounds != [-1]
+        if array_bounds != [] && array_bounds != [-1]
+          boom 'https://github.com/mvgijssel/arel_toolkit/issues/86'
+        end
 
         type_name = names.first
         type_name = case type_name
