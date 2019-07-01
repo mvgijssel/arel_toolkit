@@ -908,6 +908,36 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-CONV-TABLE' do
+    sql = <<~SQL
+      SELECT
+       box('((0,0),2.0)'::circle),
+      box('(0,0)'::point),
+      box('(0,0)'::point, '(1,1)'::point),
+      box('((0,0),(1,1),(2,0))'::polygon),
+      bound_box('((0,0),(1,1))'::box, '((3,3),(4,4))'::box),
+      circle('((0,0),(1,1))'::box),
+      circle('(0,0)'::point, 2.0),
+      circle('((0,0),(1,1),(2,0))'::polygon),
+      line('(-1,0)'::point, '(1,0)'::point),
+      lseg('((-1,0),(1,0))'::box),
+      lseg('(-1,0)'::point, '(1,0)'::point),
+      path('((0,0),(1,1),(2,0))'::polygon),
+      point(23.4, -44.5),
+      point('((-1,0),(1,0))'::box),
+      point('((0,0),2.0)'::circle),
+      point('((-1,0),(1,0))'::lseg),
+      point('((0,0),(1,1),(2,0))'::polygon),
+      polygon('((0,0),(1,1))'::box),
+      polygon('((0,0),2.0)'::circle),
+      polygon(12, '((0,0),2.0)'::circle),
+      polygon('((0,0),(1,1),(2,0))'::path)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
