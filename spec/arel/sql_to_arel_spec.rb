@@ -964,6 +964,29 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-net.html#CIDR-INET-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       abbrev('10.1.0.0/16'::inet),
+      abbrev('10.1.0.0/16'::cidr),
+      broadcast('192.168.1.5/24'),
+      family('::1'),
+      host('192.168.1.5/24'),
+      hostmask('192.168.23.20/30'),
+      masklen('192.168.1.5/24'),
+      netmask('192.168.1.5/24'),
+      network('192.168.1.5/24'),
+      set_masklen('192.168.1.5/24', 16),
+      set_masklen('192.168.1.0/24'::cidr, 16),
+      text('192.168.1.5'::inet),
+      inet_same_family('192.168.1.5/24', '::1'),
+      inet_merge('192.168.1.5/24', '192.168.2.5/24')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
