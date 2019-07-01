@@ -29,7 +29,7 @@ Or install it yourself as:
 
 ## sql_to_arel
 
-Convert your (PostgreSQL) SQL into Arel.
+Convert your (PostgreSQL) SQL into an Arel AST.
 
 ```ruby
 [1] > sql = 'SELECT id FROM users'
@@ -42,7 +42,60 @@ Convert your (PostgreSQL) SQL into Arel.
 
 ## Extensions
 
-Adds some missing Arel nodes and extends the existing visitors.
+Adds missing Arel nodes and extends the existing visitors, [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions) for a full list.
+
+## Middleware
+
+The middleware sits between ActiveRecord and the database, which allows you to mutate or log queries before they hit the database. Multiple middleware are supported by passing the results from a finished middleware to the next. User defined context will be passed, which can contains things like the `current_user_id`.
+
+### Example
+
+Create an initializer in Rails which loads the Arel::Middleware **after** ActiveRecord:
+
+```ruby
+ActiveSupport.on_load :active_record do
+  Arel::Middleware::Railtie.insert_postgresql
+end
+```
+
+Create some middleware (can be any Ruby object which responds to `call`):
+
+```ruby
+class ReorderMiddleware
+  def self.call(arel, _context)
+    arel.order(Post.arel_table[:id].asc)
+  end
+end
+
+class LoggingMiddleware
+  def self.call(arel, context)
+    puts "User executing query: `#{context[:current_user_id]}`"
+    puts "Original SQL: `#{context[:original_sql]}`"
+    puts "Modified SQL: `#{arel.to_sql}`"
+    arel
+  end
+end
+```
+
+Run a query with middleware applied
+
+```ruby
+[1] > Arel.middleware.apply([ReorderMiddleware, LoggingMiddleware]).context(current_user_id: 1) { Post.all.load }
+User executing query: `1`
+Original SQL: `SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC`
+Modified SQL: `SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC, "posts"."id" ASC`
+Post Load (4.1ms)  SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC, "posts"."id" ASC
+=> []
+```
+
+There are more methods available to help with ordering and modifying of the current applied middleware:
+
+- `Arel.middleware.apply([SomeMiddleware]) { ... }`
+- `Arel.middleware.only([OnlyMe]) { ... }`
+- `Arel.middleware.none { ... }`
+- `Arel.middleware.except(RemoveMe) { ... }`
+- `Arel.middleware.insert_before(RunBefore, ThisMiddleware) { ... }`
+- `Arel.middleware.insert_after(RunAfter, ThisMiddleware) { ... }`
 
 ## Development
 
