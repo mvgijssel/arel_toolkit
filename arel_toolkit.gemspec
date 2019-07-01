@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dpl', '~> 1.10.11'
+  spec.add_development_dependency 'github_changelog_generator', '~> 1.14.3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'database_cleaner', '~> 1.7.0'
