@@ -938,6 +938,32 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-net.html#CIDR-INET-OPERATORS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '192.168.1.5'::inet < '192.168.1.6'::inet,
+      '192.168.1.5'::inet <= '192.168.1.5'::inet,
+      '192.168.1.5'::inet = '192.168.1.5'::inet,
+      '192.168.1.5'::inet >= '192.168.1.5'::inet,
+      '192.168.1.5'::inet > '192.168.1.4'::inet,
+      '192.168.1.5'::inet != '192.168.1.4'::inet,
+      '192.168.1.5'::inet << '192.168.1/24'::inet,
+      '192.168.1/24'::inet <<= '192.168.1/24'::inet,
+      '192.168.1/24'::inet >> '192.168.1.5'::inet,
+      '192.168.1/24'::inet >>= '192.168.1/24'::inet,
+      '192.168.1/24'::inet && '192.168.1.80/28'::inet,
+       ~ '192.168.1.6'::inet,
+      '192.168.1.6'::inet & '0.0.0.255'::inet,
+      '192.168.1.6'::inet | '0.0.0.255'::inet,
+      '192.168.1.6'::inet + 25,
+      '192.168.1.43'::inet - 36,
+      '192.168.1.43'::inet - '192.168.1.19'::inet
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
