@@ -1062,6 +1062,25 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-FUNCTIONS-DEBUG-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       ts_debug('english', 'The Brightest supernovaes'),
+      ts_lexize('english_stem', 'stars'),
+      ts_parse('default', 'foo - bar'),
+      ts_parse(3722, 'foo - bar'),
+      ts_token_type('default'),
+      ts_token_type(3722),
+      ts_stat('SELECT vector from apod')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
