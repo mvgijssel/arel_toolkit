@@ -886,6 +886,28 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-FUNC-TABLE' do
+    sql = <<~SQL
+      SELECT
+       area('((0,0),(1,1))'::box),
+      center('((0,0),(1,2))'::box),
+      diameter('((0,0),2.0)'::circle),
+      height('((0,0),(1,1))'::box),
+      isclosed('((0,0),(1,1),(2,0))'::path),
+      isopen('[(0,0),(1,1),(2,0)]'::path),
+      length('((-1,0),(1,0))'::path),
+      npoints('[(0,0),(1,1),(2,0)]'::path),
+      npoints('((1,1),(0,0))'::polygon),
+      pclose('[(0,0),(1,1),(2,0)]'::path),
+      popen('((0,0),(1,1),(2,0))'::path),
+      radius('((0,0),2.0)'::circle),
+      width('((0,0),(1,1))'::box)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
