@@ -831,6 +831,21 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-enum.html#FUNCTIONS-ENUM-TABLE' do
+    sql = <<~SQL
+      SELECT
+       enum_first(NULL::rainbow),
+      enum_last(NULL::rainbow),
+      enum_range(NULL::rainbow),
+      enum_range('orange'::rainbow, 'green'::rainbow),
+      enum_range(NULL, 'green'::rainbow),
+      enum_range('orange'::rainbow, NULL)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
