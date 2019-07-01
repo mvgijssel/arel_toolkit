@@ -1026,6 +1026,42 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       array_to_tsvector('{fat,cat,rat}'::text[]),
+      get_current_ts_config(),
+      length('fat:2,4 cat:3 rat:5A'::tsvector),
+      numnode('(fat & rat) | cat'::tsquery),
+      plainto_tsquery('english', 'The Fat Rats'),
+      phraseto_tsquery('english', 'The Fat Rats'),
+      querytree('foo & ! bar'::tsquery),
+      setweight('fat:2,4 cat:3 rat:5B'::tsvector, 'A'),
+      setweight('fat:2,4 cat:3 rat:5B'::tsvector, 'A', '{cat,rat}'),
+      strip('fat:2,4 cat:3 rat:5A'::tsvector),
+      to_tsquery('english', 'The & Fat & Rats'),
+      to_tsvector('english', 'The Fat Rats'),
+      to_tsvector('english', '{"a": "The Fat Rats"}'::json),
+      ts_delete('fat:2,4 cat:3 rat:5A'::tsvector, 'fat'),
+      ts_delete('fat:2,4 cat:3 rat:5A'::tsvector, ARRAY['fat', 'rat']),
+      ts_filter('fat:2,4 cat:3b rat:5A'::tsvector, '{a,b}'),
+      ts_headline('x y z', 'z'::tsquery),
+      ts_headline('{"a":"x y z"}'::json, 'z'::tsquery),
+      ts_rank("textsearch", "query"),
+      ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', "textsearch", "query"),
+      ts_rewrite('a & b'::tsquery, 'a'::tsquery, 'foo|bar'::tsquery),
+      ts_rewrite('a & b'::tsquery, 'SELECT t,s FROM aliases'),
+      tsquery_phrase(to_tsquery('fat'), to_tsquery('cat')),
+      tsvector_to_array('fat:2,4 cat:3 rat:5A'::tsvector),
+      tsvector_update_trigger("tsvcol", 'pg_catalog.swedish', "title", "body"),
+      tsvector_update_trigger_column("tsvcol", "configcol", "title", "body"),
+      unnest('fat:2,4 cat:3 rat:5A'::tsvector)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
