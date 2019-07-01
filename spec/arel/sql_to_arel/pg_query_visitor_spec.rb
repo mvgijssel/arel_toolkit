@@ -4,12 +4,10 @@ describe Arel::SqlToArel::PgQueryVisitor do
       sql = 'SELECT posts.id AS id FROM posts'
 
       parser = described_class.new
-      ast = PgQuery.parse(sql).tree
       message = <<~STRING
 
 
         SQL: #{sql}
-        AST: #{ast}
         BINDS: []
         message: uh oh
 
@@ -103,6 +101,23 @@ describe Arel::SqlToArel::PgQueryVisitor do
         described_class.new.send(:visit_TypeName, names: names, typemod: -1)
       end.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/41')
+      end
+    end
+
+    it 'raises an exception when array_bounds is not [] or [-1]' do
+      names = [
+        { 'String' => { 'str' => Arel::SqlToArel::PgQueryVisitor::PG_CATALOG } },
+        { 'String' => { 'str' => 'bool' } },
+      ]
+      expect do
+        described_class.new.send(
+          :visit_TypeName,
+          names: names,
+          typemod: -1,
+          array_bounds: [{ 'Integer' => { 'ival' => 1 } }],
+        )
+      end.to raise_error do |error|
+        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/86')
       end
     end
   end

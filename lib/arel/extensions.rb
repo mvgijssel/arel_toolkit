@@ -85,6 +85,11 @@ require 'arel/extensions/assignment'
 require 'arel/extensions/variable_set'
 require 'arel/extensions/variable_show'
 require 'arel/extensions/position'
+require 'arel/extensions/overlay'
+require 'arel/extensions/substring'
+require 'arel/extensions/overlaps'
+require 'arel/extensions/trim'
+require 'arel/extensions/named_argument'
 
 module Arel
   module Extensions

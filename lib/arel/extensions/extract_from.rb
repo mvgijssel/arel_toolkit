@@ -18,9 +18,9 @@ module Arel
   module Visitors
     class ToSql
       def visit_Arel_Nodes_ExtractFrom(o, collector)
-        collector << 'EXTRACT('
+        collector << 'extract('
         visit o.field, collector
-        collector << ' FROM '
+        collector << ' from '
         visit o.expr, collector
         collector << ')'
       end

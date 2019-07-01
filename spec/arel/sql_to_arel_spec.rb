@@ -27,6 +27,11 @@ describe 'Arel.sql_to_arel' do
       raise '?'
     end
   end
+
+  def strip_sql_comments(sql)
+    sql.gsub(/--.*?\n/m, '')
+  end
+
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/AbcSize
 
@@ -95,7 +100,7 @@ describe 'Arel.sql_to_arel' do
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_CMD'
   visit 'pg', 'ALTER TABLE stuff ADD COLUMN address text', 'PgQuery::ALTER_TABLE_STMT'
   visit 'all', "SELECT B'0101'", 'PgQuery::BIT_STRING'
-  visit 'all', 'SELECT 1 WHERE 1 AND 2', 'PgQuery::BOOL_EXPR'
+  visit 'all', 'SELECT 1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', 'PgQuery::BOOL_EXPR'
   visit 'all',
         'SELECT ' \
         '1 IS TRUE, ' \
@@ -169,11 +174,22 @@ describe 'Arel.sql_to_arel' do
         'SUM("a") WITHIN GROUP (ORDER BY "a"), ' \
         'mleast(VARIADIC ARRAY[10, -1, 5, 4.4]), ' \
         'COUNT(DISTINCT "some_column"), ' \
-        "\"posts\".\"created_at\"::timestamptz AT TIME ZONE 'Etc/UTC', " \
-        'EXTRACT(\'epoch\' FROM "posts"."created_at"), ' \
-        'EXTRACT(\'hour\' FROM "posts"."updated_at"), ' \
+        "\"posts\".\"created_at\"::timestamp with time zone AT TIME ZONE 'Etc/UTC', " \
+        "(1 - 1) AT TIME ZONE 'Etc/UTC', " \
+        'extract(\'epoch\' from "posts"."created_at"), ' \
+        'extract(\'hour\' from "posts"."updated_at"), ' \
+        "('2001-02-16'::date, '2001-12-21'::date) OVERLAPS " \
+        "('2001-10-30'::date, '2002-10-30'::date), " \
         'some_function("a", \'b\', 1), ' \
-        "position('content'::text in 'some content')",
+        "position('content'::text in 'some content'), " \
+        "overlay('Txxxxas' placing 'hom' from 2 for 4), " \
+        "overlay('stuff' placing 'ing' from 3), " \
+        "substring('Thomas' from 2 for 3), " \
+        "substring('Thomas' from '...$'), " \
+        "substring('Thomas' from '%#\"o_a#\"_' for '#'), " \
+        "trim(both 'xyz'), " \
+        "trim(leading 'yx' from 'yxTomxx'), " \
+        "trim(trailing 'xx' from 'yxTomxx')",
         'PgQuery::FUNC_CALL'
   visit 'pg',
         "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
@@ -309,7 +325,13 @@ describe 'Arel.sql_to_arel' do
         'COMMIT',
         'PgQuery::TRANSACTION_STMT'
   visit 'pg', 'TRUNCATE public.some_table', 'PgQuery::TRUNCATE_STMT'
-  visit 'all', "SELECT 1::int4, 2::bool, '3'::text", 'PgQuery::TYPE_CAST'
+  visit 'all',
+        'SELECT ' \
+        '1::integer, ' \
+        '2::bool, ' \
+        "'3'::text, " \
+        "(date_trunc('hour', \"posts\".\"created_at\") || '-0')::timestamp with time zone",
+        'PgQuery::TYPE_CAST'
   visit 'all', 'SELECT "a"::varchar', 'PgQuery::TYPE_NAME'
   visit 'all',
         'WITH "query" AS (SELECT 1 AS a) ' \
@@ -324,7 +346,7 @@ describe 'Arel.sql_to_arel' do
         'WHERE CURRENT OF some_cursor',
         'PgQuery::UPDATE_STMT'
   visit 'all',
-        'UPDATE "some_table" SET "b" = \'t\'::bool, "c" = NULL, "d" = \'f\'::bool',
+        'UPDATE "some_table" SET "b" = 1 - 1, "c" = 2 + 2, "d" = COALESCE(NULL, 1)',
         'PgQuery::UPDATE_STMT'
   visit 'pg', 'VACUUM FULL VERBOSE ANALYZE some_table', 'PgQuery::VACUUM_STMT'
   visit 'all',
@@ -398,11 +420,11 @@ describe 'Arel.sql_to_arel' do
 
   it 'implements all operators' do
     sql = 'SELECT ' \
-          '11 + 11, ' \
-          '12 - 12, ' \
-          '10 * 10, ' \
-          '13 / 13, ' \
-          '13 % 2' \
+          '11 + (11 + 5), ' \
+          '(12 - 12) - 13, ' \
+          '3 + (10 * 10), ' \
+          '(6 - 13) / 13, ' \
+          '13 % 2, ' \
           '2.0 ^ 3.0, ' \
           ' |/ 16, ' \
           ' ||/ 17, ' \
@@ -444,7 +466,8 @@ describe 'Arel.sql_to_arel' do
           "'thomas' ~ '.*thomas.*', " \
           "'thomas' ~* '.*Thomas.*', " \
           "'thomas' !~ '.*Thomas.*', " \
-          "'thomas' !~* '.*vadim.*'"
+          "'thomas' !~* '.*vadim.*', " \
+          "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
 
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq sql
@@ -472,6 +495,590 @@ describe 'Arel.sql_to_arel' do
     sql = 'SELECT SUM(ALL "a")'
     parsed_sql = Arel.sql_to_arel(sql).to_sql
     expect(parsed_sql).to eq 'SELECT SUM("a")'
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-FUNC-TABLE' do
+    sql = <<~SQL
+      SELECT
+       abs(-17.4),
+      cbrt(27.0),
+      ceil(-42.8),
+      ceiling(-95.3),
+      degrees(0.5),
+      div(9, 4),
+      exp(1.0),
+      floor(-42.8),
+      ln(2.0),
+      log(100.0),
+      log(2.0, 64.0),
+      mod(9, 4),
+      pi(),
+      power(9.0, 3.0),
+      power(9.0, 3.0),
+      radians(45.0),
+      round(42.4),
+      round(42.4382, 2),
+      scale(8.41),
+      sign(-8.4),
+      sqrt(2.0),
+      trunc(42.8),
+      trunc(42.4382, 2),
+      width_bucket(5.35, 0.024, 10.06, 5),
+      width_bucket(5.35, 0.024, 10.06, 5),
+      width_bucket(now(), ARRAY['yesterday', 'today', 'tomorrow']::timestamp with time zone[])
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-RANDOM-TABLE' do
+    sql = <<~SQL
+      SELECT
+       random(),
+      setseed("dp")
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-TRIG-TABLE' do
+    sql = <<~SQL
+      SELECT
+       acos("x"),
+      asin("x"),
+      atan("x"),
+      atan2("y", "x"),
+      cos("x"),
+      cot("x"),
+      sin("x"),
+      tan("x")
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(sql)
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-string.html#FUNCTIONS-STRING-SQL' do
+    sql = <<~SQL
+      SELECT
+       'Post' || 'greSQL',
+      'Value: ' || 42,
+      bit_length('jose'),
+      char_length('jose'),
+      lower('TOM'),
+      octet_length('jose'),
+      overlay('Txxxxas' placing 'hom' from 2 for 4),
+      position('om' in 'Thomas'),
+      substring('Thomas' from 2 for 3),
+      substring('Thomas' from '...$'),
+      substring('Thomas' from '%#"o_a#"_' for '#'),
+      trim(both 'xyz' from 'yxTomxx'),
+      -- trim(both from 'yxTomxx', 'xyz') will become trim(both 'xyz' from 'yxTomxx')
+      upper('tom')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-string.html#FUNCTIONS-STRING-OTHER' do
+    sql = <<~SQL
+      SELECT
+       ascii('x'),
+      btrim('xyxtrimyyx', 'xyz'),
+      chr(65),
+      concat('abcde', 2, NULL, 22),
+      concat_ws(',', 'abcde', 2, NULL, 22),
+      convert('text_in_utf8', 'UTF8', 'LATIN1'),
+      convert_from('text_in_utf8', 'UTF8'),
+      convert_to('some text', 'UTF8'),
+      decode('MTIzAAE=', 'base64'),
+      encode('123\\000\\001', 'base64'),
+      format('Hello %s, %1$s', 'World'),
+      initcap('hi THOMAS'),
+      left('abcde', 2),
+      length('jose'),
+      length('jose', 'UTF8'),
+      lpad('hi', 5, 'xy'),
+      ltrim('zzzytest', 'xyz'),
+      md5('abc'),
+      parse_ident('"SomeSchema".someTable'),
+      pg_client_encoding(),
+      quote_ident('Foo bar'),
+      -- quote_literal(E'O\'Reilly'),
+      quote_literal(42.5),
+      quote_nullable(NULL),
+      quote_nullable(42.5),
+      regexp_match('foobarbequebaz', '(bar)(beque)'),
+      regexp_matches('foobarbequebaz', 'ba.', 'g'),
+      regexp_replace('Thomas', '.[mN]a.', 'M'),
+      regexp_split_to_array('hello world', '\s+'),
+      regexp_split_to_table('hello world', '\s+'),
+      repeat('Pg', 4),
+      replace('abcdefabcdef', 'cd', 'XX'),
+      reverse('abcde'),
+      right('abcde', 2),
+      rpad('hi', 5, 'xy'),
+      rtrim('testxxzx', 'xyz'),
+      split_part('abc~@~def~@~ghi', '~@~', 2),
+      strpos('high', 'ig'),
+      substr('alphabet', 3, 2),
+      to_ascii('Karel'),
+      to_hex(2147483647),
+      translate('12345', '143', 'ax')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-binarystring.html#FUNCTIONS-BINARYSTRING-SQL' do
+    sql = <<~SQL
+      SELECT
+       '\\Post'::bytea || '\\047gres\\000'::bytea,
+      octet_length('jo\\000se'::bytea),
+      overlay('Th\\000omas'::bytea placing '\\002\\003'::bytea from 2 for 3),
+      position('\\000om'::bytea in 'Th\\000omas'::bytea),
+      substring('Th\\000omas'::bytea from 2 for 3),
+      trim(both '\\000\\001'::bytea from '\\000Tom\\001'::bytea)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-binarystring.html#FUNCTIONS-BINARYSTRING-OTHER' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       btrim('\\000trim\\001'::bytea, '\\000\\001'::bytea),
+      decode('123\\000456', 'escape'),
+      encode('123\\000456'::bytea, 'escape'),
+      get_bit('Th\\000omas'::bytea, 45),
+      get_byte('Th\\000omas'::bytea, 4),
+      length('jo\\000se'::bytea),
+      md5('Th\\000omas'::bytea),
+      set_bit('Th\\000omas'::bytea, 45, 0),
+      set_byte('Th\\000omas'::bytea, 4, 64)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-matching.html#FUNCTIONS-POSIX-TABLE' do
+    sql = <<~SQL
+      SELECT
+       'thomas' ~ '.*thomas.*',
+      'thomas' ~* '.*Thomas.*',
+      'thomas' !~ '.*Thomas.*',
+      'thomas' !~* '.*vadim.*'
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-formatting.html#FUNCTIONS-FORMATTING-TABLE' do
+    sql = <<~SQL
+      SELECT
+       to_char(current_timestamp, 'HH12:MI:SS'),
+      to_char('15h 2m 12s'::interval, 'HH24:MI:SS'),
+      to_char(125, '999'),
+      to_char(125.8::real, '999D9'),
+      to_char(-125.8, '999D99S'),
+      to_date('05 Dec 2000', 'DD Mon YYYY'),
+      to_number('12,454.8-', '99G999D9S'),
+      to_timestamp('05 Dec 2000', 'DD Mon YYYY')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-formatting.html#FUNCTIONS-FORMATTING-EXAMPLES-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       to_char(current_timestamp, 'Day, DD  HH12:MI:SS'),
+      to_char(current_timestamp, 'FMDay, FMDD  HH12:MI:SS'),
+      to_char(-0.1, '99.99'),
+      to_char(-0.1, 'FM9.99'),
+      to_char(0.1, '0.9'),
+      to_char(12, '9990999.9'),
+      to_char(12, 'FM9990999.9'),
+      to_char(485, '999'),
+      to_char(-485, '999'),
+      to_char(485, '9 9 9'),
+      to_char(1485, '9,999'),
+      to_char(1485, '9G999'),
+      to_char(148.5, '999.999'),
+      to_char(148.5, 'FM999.999'),
+      to_char(148.5, 'FM999.990'),
+      to_char(148.5, '999D999'),
+      to_char(3148.5, '9G999D999'),
+      to_char(-485, '999S'),
+      to_char(-485, '999MI'),
+      to_char(485, '999MI'),
+      to_char(485, 'FM999MI'),
+      to_char(485, 'PL999'),
+      to_char(485, 'SG999'),
+      to_char(-485, 'SG999'),
+      to_char(-485, '9SG99'),
+      to_char(-485, '999PR'),
+      to_char(485, 'L999'),
+      to_char(485, 'RN'),
+      to_char(485, 'FMRN'),
+      to_char(5.2, 'FMRN'),
+      to_char(482, '999th'),
+      to_char(485, '"Good number:"999'),
+      to_char(485.8, '"Pre:"999" Post:" .999'),
+      to_char(12, '99V999'),
+      to_char(12.4, '99V999'),
+      to_char(12.45, '99V9'),
+      to_char(0.0004859, '9.99EEEE')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#OPERATORS-DATETIME-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '2001-09-28'::date + '7'::integer,
+      '2001-09-28'::date + '1 hour'::interval,
+      '2001-09-28'::date + '03:00'::time,
+      '1 day'::interval + '1 hour'::interval,
+      '2001-09-28 01:00'::timestamp + '23 hours'::interval,
+      '01:00'::time + '3 hours'::interval,
+       - '23 hours'::interval,
+      '2001-10-01'::date - '2001-09-28'::date,
+      '2001-10-01'::date - '7'::integer,
+      '2001-09-28'::date - '1 hour'::interval,
+      '05:00'::time - '03:00'::time,
+      '05:00'::time - '2 hours'::interval,
+      '2001-09-28 23:00'::timestamp - '23 hours'::interval,
+      '1 day'::interval - '1 hour'::interval,
+      '2001-09-29 03:00'::timestamp - '2001-09-27 12:00'::timestamp,
+      900 * '1 second'::interval,
+      21 * '1 day'::interval,
+      '3.5'::double precision * '1 hour'::interval,
+      '1 hour'::interval / '1.5'::double precision
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#FUNCTIONS-DATETIME-TABLE' do
+    sql = <<~SQL
+      SELECT
+       age('2001-04-10'::timestamp, '1957-06-13'::timestamp),
+      age('1957-06-13'::timestamp),
+      clock_timestamp(),
+      current_date,
+      current_time,
+      current_timestamp,
+      date_part('hour', '2001-02-16 20:38:40'::timestamp),
+      date_part('month', '2 years 3 months'::interval),
+      date_trunc('hour', '2001-02-16 20:38:40'::timestamp),
+      date_trunc('hour', '2 days 3 hours 40 minutes'::interval),
+      extract('hour' from '2001-02-16 20:38:40'::timestamp),
+      extract('month' from '2 years 3 months'::interval),
+      isfinite('2001-02-16'::date),
+      isfinite('2001-02-16 21:28:30'::timestamp),
+      isfinite('4 hours'::interval),
+      justify_days('35 days'::interval),
+      justify_hours('27 hours'::interval),
+      justify_interval('1 mon -1 hour'::interval),
+      localtime,
+      localtimestamp,
+      make_date(2013, 7, 15),
+      make_interval(days => 10),
+      make_time(8, 15, 23.5),
+      make_timestamp(2013, 7, 15, 8, 15, 23.5),
+      make_timestamptz(2013, 7, 15, 8, 15, 23.5),
+      now(),
+      statement_timestamp(),
+      timeofday(),
+      transaction_timestamp(),
+      to_timestamp(1284352323)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-datetime.html#FUNCTIONS-DATETIME-ZONECONVERT-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       '2001-02-16 20:38:40'::timestamp AT TIME ZONE 'America/Denver',
+      '2001-02-16 20:38:40-05'::timestamp with time zone AT TIME ZONE 'America/Denver',
+      '2001-02-16 20:38:40-05'::timezone AT TIME ZONE 'Asia/Tokyo' AT TIME ZONE 'America/Chicago'
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-enum.html#FUNCTIONS-ENUM-TABLE' do
+    sql = <<~SQL
+      SELECT
+       enum_first(NULL::rainbow),
+      enum_last(NULL::rainbow),
+      enum_range(NULL::rainbow),
+      enum_range('orange'::rainbow, 'green'::rainbow),
+      enum_range(NULL, 'green'::rainbow),
+      enum_range('orange'::rainbow, NULL)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-OP-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '((0,0),(1,1))'::box + '(2.0,0)'::point,
+      '((0,0),(1,1))'::box - '(2.0,0)'::point,
+      '((0,0),(1,1))'::box * '(2.0,0)'::point,
+      '((0,0),(2,2))'::box / '(2.0,0)'::point,
+      '((1,-1),(-1,1))'::box # '((1,1),(-2,-2))'::box,
+       # '((1,0),(0,1),(-1,0))'::path,
+       @-@ '((0,0),(1,0))'::path,
+       @@ '((0,0),10)'::circle,
+      '(0,0)'::point ## '((2,0),(0,2))'::lseg,
+      '((0,0),1)'::circle <-> '((5,0),1)'::circle,
+      '((0,0),(1,1))'::box && '((0,0),(2,2))'::box,
+      '((0,0),1)'::circle << '((5,0),1)'::circle,
+      '((5,0),1)'::circle >> '((0,0),1)'::circle,
+      '((0,0),(1,1))'::box &< '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box &> '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box <<| '((3,4),(5,5))'::box,
+      '((3,4),(5,5))'::box |>> '((0,0),(3,3))'::box,
+      '((0,0),(1,1))'::box &<| '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box |&> '((0,0),(2,2))'::box,
+      '((0,0),1)'::circle <^ '((0,5),1)'::circle,
+      '((0,5),1)'::circle >^ '((0,0),1)'::circle,
+      '((-1,0),(1,0))'::lseg ?# '((-2,-2),(2,2))'::box,
+       ?- '((-1,0),(1,0))'::lseg,
+      '(1,0)'::point ?- '(0,0)'::point,
+       ?| '((-1,0),(1,0))'::lseg,
+      '(0,1)'::point ?| '(0,0)'::point,
+      '((0,0),(0,1))'::lseg ?-| '((0,0),(1,0))'::lseg,
+      '((-1,0),(1,0))'::lseg ?|| '((-1,2),(1,2))'::lseg,
+      '((0,0),2)'::circle @> '(1,1)'::point,
+      '(1,1)'::point <@ '((0,0),2)'::circle,
+      '((0,0),(1,1))'::polygon ~= '((1,1),(0,0))'::polygon
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-FUNC-TABLE' do
+    sql = <<~SQL
+      SELECT
+       area('((0,0),(1,1))'::box),
+      center('((0,0),(1,2))'::box),
+      diameter('((0,0),2.0)'::circle),
+      height('((0,0),(1,1))'::box),
+      isclosed('((0,0),(1,1),(2,0))'::path),
+      isopen('[(0,0),(1,1),(2,0)]'::path),
+      length('((-1,0),(1,0))'::path),
+      npoints('[(0,0),(1,1),(2,0)]'::path),
+      npoints('((1,1),(0,0))'::polygon),
+      pclose('[(0,0),(1,1),(2,0)]'::path),
+      popen('((0,0),(1,1),(2,0))'::path),
+      radius('((0,0),2.0)'::circle),
+      width('((0,0),(1,1))'::box)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-CONV-TABLE' do
+    sql = <<~SQL
+      SELECT
+       box('((0,0),2.0)'::circle),
+      box('(0,0)'::point),
+      box('(0,0)'::point, '(1,1)'::point),
+      box('((0,0),(1,1),(2,0))'::polygon),
+      bound_box('((0,0),(1,1))'::box, '((3,3),(4,4))'::box),
+      circle('((0,0),(1,1))'::box),
+      circle('(0,0)'::point, 2.0),
+      circle('((0,0),(1,1),(2,0))'::polygon),
+      line('(-1,0)'::point, '(1,0)'::point),
+      lseg('((-1,0),(1,0))'::box),
+      lseg('(-1,0)'::point, '(1,0)'::point),
+      path('((0,0),(1,1),(2,0))'::polygon),
+      point(23.4, -44.5),
+      point('((-1,0),(1,0))'::box),
+      point('((0,0),2.0)'::circle),
+      point('((-1,0),(1,0))'::lseg),
+      point('((0,0),(1,1),(2,0))'::polygon),
+      polygon('((0,0),(1,1))'::box),
+      polygon('((0,0),2.0)'::circle),
+      polygon(12, '((0,0),2.0)'::circle),
+      polygon('((0,0),(1,1),(2,0))'::path)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-net.html#CIDR-INET-OPERATORS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '192.168.1.5'::inet < '192.168.1.6'::inet,
+      '192.168.1.5'::inet <= '192.168.1.5'::inet,
+      '192.168.1.5'::inet = '192.168.1.5'::inet,
+      '192.168.1.5'::inet >= '192.168.1.5'::inet,
+      '192.168.1.5'::inet > '192.168.1.4'::inet,
+      '192.168.1.5'::inet != '192.168.1.4'::inet,
+      '192.168.1.5'::inet << '192.168.1/24'::inet,
+      '192.168.1/24'::inet <<= '192.168.1/24'::inet,
+      '192.168.1/24'::inet >> '192.168.1.5'::inet,
+      '192.168.1/24'::inet >>= '192.168.1/24'::inet,
+      '192.168.1/24'::inet && '192.168.1.80/28'::inet,
+       ~ '192.168.1.6'::inet,
+      '192.168.1.6'::inet & '0.0.0.255'::inet,
+      '192.168.1.6'::inet | '0.0.0.255'::inet,
+      '192.168.1.6'::inet + 25,
+      '192.168.1.43'::inet - 36,
+      '192.168.1.43'::inet - '192.168.1.19'::inet
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-net.html#CIDR-INET-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       abbrev('10.1.0.0/16'::inet),
+      abbrev('10.1.0.0/16'::cidr),
+      broadcast('192.168.1.5/24'),
+      family('::1'),
+      host('192.168.1.5/24'),
+      hostmask('192.168.23.20/30'),
+      masklen('192.168.1.5/24'),
+      netmask('192.168.1.5/24'),
+      network('192.168.1.5/24'),
+      set_masklen('192.168.1.5/24', 16),
+      set_masklen('192.168.1.0/24'::cidr, 16),
+      text('192.168.1.5'::inet),
+      inet_same_family('192.168.1.5/24', '::1'),
+      inet_merge('192.168.1.5/24', '192.168.2.5/24')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-net.html#MACADDR-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       trunc('12:34:56:78:90:ab'::macaddr)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-net.html#MACADDR8-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       trunc('12:34:56:78:90:ab:cd:ef'::macaddr8),
+      macaddr8_set7bit('00:34:56:ab:cd:ef'::macaddr8)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-OPERATORS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       to_tsvector('fat cats ate rats') @@ to_tsquery('cat & rat'),
+      to_tsvector('fat cats ate rats') @@@ to_tsquery('cat & rat'),
+      'a:1 b:2'::tsvector || 'c:1 d:2 b:3'::tsvector,
+      'fat | rat'::tsquery && 'cat'::tsquery,
+      'fat | rat'::tsquery || 'cat'::tsquery,
+      !! 'cat'::tsquery,
+      to_tsquery('fat') <-> to_tsquery('rat'),
+      'cat'::tsquery @> 'cat & rat'::tsquery,
+      'cat'::tsquery <@ 'cat & rat'::tsquery
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-FUNCTIONS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       array_to_tsvector('{fat,cat,rat}'::text[]),
+      get_current_ts_config(),
+      length('fat:2,4 cat:3 rat:5A'::tsvector),
+      numnode('(fat & rat) | cat'::tsquery),
+      plainto_tsquery('english', 'The Fat Rats'),
+      phraseto_tsquery('english', 'The Fat Rats'),
+      querytree('foo & ! bar'::tsquery),
+      setweight('fat:2,4 cat:3 rat:5B'::tsvector, 'A'),
+      setweight('fat:2,4 cat:3 rat:5B'::tsvector, 'A', '{cat,rat}'),
+      strip('fat:2,4 cat:3 rat:5A'::tsvector),
+      to_tsquery('english', 'The & Fat & Rats'),
+      to_tsvector('english', 'The Fat Rats'),
+      to_tsvector('english', '{"a": "The Fat Rats"}'::json),
+      ts_delete('fat:2,4 cat:3 rat:5A'::tsvector, 'fat'),
+      ts_delete('fat:2,4 cat:3 rat:5A'::tsvector, ARRAY['fat', 'rat']),
+      ts_filter('fat:2,4 cat:3b rat:5A'::tsvector, '{a,b}'),
+      ts_headline('x y z', 'z'::tsquery),
+      ts_headline('{"a":"x y z"}'::json, 'z'::tsquery),
+      ts_rank("textsearch", "query"),
+      ts_rank_cd('{0.1, 0.2, 0.4, 1.0}', "textsearch", "query"),
+      ts_rewrite('a & b'::tsquery, 'a'::tsquery, 'foo|bar'::tsquery),
+      ts_rewrite('a & b'::tsquery, 'SELECT t,s FROM aliases'),
+      tsquery_phrase(to_tsquery('fat'), to_tsquery('cat')),
+      tsvector_to_array('fat:2,4 cat:3 rat:5A'::tsvector),
+      tsvector_update_trigger("tsvcol", 'pg_catalog.swedish', "title", "body"),
+      tsvector_update_trigger_column("tsvcol", "configcol", "title", "body"),
+      unnest('fat:2,4 cat:3 rat:5A'::tsvector)
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  # rubocop:disable LineLength
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-FUNCTIONS-DEBUG-TABLE' do
+    # rubocop:enable LineLength
+
+    sql = <<~SQL
+      SELECT
+       ts_debug('english', 'The Brightest supernovaes'),
+      ts_lexize('english_stem', 'stars'),
+      ts_parse('default', 'foo - bar'),
+      ts_parse(3722, 'foo - bar'),
+      ts_token_type('default'),
+      ts_token_type(3722),
+      ts_stat('SELECT vector from apod')
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
@@ -525,7 +1132,6 @@ describe 'Arel.sql_to_arel' do
 
 
       SQL: SELECT 1=1
-      AST: [#{ast}]
       BINDS: []
       message: Unknown Expr type `-1`
 

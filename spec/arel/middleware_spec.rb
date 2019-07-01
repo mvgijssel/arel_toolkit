@@ -1,12 +1,12 @@
 describe 'Arel.middleware' do
   class SomeMiddleware
-    def self.call(arel)
+    def self.call(arel, _context)
       arel
     end
   end
 
   class OtherMiddleware
-    def self.call(arel)
+    def self.call(arel, _context)
       arel
     end
   end
@@ -18,10 +18,10 @@ describe 'Arel.middleware' do
 
     expect(SomeMiddleware)
       .to receive(:call)
-      .and_wrap_original do |m, passed_arel|
+      .and_wrap_original do |m, passed_arel, context|
         expect(passed_arel).to eq(query_arel)
 
-        m.call(passed_arel)
+        m.call(passed_arel, context)
       end
 
     Arel.middleware.apply([SomeMiddleware]) do
@@ -46,6 +46,13 @@ describe 'Arel.middleware' do
 
     Arel.middleware.apply([SomeMiddleware]).context(yes: :sir) do
       context = Arel.middleware.context
+
+      expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, passed_context|
+        expect(passed_context).to include(yes: :sir)
+        m.call(arel, passed_context)
+      end
+
+      Post.where(id: 1).load
     end
 
     expect(context).to eq(yes: :sir)
@@ -59,6 +66,30 @@ describe 'Arel.middleware' do
         expect(Arel.middleware.context).to eq(hello: :friend)
       end
     end
+  end
+
+  it 'sets the original sql in the context' do
+    class ChangeMiddleware
+      def self.call(_arel, _context)
+        Post.select(:title)
+      end
+    end
+
+    expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, context|
+      expect(arel.to_sql)
+        .to eq 'SELECT "posts"."title" FROM "posts"'
+      expect(context[:original_sql])
+        .to eq 'SELECT "posts"."content" FROM "posts"'
+
+      m.call(arel, context)
+    end
+
+    Arel.middleware.apply([ChangeMiddleware, SomeMiddleware]) do
+      Post.select(:content).load
+    end
+  end
+
+  it 'does not allow overriding the original sql in the context' do
   end
 
   it 'only applies middleware given for a block' do
@@ -100,14 +131,12 @@ describe 'Arel.middleware' do
   end
 
   it 'resets middleware after an exception' do
-    begin
+    expect do
       Arel.middleware.apply([SomeMiddleware]) do
         raise 'something'
       end
-    rescue StandardError => e
-    end
+    end.to raise_error('something')
 
-    expect(e.message).to eq 'something'
     expect(Arel.middleware.current).to eq []
   end
 
@@ -191,37 +220,31 @@ describe 'Arel.middleware' do
   end
 
   it 'calls PostgreSQLAdapter#execute' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:execute).twice.and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:execute_without_arel_middleware).twice.and_call_original
+    expect(connection).to receive(:execute).twice.and_call_original
 
     Post.create!
   end
 
   it 'calls PostgreSQLAdapter#exec_no_cache' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_no_cache).twice.and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_no_cache_without_arel_middleware).twice.and_call_original
+    expect(connection).to receive(:exec_no_cache).twice.and_call_original
 
     Arel.middleware.apply([SomeMiddleware]) do
       Post.where(id: [1, 2]).load # IN statements are not prepared
 
-      ActiveRecord::Base.connection.unprepared_statement do
+      connection.unprepared_statement do
         Post.where(id: 1).load
       end
     end
   end
 
   it 'calls PostgreSQLAdapter#exec_cache' do
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_cache).and_call_original
+    connection = ActiveRecord::Base.connection
 
-    expect_any_instance_of(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-      .to receive(:exec_cache_without_arel_middleware).and_call_original
+    expect(connection).to receive(:exec_cache).and_call_original
 
     Arel.middleware.apply([SomeMiddleware]) do
       Post.where(id: 1).load
@@ -281,5 +304,18 @@ describe 'Arel.middleware' do
     Arel.middleware.apply([SomeMiddleware]) do
       post.destroy!
     end
+  end
+
+  it 'does not use middleware when configuring a connection to prevent endless checkouts' do
+    # New thread makes sure we're not reusing the same connection
+    Thread.new do
+      # Apply middleware in the new thread otherwise it won't be picked up
+      Arel.middleware.apply([SomeMiddleware]) do
+        # Force checkout a new connection
+        ActiveRecord::Base.connection_pool.with_connection do
+          Post.create!(title: 'some title', content: 'some content')
+        end
+      end
+    end.join
   end
 end

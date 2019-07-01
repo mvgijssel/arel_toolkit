@@ -29,7 +29,7 @@ module Arel
       rescue ::StandardError => e
         raise e.class, e.message, e.backtrace if e.is_a?(Arel::SqlToArel::Error)
 
-        boom e.message
+        boom e.message, e.backtrace
       end
 
       private
@@ -390,11 +390,37 @@ module Arel
 
                when [PG_CATALOG, 'timezone']
                  timezone, expression = args
-                 [Arel::Nodes::AtTimeZone.new(expression, timezone)]
 
+                 [Arel::Nodes::AtTimeZone.new(maybe_add_grouping(expression), timezone)]
+
+               # https://www.postgresql.org/docs/10/functions-string.html
                when [PG_CATALOG, 'position']
                  string, substring = args
                  [Arel::Nodes::Position.new(substring, string)]
+
+               when [PG_CATALOG, 'overlay']
+                 string, substring, start, length = args
+                 [Arel::Nodes::Overlay.new(string, substring, start, length)]
+
+               when [PG_CATALOG, 'ltrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('leading', substring, string)]
+
+               when [PG_CATALOG, 'rtrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('trailing', substring, string)]
+
+               when [PG_CATALOG, 'btrim']
+                 string, substring = args
+                 [Arel::Nodes::Trim.new('both', substring, string)]
+
+               when [PG_CATALOG, 'substring']
+                 string, pattern, escape = args
+                 [Arel::Nodes::Substring.new(string, pattern, escape)]
+
+               when [PG_CATALOG, 'overlaps']
+                 start1, end1, start2, end2 = args
+                 [Arel::Nodes::Overlaps.new(start1, end1, start2, end2)]
 
                else
                  if function_names.length > 1
@@ -525,6 +551,13 @@ module Arel
         else
           boom "Unknown Op -> #{op}"
         end
+      end
+
+      def visit_NamedArgExpr(arg:, name:, argnumber:)
+        arg = visit(arg)
+        boom '' unless argnumber == -1
+
+        Arel::Nodes::NamedArgument.new(name, arg)
       end
 
       def visit_Null(**_)
@@ -818,10 +851,12 @@ module Arel
         arg = visit(arg)
         type_name = visit(type_name)
 
-        Arel::Nodes::TypeCast.new(arg, type_name)
+        Arel::Nodes::TypeCast.new(maybe_add_grouping(arg), type_name)
       end
 
-      def visit_TypeName(names:, typemod:)
+      def visit_TypeName(names:, typemod:, array_bounds: [])
+        array_bounds = visit(array_bounds)
+
         names = names.map do |name|
           visit(name, :operator)
         end
@@ -830,8 +865,26 @@ module Arel
 
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/40' if typemod != -1
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
+        if array_bounds != [] && array_bounds != [-1]
+          boom 'https://github.com/mvgijssel/arel_toolkit/issues/86'
+        end
 
-        names.first
+        type_name = names.first
+        type_name = case type_name
+                    when 'int4'
+                      'integer'
+                    when 'float4'
+                      'real'
+                    when 'float8'
+                      'double precision'
+                    when 'timestamptz'
+                      'timestamp with time zone'
+                    else
+                      type_name
+                    end
+
+        type_name << '[]' if array_bounds == [-1]
+        type_name
       end
 
       def visit_UpdateStmt(
@@ -902,13 +955,20 @@ module Arel
       end
 
       def generate_operator(left, right, operator)
+        left = maybe_add_grouping(left)
+        right = maybe_add_grouping(right)
+
         case operator
 
         # https://www.postgresql.org/docs/10/functions-math.html
         when '+'
           Arel::Nodes::Addition.new(left, right)
         when '-'
-          Arel::Nodes::Subtraction.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'-', right)
+          else
+            Arel::Nodes::Subtraction.new(left, right)
+          end
         when '*'
           Arel::Nodes::Multiplication.new(left, right)
         when '/'
@@ -932,7 +992,11 @@ module Arel
         when '|'
           Arel::Nodes::BitwiseOr.new(left, right)
         when '#'
-          Arel::Nodes::BitwiseXor.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'#', right)
+          else
+            Arel::Nodes::BitwiseXor.new(left, right)
+          end
         when '~'
           if left.nil?
             Arel::Nodes::BitwiseNot.new(right)
@@ -988,7 +1052,11 @@ module Arel
         when '?'
           Arel::Nodes::JsonbKeyExists.new(left, right)
         when '?|'
-          Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'?|', right)
+          else
+            Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+          end
         when '?&'
           Arel::Nodes::JsonbAllKeyExists.new(left, right)
 
@@ -1001,7 +1069,11 @@ module Arel
           Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
-          boom "Unknown operator `#{operator}`"
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(operator, right)
+          else
+            Arel::Nodes::InfixOperation.new(operator, left, right)
+          end
         end
       end
 
@@ -1117,16 +1189,26 @@ module Arel
         end
       end
 
-      def boom(message)
+      def maybe_add_grouping(node)
+        case node
+        when Arel::Nodes::Binary
+          Arel::Nodes::Grouping.new(node)
+        else
+          node
+        end
+      end
+
+      def boom(message, backtrace = nil)
         new_message = <<~STRING
 
 
           SQL: #{sql}
-          AST: #{object}
           BINDS: #{binds}
           message: #{message}
 
         STRING
+
+        raise(Arel::SqlToArel::Error, new_message, backtrace) if backtrace
 
         raise Arel::SqlToArel::Error, new_message
       end
