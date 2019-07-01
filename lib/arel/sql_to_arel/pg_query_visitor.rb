@@ -992,7 +992,11 @@ module Arel
         when '|'
           Arel::Nodes::BitwiseOr.new(left, right)
         when '#'
-          Arel::Nodes::BitwiseXor.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'#', right)
+          else
+            Arel::Nodes::BitwiseXor.new(left, right)
+          end
         when '~'
           if left.nil?
             Arel::Nodes::BitwiseNot.new(right)
@@ -1048,7 +1052,11 @@ module Arel
         when '?'
           Arel::Nodes::JsonbKeyExists.new(left, right)
         when '?|'
-          Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(:'?|', right)
+          else
+            Arel::Nodes::JsonbAnyKeyExists.new(left, right)
+          end
         when '?&'
           Arel::Nodes::JsonbAllKeyExists.new(left, right)
 
@@ -1061,7 +1069,11 @@ module Arel
           Arel::Nodes::NotRegexp.new(left, right, false)
 
         else
-          Arel::Nodes::InfixOperation.new(operator, left, right)
+          if left.nil?
+            Arel::Nodes::UnaryOperation.new(operator, right)
+          else
+            Arel::Nodes::InfixOperation.new(operator, left, right)
+          end
         end
       end
 

@@ -846,6 +846,46 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-geometry.html#FUNCTIONS-GEOMETRY-OP-TABLE' do
+    sql = <<~SQL
+      SELECT
+       '((0,0),(1,1))'::box + '(2.0,0)'::point,
+      '((0,0),(1,1))'::box - '(2.0,0)'::point,
+      '((0,0),(1,1))'::box * '(2.0,0)'::point,
+      '((0,0),(2,2))'::box / '(2.0,0)'::point,
+      '((1,-1),(-1,1))'::box # '((1,1),(-2,-2))'::box,
+       # '((1,0),(0,1),(-1,0))'::path,
+       @-@ '((0,0),(1,0))'::path,
+       @@ '((0,0),10)'::circle,
+      '(0,0)'::point ## '((2,0),(0,2))'::lseg,
+      '((0,0),1)'::circle <-> '((5,0),1)'::circle,
+      '((0,0),(1,1))'::box && '((0,0),(2,2))'::box,
+      '((0,0),1)'::circle << '((5,0),1)'::circle,
+      '((5,0),1)'::circle >> '((0,0),1)'::circle,
+      '((0,0),(1,1))'::box &< '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box &> '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box <<| '((3,4),(5,5))'::box,
+      '((3,4),(5,5))'::box |>> '((0,0),(3,3))'::box,
+      '((0,0),(1,1))'::box &<| '((0,0),(2,2))'::box,
+      '((0,0),(3,3))'::box |&> '((0,0),(2,2))'::box,
+      '((0,0),1)'::circle <^ '((0,5),1)'::circle,
+      '((0,5),1)'::circle >^ '((0,0),1)'::circle,
+      '((-1,0),(1,0))'::lseg ?# '((-2,-2),(2,2))'::box,
+       ?- '((-1,0),(1,0))'::lseg,
+      '(1,0)'::point ?- '(0,0)'::point,
+       ?| '((-1,0),(1,0))'::lseg,
+      '(0,1)'::point ?| '(0,0)'::point,
+      '((0,0),(0,1))'::lseg ?-| '((0,0),(1,0))'::lseg,
+      '((-1,0),(1,0))'::lseg ?|| '((-1,2),(1,2))'::lseg,
+      '((0,0),2)'::circle @> '(1,1)'::point,
+      '(1,1)'::point <@ '((0,0),2)'::circle,
+      '((0,0),(1,1))'::polygon ~= '((1,1),(0,0))'::polygon
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
