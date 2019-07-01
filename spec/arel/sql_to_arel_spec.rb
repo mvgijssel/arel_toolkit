@@ -1008,6 +1008,24 @@ describe 'Arel.sql_to_arel' do
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
   end
 
+  it 'https://www.postgresql.org/docs/10/functions-textsearch.html#TEXTSEARCH-OPERATORS-TABLE' do
+    sql = <<~SQL
+      SELECT
+       to_tsvector('fat cats ate rats') @@ to_tsquery('cat & rat'),
+      to_tsvector('fat cats ate rats') @@@ to_tsquery('cat & rat'),
+      'a:1 b:2'::tsvector || 'c:1 d:2 b:3'::tsvector,
+      'fat | rat'::tsquery && 'cat'::tsquery,
+      'fat | rat'::tsquery || 'cat'::tsquery,
+      !! 'cat'::tsquery,
+      to_tsquery('fat') <-> to_tsquery('rat'),
+      'cat'::tsquery @> 'cat & rat'::tsquery,
+      'cat'::tsquery <@ 'cat & rat'::tsquery
+    SQL
+
+    result = Arel.sql_to_arel(sql)
+    expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
     query_arel = replace_active_record_arel(query.arel)
