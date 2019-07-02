@@ -1,4 +1,14 @@
 GIT
+  remote: https://github.com/Hacker0x01/active_record_upsert.git
+  revision: 7aa8a57431e817e53e68097c4a83b53dfe6d7c8e
+  branch: master
+  specs:
+    active_record_upsert (0.9.1)
+      activerecord (>= 5.0, < 6.0)
+      arel (> 7.0, < 10.0)
+      pg (>= 0.18, < 2.0)
+
+GIT
   remote: https://github.com/Hacker0x01/postgres_ext.git
   revision: 0df6a2891a3bad7da1e7d06e5b6d4e10a3219eb4
   branch: rails-5.2
@@ -173,6 +183,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  active_record_upsert!
   appraisal (~> 2.2.0)
   arel_toolkit!
   bundler (~> 2.0)

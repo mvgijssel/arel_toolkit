@@ -11,9 +11,7 @@ require 'pry-alias'
 require 'arel_toolkit'
 
 require 'postgres_ext' if Gem.loaded_specs.key?('postgres_ext')
-
-require 'support/fake_record'
-Arel::Table.engine = FakeRecord::Base.new
+require 'active_record_upsert' if Gem.loaded_specs.key?('active_record_upsert')
 
 require 'support/active_record'
 

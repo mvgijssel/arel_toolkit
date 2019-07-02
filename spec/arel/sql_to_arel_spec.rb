@@ -35,15 +35,6 @@ describe 'Arel.sql_to_arel' do
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/AbcSize
 
-  around(:example) do |example|
-    old_visitor = Arel::Table.engine.connection.visitor
-    Arel::Table.engine.connection.visitor = Arel::Visitors::PostgreSQL.new(
-      Arel::Table.engine.connection,
-    )
-    example.call
-    Arel::Table.engine.connection.visitor = old_visitor
-  end
-
   define :ast_contains do |expected|
     match do |pg_query_tree|
       ast_contains_constant(pg_query_tree, expected)
@@ -214,7 +205,8 @@ describe 'Arel.sql_to_arel' do
   visit 'all',
         'INSERT INTO "t" VALUES (1) ON CONFLICT DO UPDATE ' \
         'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
-        'WHERE 2 = 3',
+        'WHERE 2 = 3 ' \
+        'RETURNING *',
         'PgQuery::INSERT_STMT'
   visit 'all',
         'INSERT INTO "t" VALUES (1) ON CONFLICT ON CONSTRAINT constaint_name DO UPDATE SET "a" = 1',
