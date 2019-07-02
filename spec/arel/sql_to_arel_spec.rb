@@ -212,7 +212,7 @@ describe 'Arel.sql_to_arel' do
         'INSERT INTO "t" VALUES (1) ON CONFLICT ON CONSTRAINT constaint_name DO UPDATE SET "a" = 1',
         'PgQuery::INSERT_STMT'
   visit 'all',
-        'INSERT INTO "t" VALUES (1) ON CONFLICT (a, b) DO UPDATE SET "a" = 1',
+        'INSERT INTO "t" VALUES (1) ON CONFLICT ("a", "b") DO UPDATE SET "a" = 1',
         'PgQuery::INSERT_STMT'
   # https://github.com/mvgijssel/arel_toolkit/issues/56
   # visit 'pg', '???', 'PgQuery::INT_LIST'
