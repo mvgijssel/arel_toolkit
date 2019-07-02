@@ -78,8 +78,9 @@ module Arel
         recursive_inspect('')
       end
 
+      # TODO: return array if the node is an array, otherwise first value
       def value
-        @fields.first
+        @fields
       end
 
       def add(field, node)
@@ -94,6 +95,7 @@ module Arel
 
       def recursive_inspect(string, indent = 1)
         string << "<#{name_inspect} #{path.inspect}\n"
+        string << "#{spacing(indent)}sql = #{sql_inspect}\n" unless sql_inspect.nil?
         string << "#{spacing(indent)}parent = #{parent && parent.name_inspect}"
         string << "\n" unless children.length.zero?
         children.each do |key, child|
@@ -102,7 +104,7 @@ module Arel
           child.recursive_inspect(string, indent + 2)
         end
         string << "\n" if children.length.zero? && value_inspect.present?
-        string << "#{spacing(indent)}value = #{value_inspect}" unless value_inspect.nil?
+        string << "#{spacing(indent)}value = #{value_inspect}" if value_inspect.present?
 
         if children.length.zero?
           string << ">\n"
@@ -117,7 +119,14 @@ module Arel
 
       def value_inspect
         return if @fields.length.zero?
-        value.nil? ? value.class : value
+        @fields.join(', ')
+      end
+
+      def sql_inspect(engine = Table.engine)
+        return nil if children.empty?
+        collector = Arel::Collectors::SQLString.new
+        Arel::Visitors::ToSql.new(engine.connection).accept(node, collector)
+        collector.value
       end
 
       def spacing(indent)
