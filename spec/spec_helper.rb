@@ -10,6 +10,8 @@ require 'pry'
 require 'pry-alias'
 require 'arel_toolkit'
 
+require 'postgres_ext' if Gem.loaded_specs.key?('postgres_ext')
+
 require 'support/fake_record'
 Arel::Table.engine = FakeRecord::Base.new
 
