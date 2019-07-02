@@ -3,11 +3,6 @@
 
 module Arel
   module Nodes
-    if Gem.loaded_specs.key?('active_record_upsert')
-      # Make sure the active_record_upsert Arel extensions are loaded first
-      require 'active_record_upsert/arel/nodes/insert_statement'
-    end
-
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     module InsertStatementExtensions
       attr_accessor :with

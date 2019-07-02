@@ -3,9 +3,6 @@
 
 module Arel
   if Gem.loaded_specs.key?('postgres_ext')
-    # Make sure the postgres_ext Arel extensions are loaded
-    require 'postgres_ext/arel'
-
     module Visitors
       module ContainsPatch
         def visit_Arel_Nodes_Contains(o, collector)

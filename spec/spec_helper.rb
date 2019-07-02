@@ -12,10 +12,6 @@ require 'arel_toolkit'
 
 require 'support/active_record'
 
-require 'postgres_ext' if Gem.loaded_specs.key?('postgres_ext')
-require 'active_record_upsert' if Gem.loaded_specs.key?('active_record_upsert')
-require 'pg_search' if Gem.loaded_specs.key?('pg_search')
-
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
