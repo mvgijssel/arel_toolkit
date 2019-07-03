@@ -9,8 +9,6 @@ notifications:
   email: false
 rvm:
   - 2.5.3
-env:
-  - BUNDLE_PATH=vendor/bundle
 addons:
   postgresql: "9.5"
 before_script:
@@ -18,9 +16,9 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 before_install:
-  - gem install bundler -v 2.0.1 --install-dir vendor/bundle
+  - gem install bundler -v 2.0.1
 install:
-  - bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - bundle install --jobs=3 --retry=3 --deployment
   - bundle exec appraisal install --jobs=3 --retry=3
 script:
   - bundle exec appraisal rspec
