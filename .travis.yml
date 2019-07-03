@@ -2,8 +2,6 @@
 env:
   global:
     - CC_TEST_REPORTER_ID=64634aec08aacb7cba69b6eb1f4c814228cffe9d167dcb208dcc6d49a4c5c493
-    - BUNDLE_PATH=vendor/bundle
-    - GEM_HOME=vendor/bundle
 sudo: false
 language: ruby
 cache: bundler
@@ -18,15 +16,16 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 before_install:
-  - env
-  - GEM_HOME=vendor/bundle gem install bundler -v 2.0.1
+  - gem install bundler -v 2.0.1
 install:
-  - env
-  - GEM_HOME=vendor/bundle BUNDLE_GEMFILE=gemfiles/arel_gems.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
-  - GEM_HOME=vendor/bundle BUNDLE_GEMFILE=gemfiles/default.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
-  - GEM_HOME=vendor/bundle BUNDLE_GEMFILE=Gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - bundle config --global path vendor/bundle
+  - bundle config --global bin vendor/bundle/bin
+  - bundle config
+  - bundle config --global
+  - BUNDLE_GEMFILE=gemfiles/arel_gems.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - BUNDLE_GEMFILE=gemfiles/default.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - BUNDLE_GEMFILE=Gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
 script:
-  - env
   - GEM_HOME=vendor/bundle BUNDLE_PATH=vendor/bundle bundle exec appraisal rspec || true
   - GEM_HOME=vendor/bundle BUNDLE_PATH=vendor/bundle bundle exec rspec
 after_script:
