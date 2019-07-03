@@ -20,8 +20,10 @@ before_install:
 install:
   - BUNDLE_GEMFILE=gemfiles/arel_gems.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
   - BUNDLE_GEMFILE=gemfiles/default.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - BUNDLE_GEMFILE=Gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
 script:
-  - bundle exec appraisal rspec
+  - bundle exec appraisal rspec || 0
+  - bundle exec rspec
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 deploy:
