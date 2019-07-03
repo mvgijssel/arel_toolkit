@@ -19,7 +19,8 @@ before_install:
   - gem install bundler -v 2.0.1
 install:
   - bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
-  - bundle exec appraisal install
+  - export BUNDLE_PATH=vendor/bundle
+  - bundle exec appraisal install --jobs=3 --retry=3
 script:
   - bundle exec appraisal rspec
 after_script:
