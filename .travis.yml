@@ -9,9 +9,6 @@ notifications:
   email: false
 rvm:
   - 2.5.3
-gemfile:
-  - gemfiles/arel_gems.gemfile
-  - Gemfile
 addons:
   postgresql: "9.5"
 before_script:
@@ -21,7 +18,7 @@ before_script:
 before_install:
   - gem install bundler -v 2.0.1
 script:
-  - bundle exec rspec spec
+  - bundle exec appraisal rspec
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 deploy:

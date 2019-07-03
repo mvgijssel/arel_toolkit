@@ -3,3 +3,6 @@ appraise 'arel_gems' do
   gem 'active_record_upsert', github: 'Hacker0x01/active_record_upsert', branch: 'master'
   gem 'pg_search', github: 'Hacker0x01/pg_search', branch: 'update-ranking'
 end
+
+appraise 'default' do
+end

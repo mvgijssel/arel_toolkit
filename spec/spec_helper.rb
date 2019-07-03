@@ -4,6 +4,8 @@ SimpleCov.start do
   add_filter %r{^/spec/}
 end
 
+SimpleCov.command_name ENV.fetch('BUNDLE_GEMFILE')
+
 require 'bundler/setup'
 require 'database_cleaner'
 require 'pry'
