@@ -15,6 +15,8 @@ before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+install:
+  - bundle exec appraisal install
 before_install:
   - gem install bundler -v 2.0.1
 script:
