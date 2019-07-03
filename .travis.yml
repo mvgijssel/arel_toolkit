@@ -16,13 +16,13 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 before_install:
-  - gem install bundler -v 2.0.1
+  - GEM_HOME=vendor/bundle gem install bundler -v 2.0.1
 install:
   - BUNDLE_GEMFILE=gemfiles/arel_gems.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
   - BUNDLE_GEMFILE=gemfiles/default.gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
   - BUNDLE_GEMFILE=Gemfile bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
 script:
-  - BUNDLE_PATH=vendor/bundle bundle exec appraisal rspec || 0
+  - GEM_HOME=vendor/bundle BUNDLE_PATH=vendor/bundle bundle exec appraisal rspec || true
   - bundle exec rspec
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
