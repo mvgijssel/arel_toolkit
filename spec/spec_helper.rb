@@ -8,6 +8,7 @@ SimpleCov.command_name ENV.fetch('BUNDLE_GEMFILE')
 
 require 'bundler/setup'
 require 'database_cleaner'
+require 'approvals/rspec'
 require 'pry'
 require 'pry-alias'
 require 'arel_toolkit'

@@ -12,4 +12,11 @@ describe 'Arel.transformer' do
 
     expect(Arel.transformer(transformer)).to eql(transformer)
   end
+
+  it 'prints a pretty ast' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+
+    verify { transformer.inspect }
+  end
 end
