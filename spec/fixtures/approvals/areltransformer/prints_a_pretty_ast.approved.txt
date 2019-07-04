@@ -1,5 +1,5 @@
 <Node(Arel::SelectManager) []
-  sql = (SELECT 1, 2 FROM "posts" WHERE "id" = 1)
+  sql = SELECT 1, 2 FROM "posts" WHERE "id" = 1
   parent = nil
   ast =
     <Node(Arel::Nodes::SelectStatement) ["ast"]

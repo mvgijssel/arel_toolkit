@@ -36,8 +36,9 @@ module Arel
       def to_sql(engine = Table.engine)
         return nil if children.empty?
 
+        target_object = object.is_a?(Arel::SelectManager) ? object.ast : object
         collector = Arel::Collectors::SQLString.new
-        collector = engine.connection.visitor.accept object, collector
+        collector = engine.connection.visitor.accept target_object, collector
         collector.value
       end
 

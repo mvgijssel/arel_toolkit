@@ -19,4 +19,11 @@ describe 'Arel.transformer' do
 
     verify { transformer.inspect }
   end
+
+  it 'prints the same SQL' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+
+    expect(transformer.to_sql).to eq result.to_sql
+  end
 end
