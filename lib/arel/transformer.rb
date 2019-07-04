@@ -5,7 +5,9 @@ module Arel
   module Transformer
   end
 
-  def self.transformer(arel)
-    Arel::Transformer::Visitor.new.accept(arel)
+  def self.transformer(object)
+    return object if object.is_a?(Arel::Transformer::Node)
+
+    Arel::Transformer::Visitor.new.accept(object)
   end
 end
