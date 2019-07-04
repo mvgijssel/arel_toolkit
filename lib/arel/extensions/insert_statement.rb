@@ -4,19 +4,20 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    Arel::Nodes::InsertStatement.class_eval do
+    module InsertStatementExtensions
       attr_accessor :with
       attr_accessor :conflict
       attr_accessor :override
       attr_accessor :returning
 
-      alias_method :old_initialize, :initialize
       def initialize
-        old_initialize
+        super
 
         @returning = []
       end
     end
+
+    Arel::Nodes::InsertStatement.prepend(InsertStatementExtensions)
   end
 
   module Visitors
@@ -57,12 +58,13 @@ module Arel
                       collector
                     end
 
+        visit(o.conflict, collector) if o.conflict
+
         unless o.returning.empty?
           collector << ' RETURNING '
           collector = inject_join o.returning, collector, ', '
         end
 
-        visit(o.conflict, collector) if o.conflict
         collector
       end
       # rubocop:enable Metrics/CyclomaticComplexity

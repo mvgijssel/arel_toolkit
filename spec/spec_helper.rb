@@ -4,14 +4,13 @@ SimpleCov.start do
   add_filter %r{^/spec/}
 end
 
+SimpleCov.command_name ENV.fetch('BUNDLE_GEMFILE')
+
 require 'bundler/setup'
 require 'database_cleaner'
 require 'pry'
 require 'pry-alias'
 require 'arel_toolkit'
-
-require 'support/fake_record'
-Arel::Table.engine = FakeRecord::Base.new
 
 require 'support/active_record'
 

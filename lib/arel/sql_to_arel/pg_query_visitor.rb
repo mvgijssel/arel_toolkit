@@ -454,7 +454,7 @@ module Arel
         boom "Unknown ordering `#{ordering}`" unless ordering.zero?
         boom "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
 
-        Arel.sql(name)
+        Arel.sql visit_String(str: name)
       end
 
       def visit_InsertStmt(
