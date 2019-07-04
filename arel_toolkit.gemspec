@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'github_changelog_generator', '~> 1.14.3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
+  spec.add_development_dependency 'appraisal', '~> 2.2.0'
   spec.add_development_dependency 'database_cleaner', '~> 1.7.0'
   spec.add_development_dependency 'simplecov', '~> 0.16.1'
   spec.add_development_dependency 'simplecov-console', '~> 0.4.2'

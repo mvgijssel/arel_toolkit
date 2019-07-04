@@ -42,11 +42,15 @@ require 'arel/extensions/modulo'
 require 'arel/extensions/absolute'
 require 'arel/extensions/bitwise_xor'
 require 'arel/extensions/exponentiation'
+
 require 'arel/extensions/contains'
+unless Gem.loaded_specs.key?('postgres_ext')
+  require 'arel/extensions/contained_within_equals'
+  require 'arel/extensions/contains_equals'
+  require 'arel/extensions/overlap'
+end
+
 require 'arel/extensions/contained_by'
-require 'arel/extensions/contained_within_equals'
-require 'arel/extensions/contains_equals'
-require 'arel/extensions/overlap'
 require 'arel/extensions/select_statement'
 require 'arel/extensions/insert_statement'
 require 'arel/extensions/default_values'

@@ -9,14 +9,19 @@ notifications:
   email: false
 rvm:
   - 2.5.3
+addons:
+  postgresql: "9.5"
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 before_install:
-  - gem install bundler -v 2.0.1
+  - GEM_HOME=vendor/bundle/ruby/2.5.0 gem install bundler -v 2.0.1
+install:
+  - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
+  - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle exec appraisal install
 script:
-  - bundle exec rspec spec
+  - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle exec appraisal rspec
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 deploy:
