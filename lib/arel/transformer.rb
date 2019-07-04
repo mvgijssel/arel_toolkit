@@ -105,8 +105,7 @@ module Arel
         return nil if children.empty?
 
         collector = Arel::Collectors::SQLString.new
-        # TODO: use appropriate visitor
-        Arel::Visitors::ToSql.new(engine.connection).accept(object, collector)
+        collector = engine.connection.visitor.accept object, collector
         collector.value
       end
 
