@@ -4,6 +4,6 @@ describe 'Arel.transformer' do
     # TODO: note we need to pass .ast here, selectmanager should also work
     transformer = Arel::Transformer.call(result.first.ast)
 
-    expect(transformer['cores']['source']['left'].node).to eq Arel::Table.new('posts')
+    expect(transformer['cores'][0]['source']['left'].object).to eq Arel::Table.new('posts')
   end
 end
