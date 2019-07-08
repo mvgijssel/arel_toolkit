@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/CyclomaticComplexity
@@ -10,6 +11,7 @@ module Arel
       attr_reader :type
       attr_reader :options
 
+      sig { params(type: Integer, options: T::Array[String]).void }
       def initialize(type, options)
         @type = type
         @options = options
@@ -19,6 +21,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Transaction, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Transaction(o, collector)
         case o.type
         when 0

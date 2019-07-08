@@ -1,6 +1,8 @@
+# typed: false
 describe 'Arel.sql_to_arel' do
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/AbcSize
+  sig { params(tree: T.any(T::Array[T::Hash[String, T::Hash[String, T::Hash[String, T::Hash[String, T.any(T::Boolean, Integer, T::Array[T::Hash[String, T::Hash[String, T.any(Integer, String)]]])]]]]], T::Hash[String, T::Hash[String, T.any(T::Boolean, Integer, T::Array[T::Hash[String, T::Hash[String, T.any(Integer, String)]]])]], Integer, String, T::Boolean), constant: String).returns(T::Boolean) }
   def ast_contains_constant(tree, constant)
     case tree
     when Array
@@ -28,6 +30,7 @@ describe 'Arel.sql_to_arel' do
     end
   end
 
+  sig { params(sql: String).returns(String) }
   def strip_sql_comments(sql)
     sql.gsub(/--.*?\n/m, '')
   end

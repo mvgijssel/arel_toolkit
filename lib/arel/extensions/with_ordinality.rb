@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::WithOrdinality, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_WithOrdinality(o, collector)
         visit o.expr, collector
         collector << ' WITH ORDINALITY'

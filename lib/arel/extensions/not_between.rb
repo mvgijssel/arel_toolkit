@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -9,6 +10,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::NotBetween, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_NotBetween(o, collector)
         collector = visit o.left, collector
         collector << ' NOT BETWEEN '

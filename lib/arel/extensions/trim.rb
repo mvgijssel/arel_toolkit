@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -9,6 +10,7 @@ module Arel
       attr_reader :substring
       attr_reader :string
 
+      sig { params(type: String, substring: T.nilable(Arel::Nodes::Quoted, Arel::Nodes::TypeCast), string: T.any(Arel::Nodes::Quoted, Arel::Nodes::TypeCast)).void }
       def initialize(type, substring, string)
         @type = type
         @substring = substring
@@ -19,6 +21,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Trim, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Trim(o, collector)
         collector << "trim(#{o.type} "
         if o.substring

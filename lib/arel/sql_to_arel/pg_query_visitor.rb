@@ -1,3 +1,4 @@
+# typed: false
 # rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Naming/MethodName
 # rubocop:disable Metrics/CyclomaticComplexity
@@ -18,6 +19,7 @@ module Arel
       attr_reader :binds
       attr_reader :sql
 
+      sig { params(sql: String, binds: T::Array).returns(Arel::SqlToArel::Result) }
       def accept(sql, binds = [])
         tree = PgQuery.parse(sql).tree
 
@@ -34,14 +36,17 @@ module Arel
 
       private
 
+      sig { params(elements: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]]]).returns(Arel::Nodes::Array) }
       def visit_A_ArrayExpr(elements:)
         Arel::Nodes::Array.new visit(elements)
       end
 
+      sig { params(val: T::Hash[String, T::Hash[String, Integer]]).returns(T.any(Integer, Arel::Nodes::Quoted, Arel::Nodes::SqlLiteral, Arel::Nodes::BitString)) }
       def visit_A_Const(val:)
         visit(val, :const)
       end
 
+      sig { params(kind: Integer, lexpr: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], rexpr: T.nilable(T::Hash[String, T::Hash[String, Integer]], T::Array[T::Hash[String, T::Hash[String, Integer]]]), name: T.any(String, T::Array[T::Hash[String, T::Hash[String, String]]])).returns(T.any(Arel::Nodes::Equality, Arel::Nodes::Addition, Arel::Nodes::Subtraction, Arel::Nodes::Multiplication, Arel::Nodes::Division, Arel::Nodes::Modulo, Arel::Nodes::Exponentiation, Arel::Nodes::SquareRoot, Arel::Nodes::CubeRoot, Arel::Nodes::Factorial, Arel::Nodes::Absolute, Arel::Nodes::BitwiseAnd, Arel::Nodes::BitwiseOr, Arel::Nodes::BitwiseXor, Arel::Nodes::BitwiseNot, Arel::Nodes::BitwiseShiftLeft, Arel::Nodes::BitwiseShiftRight, Arel::Nodes::LessThan, Arel::Nodes::GreaterThan, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThanOrEqual, Arel::Nodes::NotEqual, Arel::Nodes::Contains, Arel::Nodes::ContainedBy, Arel::Nodes::Overlap, Arel::Nodes::Concat, Arel::Nodes::ContainedWithinEquals, Arel::Nodes::ContainsEquals, Arel::Nodes::JsonGetObject, Arel::Nodes::JsonGetField, Arel::Nodes::JsonPathGetObject, Arel::Nodes::JsonPathGetField, Arel::Nodes::JsonbKeyExists, Arel::Nodes::JsonbAnyKeyExists, Arel::Nodes::JsonbAllKeyExists, Arel::Nodes::Regexp, Arel::Nodes::NotRegexp, Arel::Nodes::InfixOperation, Arel::Nodes::UnaryOperation, Arel::Nodes::DistinctFrom, Arel::Nodes::NotDistinctFrom, Arel::Nodes::NullIf, Arel::Nodes::In, Arel::Nodes::NotIn, Arel::Nodes::DoesNotMatch, Arel::Nodes::Matches, Arel::Nodes::Similar, Arel::Nodes::NotSimilar, Arel::Nodes::Between, Arel::Nodes::NotBetween, Arel::Nodes::BetweenSymmetric, Arel::Nodes::NotBetweenSymmetric)) }
       def visit_A_Expr(kind:, lexpr: nil, rexpr: nil, name:)
         case kind
         when PgQuery::AEXPR_OP
@@ -179,26 +184,32 @@ module Arel
         end
       end
 
+      sig { params(context: Symbol, uidx: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]]).returns(Integer) }
       def visit_A_Indices(context, uidx:)
         visit uidx, context
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], indirection: T::Array[T::Hash[String, T::Hash[String, T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]]]]]).returns(Arel::Nodes::Indirection) }
       def visit_A_Indirection(arg:, indirection:)
         Arel::Nodes::Indirection.new(visit(arg), visit(indirection, :operator))
       end
 
+      sig { returns(Arel::Nodes::SqlLiteral) }
       def visit_A_Star
         Arel.star
       end
 
+      sig { params(aliasname: String).returns(String) }
       def visit_Alias(aliasname:)
         aliasname
       end
 
+      sig { params(str: String).returns(Arel::Nodes::BitString) }
       def visit_BitString(str:)
         Arel::Nodes::BitString.new(str)
       end
 
+      sig { params(context: T::Boolean, args: T::Array[T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]]], boolop: Integer).returns(T.any(Arel::Nodes::And, Arel::Nodes::Grouping, Arel::Nodes::Or)) }
       def visit_BoolExpr(context = false, args:, boolop:)
         args = visit(args, context || true)
 
@@ -223,6 +234,7 @@ module Arel
         end
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], booltesttype: Integer).returns(T.any(Arel::Nodes::Equality, Arel::Nodes::NotEqual)) }
       def visit_BooleanTest(arg:, booltesttype:)
         arg = visit(arg)
 
@@ -250,6 +262,7 @@ module Arel
         end
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], args: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], Integer)]]], defresult: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]])]]).returns(Arel::Nodes::Case) }
       def visit_CaseExpr(arg: nil, args:, defresult: nil)
         Arel::Nodes::Case.new.tap do |kees|
           kees.case = visit(arg) if arg
@@ -264,6 +277,7 @@ module Arel
         end
       end
 
+      sig { params(expr: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], result: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]]).returns(Arel::Nodes::When) }
       def visit_CaseWhen(expr:, result:)
         expr = visit(expr)
         result = visit(result)
@@ -271,12 +285,14 @@ module Arel
         Arel::Nodes::When.new(expr, result)
       end
 
+      sig { params(args: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]]]).returns(Arel::Nodes::Coalesce) }
       def visit_CoalesceExpr(args:)
         args = visit(args)
 
         Arel::Nodes::Coalesce.new args
       end
 
+      sig { params(fields: T::Array[T::Hash[String, T::Hash[String, String]]]).returns(T.any(Arel::Nodes::UnboundColumnReference, Arel::Attributes::Attribute)) }
       def visit_ColumnRef(fields:)
         visited_fields = visit(fields)
 
@@ -292,16 +308,19 @@ module Arel
         end
       end
 
+      sig { params(ctename: String, ctequery: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]]).returns(Arel::Nodes::As) }
       def visit_CommonTableExpr(ctename:, ctequery:)
         cte_table = Arel::Table.new(ctename)
         cte_definition = visit(ctequery)
         Arel::Nodes::As.new(cte_table, Arel::Nodes::Grouping.new(cte_definition))
       end
 
+      sig { params(cursor_name: String).returns(Arel::Nodes::CurrentOfExpression) }
       def visit_CurrentOfExpr(cursor_name:)
         Arel::Nodes::CurrentOfExpression.new(cursor_name)
       end
 
+      sig { params(defname: String, arg: T::Hash[String, T::Hash[String, String]], defaction: Integer).returns(String) }
       def visit_DefElem(defname:, arg:, defaction:)
         case defname
         when 'savepoint_name'
@@ -311,6 +330,7 @@ module Arel
         end
       end
 
+      sig { params(relation: T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]], using_clause: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]]], where_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, Integer]])]], returning_list: T::Array, with_clause: T::Hash[String, T::Hash[String, T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]], Integer)]]]]]).returns(Arel::DeleteManager) }
       def visit_DeleteStmt(
         relation:,
         using_clause: nil,
@@ -330,11 +350,13 @@ module Arel
         delete_manager
       end
 
+      sig { params(str: String).returns(Arel::Nodes::SqlLiteral) }
       def visit_Float(str:)
         Arel::Nodes::SqlLiteral.new str
       end
 
       # https://github.com/postgres/postgres/blob/REL_10_1/src/include/nodes/parsenodes.h
+      sig { params(funcname: T::Array[T::Hash[String, T::Hash[String, String]]], args: T::Array[T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]]], agg_order: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]], agg_filter: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]])]], agg_within_group: T::Boolean, agg_star: T.untyped, agg_distinct: T::Boolean, func_variadic: T::Boolean, over: T::Hash[String, T::Hash[String, Integer]]).returns(T.any(Arel::Nodes::NamedFunction, Arel::Nodes::Sum, T::Array[Arel::Nodes::Trim], Arel::Nodes::Over, Arel::Nodes::Avg, Arel::Nodes::Rank, Arel::Nodes::Count, Arel::Nodes::GenerateSeries, Arel::Nodes::Max, Arel::Nodes::Min)) }
       def visit_FuncCall(
         funcname:,
         args: nil,
@@ -443,6 +465,7 @@ module Arel
         end
       end
 
+      sig { params(conname: String, index_elems: T::Array[T::Hash[String, T::Hash[String, T.any(String, Integer)]]]).returns(Arel::Nodes::Infer) }
       def visit_InferClause(conname: nil, index_elems: nil)
         infer = Arel::Nodes::Infer.new
         infer.name = Arel.sql(conname) if conname
@@ -450,6 +473,7 @@ module Arel
         infer
       end
 
+      sig { params(name: String, ordering: Integer, nulls_ordering: Integer).returns(Arel::Nodes::SqlLiteral) }
       def visit_IndexElem(name:, ordering:, nulls_ordering:)
         boom "Unknown ordering `#{ordering}`" unless ordering.zero?
         boom "Unknown nulls ordering `#{ordering}`" unless nulls_ordering.zero?
@@ -457,6 +481,7 @@ module Arel
         Arel.sql visit_String(str: name)
       end
 
+      sig { params(relation: T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]], cols: T::Array[T::Hash[String, T::Hash[String, T.any(String, Integer)]]], select_stmt: T::Hash[String, T::Hash[String, T.any(T::Array[T::Array[T::Hash[String, T::Hash[String, Integer]]]], Integer)]], on_conflict_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(Integer, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]])]], Integer)]]], T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]])]])]], with_clause: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]]], Integer)]], Integer)]]], T::Boolean)]], returning_list: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]], override: Integer).returns(Arel::InsertManager) }
       def visit_InsertStmt(
         relation:,
         cols: [],
@@ -490,10 +515,12 @@ module Arel
         insert_manager
       end
 
+      sig { params(ival: Integer).returns(Integer) }
       def visit_Integer(ival:)
         ival
       end
 
+      sig { params(jointype: Integer, is_natural: T::Boolean, larg: T::Hash[String, T::Hash[String, T::Hash[String, T::Hash[String, String]]]], rarg: T::Hash[String, T::Hash[String, T.any(T::Boolean, T::Hash[String, T::Hash[String, String]])]], quals: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]).returns(T::Array[T.any(Arel::Nodes::TableAlias, Arel::Nodes::InnerJoin)]) }
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
         join_class = case jointype
                      when 0
@@ -526,6 +553,7 @@ module Arel
         end
       end
 
+      sig { params(strength: Integer, wait_policy: Integer).returns(Arel::Nodes::Lock) }
       def visit_LockingClause(strength:, wait_policy:)
         strength_clause = {
           1 => 'FOR KEY SHARE',
@@ -542,6 +570,7 @@ module Arel
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
       end
 
+      sig { params(op: Integer, args: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash], Integer)]]]).returns(T.any(Arel::Nodes::Least, Arel::Nodes::Greatest)) }
       def visit_MinMaxExpr(op:, args:)
         case op
         when 0
@@ -553,6 +582,7 @@ module Arel
         end
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], name: String, argnumber: Integer).returns(Arel::Nodes::NamedArgument) }
       def visit_NamedArgExpr(arg:, name:, argnumber:)
         arg = visit(arg)
         boom '' unless argnumber == -1
@@ -560,10 +590,12 @@ module Arel
         Arel::Nodes::NamedArgument.new(name, arg)
       end
 
+      sig { params(_: T::Hash).returns(Arel::Nodes::SqlLiteral) }
       def visit_Null(**_)
         Arel.sql 'NULL'
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], nulltesttype: Integer).returns(T.any(Arel::Nodes::Equality, Arel::Nodes::NotEqual)) }
       def visit_NullTest(arg:, nulltesttype:)
         arg = visit(arg)
 
@@ -575,6 +607,7 @@ module Arel
         end
       end
 
+      sig { params(action: Integer, infer: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, Integer)]]], Integer)]], target_list: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(Integer, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]])]], Integer)]]], where_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]])]]).returns(Arel::Nodes::Conflict) }
       def visit_OnConflictClause(action:, infer: nil, target_list: nil, where_clause: nil)
         conflict = Arel::Nodes::Conflict.new
         conflict.action = action
@@ -584,12 +617,14 @@ module Arel
         conflict
       end
 
+      sig { params(number: Integer).returns(Arel::Nodes::BindParam) }
       def visit_ParamRef(number:)
         value = (binds[number - 1] unless binds.empty?)
 
         Arel::Nodes::BindParam.new(value)
       end
 
+      sig { params(is_rowsfrom: T::Boolean, functions: T::Array[T::Array[T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]]]], lateral: T::Boolean, ordinality: T::Boolean).returns(Arel::Nodes::WithOrdinality) }
       def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/36' unless is_rowsfrom == true
 
@@ -605,6 +640,7 @@ module Arel
         ordinality ? Arel::Nodes::WithOrdinality.new(node) : node
       end
 
+      sig { params(aliaz: T::Hash[String, T::Hash[String, String]], subquery: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]], lateral: T::Boolean).returns(T.any(Arel::Nodes::TableAlias, Arel::Nodes::Lateral)) }
       def visit_RangeSubselect(aliaz:, subquery:, lateral: false)
         aliaz = visit(aliaz)
         subquery = visit(subquery)
@@ -612,6 +648,7 @@ module Arel
         lateral ? Arel::Nodes::Lateral.new(node) : node
       end
 
+      sig { params(aliaz: T::Hash[String, T::Hash[String, String]], relname: String, inh: T::Boolean, relpersistence: String, schemaname: String).returns(Arel::Table) }
       def visit_RangeVar(aliaz: nil, relname:, inh: false, relpersistence:, schemaname: nil)
         Arel::Table.new(
           relname,
@@ -622,10 +659,12 @@ module Arel
         )
       end
 
+      sig { params(context: Symbol, args: T::Hash[Symbol, T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, String]], Integer)]]])]]]).returns(T.any(Arel::SelectManager, Arel::InsertManager, Arel::UpdateManager, Arel::DeleteManager, Arel::Nodes::Transaction, Arel::Nodes::VariableShow, Arel::Nodes::VariableSet)) }
       def visit_RawStmt(context, **args)
         visit(args.fetch(:stmt), context)
       end
 
+      sig { params(context: Symbol, val: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], name: String).returns(T.any(Arel::Nodes::NamedFunction, Integer, Arel::Nodes::Grouping, Arel::Nodes::Sum, Arel::Nodes::Addition, Arel::Nodes::Subtraction, Arel::Nodes::Division, Arel::Nodes::Modulo, Arel::Nodes::Exponentiation, Arel::Nodes::SquareRoot, Arel::Nodes::CubeRoot, Arel::Nodes::Factorial, Arel::Nodes::Absolute, Arel::Nodes::BitwiseAnd, Arel::Nodes::BitwiseOr, Arel::Nodes::BitwiseXor, Arel::Nodes::BitwiseNot, Arel::Nodes::BitwiseShiftLeft, Arel::Nodes::BitwiseShiftRight, Arel::Nodes::LessThan, Arel::Nodes::GreaterThan, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThanOrEqual, Arel::Nodes::Equality, Arel::Nodes::NotEqual, Arel::Nodes::Contains, Arel::Nodes::ContainedBy, Arel::Nodes::Overlap, Arel::Nodes::Concat, Arel::Nodes::ContainedWithinEquals, Arel::Nodes::ContainsEquals, Arel::Nodes::JsonGetObject, Arel::Nodes::JsonGetField, Arel::Nodes::JsonPathGetObject, Arel::Nodes::JsonPathGetField, Arel::Nodes::JsonbKeyExists, Arel::Nodes::JsonbAnyKeyExists, Arel::Nodes::JsonbAllKeyExists, Arel::Nodes::Regexp, Arel::Nodes::NotRegexp, Arel::Nodes::InfixOperation, Arel::Attributes::Attribute, Arel::Nodes::Multiplication, Arel::Nodes::UnaryOperation, Arel::Nodes::TypeCast, String, Arel::Nodes::Assignment, Arel::Nodes::CurrentDate, Arel::Nodes::CurrentTime, Arel::Nodes::CurrentTimestamp, T::Array[Arel::Nodes::Trim], Arel::Nodes::LocalTime, Arel::Nodes::LocalTimestamp, Arel::Nodes::SqlLiteral, Arel::Nodes::Over, Arel::Nodes::Row, Arel::Nodes::Quoted, Arel::Nodes::UnboundColumnReference, Arel::Nodes::BindParam, Arel::Nodes::Case, Arel::Nodes::Indirection, Arel::Nodes::Exists, Arel::Nodes::Avg, Arel::Nodes::In, Arel::Nodes::ArraySubselect, Arel::Nodes::Coalesce, Arel::Nodes::DistinctFrom, Arel::Nodes::NotDistinctFrom, Arel::Nodes::NullIf, Arel::Nodes::NotIn, Arel::Nodes::DoesNotMatch, Arel::Nodes::Matches, Arel::Nodes::Similar, Arel::Nodes::NotSimilar, Arel::Nodes::Between, Arel::Nodes::NotBetween, Arel::Nodes::BetweenSymmetric, Arel::Nodes::NotBetweenSymmetric, Arel::Nodes::As, Arel::Nodes::Array, Arel::Nodes::Least, Arel::Nodes::Greatest, Arel::Nodes::And, Arel::Nodes::Rank, Arel::Nodes::Count, Arel::Nodes::GenerateSeries, Arel::Nodes::Max, Arel::Nodes::Min, Arel::Nodes::CurrentRole, Arel::Nodes::CurrentUser, Arel::Nodes::SessionUser, Arel::Nodes::User, Arel::Nodes::CurrentCatalog, Arel::Nodes::CurrentSchema, Arel::Nodes::BitString)) }
       def visit_ResTarget(context, val: nil, name: nil)
         case context
         when :select
@@ -649,10 +688,12 @@ module Arel
         end
       end
 
+      sig { params(args: T::Array[T::Hash[String, T::Hash[String, Integer]]], row_format: Integer).returns(Arel::Nodes::Row) }
       def visit_RowExpr(args:, row_format:)
         Arel::Nodes::Row.new(visit(args), row_format)
       end
 
+      sig { params(context: Symbol, from_clause: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]]], limit_count: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], target_list: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]], sort_clause: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], Integer)]]], where_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, Integer]])]], limit_offset: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], distinct_clause: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]]], group_clause: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]]], having_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]])]], with_clause: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]], Integer)]]], T::Boolean, Integer)]], locking_clause: T::Array[T::Hash[String, T::Hash[String, Integer]]], op: Integer, window_clause: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]], Integer)]]], values_lists: T::Array[T::Array[T::Hash[String, T::Hash[String, Integer]]]], all: T::Boolean, larg: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], Integer)]]], Integer)]], rarg: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]], Integer)]]], Integer)]]).returns(T.any(Arel::SelectManager, Arel::Nodes::SelectStatement)) }
       def visit_SelectStmt(
         context = nil,
         from_clause: nil,
@@ -778,10 +819,12 @@ module Arel
         end
       end
 
+      sig { params(_args: T::Hash).returns(Arel::Nodes::SetToDefault) }
       def visit_SetToDefault(_args)
         Arel::Nodes::SetToDefault.new
       end
 
+      sig { params(node: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], sortby_dir: Integer, sortby_nulls: Integer).returns(T.any(Arel::Nodes::Descending, Arel::Nodes::Ascending, Arel::Nodes::UnboundColumnReference)) }
       def visit_SortBy(node:, sortby_dir:, sortby_nulls:)
         result = visit(node)
         case sortby_dir
@@ -794,6 +837,7 @@ module Arel
         end
       end
 
+      sig { params(op: Integer, typmod: Integer).returns(T.any(Arel::Nodes::CurrentTimestamp, Arel::Nodes::CurrentDate, Arel::Nodes::CurrentTime, Arel::Nodes::LocalTime, Arel::Nodes::LocalTimestamp, Arel::Nodes::CurrentRole, Arel::Nodes::CurrentUser, Arel::Nodes::SessionUser, Arel::Nodes::User, Arel::Nodes::CurrentCatalog, Arel::Nodes::CurrentSchema)) }
       def visit_SQLValueFunction(op:, typmod:)
         [
           -> { Arel::Nodes::CurrentDate.new },
@@ -814,6 +858,7 @@ module Arel
         ][op].call
       end
 
+      sig { params(context: Symbol, str: String).returns(T.any(String, Arel::Nodes::Quoted)) }
       def visit_String(context = nil, str:)
         case context
         when :operator
@@ -825,6 +870,7 @@ module Arel
         end
       end
 
+      sig { params(subselect: T.any(T::Array, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]]), sub_link_type: Integer, testexpr: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], oper_name: T::Array[T::Hash[String, T::Hash[String, String]]]).returns(T.any(Arel::Nodes::Grouping, Arel::Nodes::LessThanOrEqual, Arel::Nodes::Exists, Arel::Nodes::GreaterThan, Arel::Nodes::Equality, Arel::Nodes::In, Arel::Nodes::ArraySubselect)) }
       def visit_SubLink(subselect:, sub_link_type:, testexpr: nil, oper_name: nil)
         subselect = visit(subselect)
         testexpr = visit(testexpr) if testexpr
@@ -840,6 +886,7 @@ module Arel
         generate_sublink(sub_link_type, subselect, testexpr, operator)
       end
 
+      sig { params(kind: Integer, options: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, String]], Integer)]]]).returns(Arel::Nodes::Transaction) }
       def visit_TransactionStmt(kind:, options: nil)
         Arel::Nodes::Transaction.new(
           kind,
@@ -847,6 +894,7 @@ module Arel
         )
       end
 
+      sig { params(arg: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, String]], Integer)]], type_name: T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]]).returns(Arel::Nodes::TypeCast) }
       def visit_TypeCast(arg:, type_name:)
         arg = visit(arg)
         type_name = visit(type_name)
@@ -854,6 +902,7 @@ module Arel
         Arel::Nodes::TypeCast.new(maybe_add_grouping(arg), type_name)
       end
 
+      sig { params(names: T::Array[T::Hash[String, T::Hash[String, String]]], typemod: Integer, array_bounds: T::Array).returns(String) }
       def visit_TypeName(names:, typemod:, array_bounds: [])
         array_bounds = visit(array_bounds)
 
@@ -887,6 +936,7 @@ module Arel
         type_name
       end
 
+      sig { params(relation: T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]], target_list: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, Integer]], Integer)]]], where_clause: T::Hash[String, T::Hash[String, T.any(Integer, T::Array[T::Hash[String, T::Hash[String, String]]], T::Hash[String, T::Hash[String, Integer]])]], from_clause: T::Array, returning_list: T::Array, with_clause: T::Hash[String, T::Hash[String, T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]], Integer)]]]]]).returns(Arel::UpdateManager) }
       def visit_UpdateStmt(
         relation:,
         target_list:,
@@ -909,6 +959,7 @@ module Arel
         update_manager
       end
 
+      sig { params(kind: Integer, name: String, args: T::Array, is_local: T::Boolean).returns(Arel::Nodes::VariableSet) }
       def visit_VariableSetStmt(kind:, name:, args: [], is_local: false)
         Arel::Nodes::VariableSet.new(
           kind,
@@ -918,10 +969,12 @@ module Arel
         )
       end
 
+      sig { params(name: String).returns(Arel::Nodes::VariableShow) }
       def visit_VariableShowStmt(name:)
         Arel::Nodes::VariableShow.new(name)
       end
 
+      sig { params(partition_clause: T::Array[T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]]], order_clause: T::Array[T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, String]]], Integer)]], Integer)]]], frame_options: Integer, name: String, start_offset: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], end_offset: T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]]).returns(T.any(Arel::Nodes::Window, Arel::Nodes::NamedWindow)) }
       def visit_WindowDef(
         partition_clause: [],
         order_clause: [],
@@ -946,6 +999,7 @@ module Arel
         end
       end
 
+      sig { params(ctes: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, T.any(T::Hash[String, T::Hash[String, Integer]], Integer)]], Integer)]]], Integer)]], Integer)]]], recursive: T::Boolean).returns(T.any(Arel::Nodes::With, Arel::Nodes::WithRecursive)) }
       def visit_WithClause(ctes:, recursive: false)
         if recursive
           Arel::Nodes::WithRecursive.new visit(ctes)
@@ -954,6 +1008,7 @@ module Arel
         end
       end
 
+      sig { params(left: T.nilable(Arel::Nodes::UnboundColumnReference, Integer, Arel::Nodes::Subtraction, Arel::Nodes::SqlLiteral, Arel::Nodes::Array, Arel::Nodes::TypeCast, Arel::Nodes::Quoted, Arel::Nodes::NamedFunction, Arel::Nodes::Concat, Arel::Attributes::Attribute), right: T.nilable(Arel::Nodes::Quoted, Integer, Arel::Nodes::Addition, Arel::Nodes::Multiplication, Arel::Nodes::SqlLiteral, Arel::Nodes::Array, Arel::Nodes::TypeCast, Arel::Nodes::NamedFunction, Arel::Nodes::Overlap, Arel::Nodes::BindParam, Arel::Nodes::Any, Arel::Nodes::All, Arel::Nodes::Grouping, Arel::Nodes::UnboundColumnReference), operator: String).returns(T.any(Arel::Nodes::Equality, Arel::Nodes::Addition, Arel::Nodes::Subtraction, Arel::Nodes::Multiplication, Arel::Nodes::Division, Arel::Nodes::Modulo, Arel::Nodes::Exponentiation, Arel::Nodes::SquareRoot, Arel::Nodes::CubeRoot, Arel::Nodes::Factorial, Arel::Nodes::Absolute, Arel::Nodes::BitwiseAnd, Arel::Nodes::BitwiseOr, Arel::Nodes::BitwiseXor, Arel::Nodes::BitwiseNot, Arel::Nodes::BitwiseShiftLeft, Arel::Nodes::BitwiseShiftRight, Arel::Nodes::LessThan, Arel::Nodes::GreaterThan, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThanOrEqual, Arel::Nodes::NotEqual, Arel::Nodes::Contains, Arel::Nodes::ContainedBy, Arel::Nodes::Overlap, Arel::Nodes::Concat, Arel::Nodes::ContainedWithinEquals, Arel::Nodes::ContainsEquals, Arel::Nodes::JsonGetObject, Arel::Nodes::JsonGetField, Arel::Nodes::JsonPathGetObject, Arel::Nodes::JsonPathGetField, Arel::Nodes::JsonbKeyExists, Arel::Nodes::JsonbAnyKeyExists, Arel::Nodes::JsonbAllKeyExists, Arel::Nodes::Regexp, Arel::Nodes::NotRegexp, Arel::Nodes::InfixOperation, Arel::Nodes::UnaryOperation)) }
       def generate_operator(left, right, operator)
         left = maybe_add_grouping(left)
         right = maybe_add_grouping(right)
@@ -1077,6 +1132,7 @@ module Arel
         end
       end
 
+      sig { params(attribute: T.any(T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Hash[String, T::Hash[String, String]], Integer)]]], T::Hash[String, T::Hash[String, String]]), context: T.nilable(Symbol, T::Boolean)).returns(T.any(String, Integer, Arel::Table, Arel::Nodes::UnboundColumnReference, Arel::Nodes::NamedFunction, Arel::SelectManager, Arel::Nodes::Quoted, Arel::Nodes::Equality, Arel::Nodes::SqlLiteral, Arel::Nodes::Array, Arel::Nodes::TypeCast, Arel::Nodes::SelectStatement, Arel::Nodes::Grouping, Arel::Nodes::Sum, Arel::Nodes::Addition, Arel::Nodes::Subtraction, Arel::Nodes::Multiplication, Arel::Nodes::Division, Arel::Nodes::Modulo, Arel::Nodes::Exponentiation, Arel::Nodes::SquareRoot, Arel::Nodes::CubeRoot, Arel::Nodes::Factorial, Arel::Nodes::Absolute, Arel::Nodes::BitwiseAnd, Arel::Nodes::BitwiseOr, Arel::Nodes::BitwiseXor, Arel::Nodes::BitwiseNot, Arel::Nodes::BitwiseShiftLeft, Arel::Nodes::BitwiseShiftRight, Arel::Nodes::LessThan, Arel::Nodes::GreaterThan, Arel::Nodes::LessThanOrEqual, Arel::Nodes::GreaterThanOrEqual, Arel::Nodes::NotEqual, Arel::Nodes::Contains, Arel::Nodes::ContainedBy, Arel::Nodes::Overlap, Arel::Nodes::Concat, Arel::Nodes::ContainedWithinEquals, Arel::Nodes::ContainsEquals, Arel::Nodes::JsonGetObject, Arel::Nodes::JsonGetField, Arel::Nodes::JsonPathGetObject, Arel::Nodes::JsonPathGetField, Arel::Nodes::JsonbKeyExists, Arel::Nodes::JsonbAnyKeyExists, Arel::Nodes::JsonbAllKeyExists, Arel::Nodes::Regexp, Arel::Nodes::NotRegexp, Arel::Nodes::InfixOperation, Arel::Attributes::Attribute, Arel::Nodes::UnaryOperation, Arel::Nodes::CurrentTimestamp, Arel::InsertManager, Arel::Nodes::BindParam, Arel::Nodes::Assignment, Arel::UpdateManager, Arel::Nodes::CurrentDate, Arel::Nodes::CurrentTime, T::Array[T.any(Arel::Nodes::TableAlias, Arel::Nodes::InnerJoin)], Arel::Nodes::LocalTime, Arel::Nodes::LocalTimestamp, Arel::Nodes::NamedArgument, Arel::DeleteManager, Arel::Nodes::Window, Arel::Nodes::Over, Arel::Nodes::Descending, Arel::Nodes::NamedWindow, Arel::Nodes::Row, Arel::Nodes::Ascending, Arel::Nodes::Lock, Arel::Nodes::As, Arel::Nodes::With, Arel::Nodes::Transaction, Arel::Nodes::When, Arel::Nodes::Case, Arel::Nodes::WithRecursive, Arel::Nodes::TableAlias, Arel::Nodes::Indirection, Arel::Nodes::Coalesce, Arel::Nodes::Exists, Arel::Nodes::Avg, Arel::Nodes::In, Arel::Nodes::ArraySubselect, Arel::Nodes::Infer, Arel::Nodes::Conflict, Arel::Nodes::DistinctFrom, Arel::Nodes::NotDistinctFrom, Arel::Nodes::NullIf, Arel::Nodes::NotIn, Arel::Nodes::DoesNotMatch, Arel::Nodes::Matches, Arel::Nodes::Similar, Arel::Nodes::NotSimilar, Arel::Nodes::Between, Arel::Nodes::NotBetween, Arel::Nodes::BetweenSymmetric, Arel::Nodes::NotBetweenSymmetric, Arel::Nodes::CurrentOfExpression, Arel::Nodes::Least, Arel::Nodes::Greatest, Arel::Nodes::And, Arel::Nodes::SetToDefault, Arel::Nodes::VariableShow, Arel::Nodes::Rank, Arel::Nodes::Count, Arel::Nodes::GenerateSeries, Arel::Nodes::Max, Arel::Nodes::Min, Arel::Nodes::VariableSet, Arel::Nodes::Lateral, Arel::Nodes::CurrentRole, Arel::Nodes::CurrentUser, Arel::Nodes::SessionUser, Arel::Nodes::User, Arel::Nodes::CurrentCatalog, Arel::Nodes::CurrentSchema, Arel::Nodes::WithOrdinality, Arel::Nodes::BitString, Arel::Nodes::Or)) }
       def visit(attribute, context = nil)
         return attribute.map { |attr| visit(attr, context) } if attribute.is_a? Array
 
@@ -1109,10 +1165,12 @@ module Arel
         end
       end
 
+      sig { params(object: T::Hash[String, T::Hash[String, String]]).returns(T::Array[T.any(String, T::Hash[String, String])]) }
       def klass_and_attributes(object)
         [object.keys.first, object.values.first]
       end
 
+      sig { params(args: T::Array[Arel::Nodes::Grouping], boolean_class: Class).returns(Arel::Nodes::Or) }
       def generate_boolean_expression(args, boolean_class)
         chain = boolean_class.new(nil, nil)
 
@@ -1130,6 +1188,7 @@ module Arel
         chain.right
       end
 
+      sig { params(clause: T::Array[T::Hash[String, T::Hash[String, T.any(String, T::Boolean, Integer)]]]).returns(T::Array[T::Array]) }
       def generate_sources(clause)
         froms = []
         join_sources = []
@@ -1154,6 +1213,7 @@ module Arel
         end
       end
 
+      sig { params(sub_link_type: Integer, subselect: Arel::Nodes::SelectStatement, testexpr: Arel::Nodes::UnboundColumnReference, operator: String).returns(T.any(Arel::Nodes::Grouping, Arel::Nodes::LessThanOrEqual, Arel::Nodes::Exists, Arel::Nodes::GreaterThan, Arel::Nodes::Equality, Arel::Nodes::In, Arel::Nodes::ArraySubselect)) }
       def generate_sublink(sub_link_type, subselect, testexpr, operator)
         case sub_link_type
         when PgQuery::SUBLINK_TYPE_EXISTS
@@ -1189,6 +1249,7 @@ module Arel
         end
       end
 
+      sig { params(node: T.nilable(Arel::Nodes::UnboundColumnReference, Arel::Nodes::Quoted, Arel::Nodes::Array, Integer, Arel::Nodes::Addition, Arel::Nodes::Subtraction, Arel::Nodes::Multiplication, Arel::Nodes::SqlLiteral, Arel::Nodes::TypeCast, Arel::Nodes::NamedFunction, Arel::Nodes::Concat, Arel::Nodes::Overlap, Arel::Attributes::Attribute, Arel::Nodes::BindParam, Arel::Nodes::Any, T::Array[Arel::Nodes::AtTimeZone], Arel::Nodes::All, Arel::Nodes::Grouping)).returns(T.nilable(Arel::Nodes::UnboundColumnReference, Arel::Nodes::Quoted, Arel::Nodes::Array, Integer, Arel::Nodes::Grouping, Arel::Nodes::SqlLiteral, Arel::Nodes::TypeCast, Arel::Nodes::NamedFunction, Arel::Attributes::Attribute, Arel::Nodes::BindParam, Arel::Nodes::Any, T::Array[Arel::Nodes::AtTimeZone], Arel::Nodes::All)) }
       def maybe_add_grouping(node)
         case node
         when Arel::Nodes::Binary
@@ -1198,6 +1259,7 @@ module Arel
         end
       end
 
+      sig { params(message: String, backtrace: T::Array[String]).returns(T.untyped) }
       def boom(message, backtrace = nil)
         new_message = <<~STRING
 

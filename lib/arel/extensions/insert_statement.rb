@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
       attr_accessor :override
       attr_accessor :returning
 
+      sig { void }
       def initialize
         super
 
@@ -25,6 +27,7 @@ module Arel
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/PerceivedComplexity
+      sig { params(o: Arel::Nodes::InsertStatement, collector: T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)).returns(T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)) }
       def visit_Arel_Nodes_InsertStatement(o, collector)
         if o.with
           collector = visit o.with, collector

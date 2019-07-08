@@ -1,3 +1,4 @@
+# typed: strict
 # Make sure the extensions are loaded before ArelToolkit
 require 'postgres_ext' if Gem.loaded_specs.key?('postgres_ext')
 require 'active_record_upsert' if Gem.loaded_specs.key?('active_record_upsert')

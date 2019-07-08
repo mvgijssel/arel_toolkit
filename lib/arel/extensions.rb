@@ -1,3 +1,4 @@
+# typed: strict
 require 'arel/extensions/unknown'
 require 'arel/extensions/time_with_precision'
 require 'arel/extensions/current_time'

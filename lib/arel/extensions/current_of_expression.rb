@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -7,6 +8,7 @@ module Arel
     class CurrentOfExpression < Arel::Nodes::Node
       attr_accessor :cursor_name
 
+      sig { params(cursor_name: String).void }
       def initialize(cursor_name)
         super()
 
@@ -17,6 +19,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::CurrentOfExpression, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_CurrentOfExpression(o, collector)
         collector << 'CURRENT OF '
         collector << o.cursor_name

@@ -1,3 +1,4 @@
+# typed: false
 if Gem.loaded_specs.key?('postgres_ext')
   describe PostgresExt do
     ActiveRecord::Schema.define do
@@ -26,6 +27,7 @@ if Gem.loaded_specs.key?('postgres_ext')
     end
 
     class SomeMiddleware
+      sig { params(arel: T.untyped, _context: T.untyped).returns(T.untyped) }
       def self.call(arel, _context)
         arel
       end

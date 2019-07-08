@@ -1,3 +1,4 @@
+# typed: false
 describe Arel::SqlToArel::PgQueryVisitor do
   describe 'accept' do
     it 'raises nice exceptions for all unknown errors' do

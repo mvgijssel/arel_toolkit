@@ -1,3 +1,4 @@
+# typed: false
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/ParameterLists
@@ -13,6 +14,7 @@ module Arel
       attr_accessor :relpersistence
 
       alias_method :old_initialize, :initialize
+      sig { params(name: String, as: String, type_caster: ActiveRecord::TypeCaster::Map, only: T::Boolean, schema_name: String, relpersistence: String).void }
       def initialize(
         name,
         as: nil,
@@ -33,6 +35,7 @@ module Arel
   module Visitors
     class ToSql
       alias old_visit_Arel_Table visit_Arel_Table
+      sig { params(o: Arel::Table, collector: T.any(Arel::Collectors::Composite, Arel::Collectors::SQLString, Arel::Collectors::SubstituteBinds)).returns(T.any(Arel::Collectors::Composite, Arel::Collectors::SQLString, Arel::Collectors::SubstituteBinds)) }
       def visit_Arel_Table(o, collector)
         collector << 'ONLY ' if o.only
 

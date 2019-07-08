@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -7,6 +8,7 @@ module Arel
     class ExtractFrom < Arel::Nodes::Unary
       attr_reader :field
 
+      sig { params(expr: T.any(Arel::Nodes::TypeCast, Arel::Attributes::Attribute), field: Arel::Nodes::Quoted).void }
       def initialize(expr, field)
         super(expr)
 
@@ -17,6 +19,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::ExtractFrom, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_ExtractFrom(o, collector)
         collector << 'extract('
         visit o.field, collector

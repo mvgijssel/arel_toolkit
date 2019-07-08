@@ -1,3 +1,4 @@
+# typed: false
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
       attr_accessor :returning
 
       alias_method :old_initialize, :initialize
+      sig { params(relation: T.untyped, wheres: T::Array).void }
       def initialize(relation = nil, wheres = [])
         old_initialize(relation, wheres)
 
@@ -21,6 +23,7 @@ module Arel
   module Visitors
     class ToSql
       # rubocop:disable Metrics/AbcSize
+      sig { params(o: Arel::Nodes::DeleteStatement, collector: T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)).returns(T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)) }
       def visit_Arel_Nodes_DeleteStatement(o, collector)
         if o.with
           collector = visit o.with, collector

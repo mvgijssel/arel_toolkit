@@ -1,3 +1,4 @@
+# typed: strong
 module Arel
   module SqlToArel
     class Error < StandardError

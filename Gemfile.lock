@@ -152,6 +152,10 @@ GEM
       hirb
       simplecov
     simplecov-html (0.10.2)
+    sorbet (0.4.4399)
+      sorbet-static (= 0.4.4399)
+    sorbet-runtime (0.4.4399)
+    sorbet-static (0.4.4399-universal-darwin-14)
     thor (0.20.3)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
@@ -181,6 +185,8 @@ DEPENDENCIES
   rubocop (~> 0.69)
   simplecov (~> 0.16.1)
   simplecov-console (~> 0.4.2)
+  sorbet
+  sorbet-runtime
 
 BUNDLED WITH
    2.0.1

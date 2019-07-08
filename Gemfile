@@ -5,5 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem 'sorbet'
+gem 'sorbet-runtime'
+
 # Specify your gem's dependencies in arel_toolkit.gemspec
 gemspec

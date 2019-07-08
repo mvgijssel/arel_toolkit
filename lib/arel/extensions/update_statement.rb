@@ -1,3 +1,4 @@
+# typed: false
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
       attr_accessor :returning
 
       alias_method :old_initialize, :initialize
+      sig { void }
       def initialize
         old_initialize
 
@@ -24,6 +26,7 @@ module Arel
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/PerceivedComplexity
+      sig { params(o: Arel::Nodes::UpdateStatement, collector: T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)).returns(T.any(Arel::Collectors::SQLString, Arel::Collectors::Composite)) }
       def visit_Arel_Nodes_UpdateStatement(o, collector)
         if o.with
           collector = visit o.with, collector

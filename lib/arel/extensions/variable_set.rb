@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
       attr_reader :name
       attr_reader :local
 
+      sig { params(type: Integer, args: T::Array, name: String, local: T::Boolean).void }
       def initialize(type, args, name, local)
         @type = type
         @args = args
@@ -21,6 +23,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::VariableSet, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_VariableSet(o, collector)
         collector << 'SET '
         collector << 'LOCAL ' if o.local

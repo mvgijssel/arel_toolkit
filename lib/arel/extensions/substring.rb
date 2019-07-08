@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -9,6 +10,7 @@ module Arel
       attr_reader :pattern
       attr_reader :escape
 
+      sig { params(string: T.any(Arel::Nodes::Quoted, Arel::Nodes::TypeCast), pattern: T.any(Integer, Arel::Nodes::Quoted), escape: T.nilable(Integer, Arel::Nodes::Quoted)).void }
       def initialize(string, pattern, escape)
         @string = string
         @pattern = pattern
@@ -19,6 +21,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Substring, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Substring(o, collector)
         collector << 'substring('
         visit o.string, collector

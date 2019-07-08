@@ -1,6 +1,8 @@
+# typed: false
 if Gem.loaded_specs.key?('active_record_upsert')
   describe ActiveRecordUpsert do
     class SomeMiddleware
+      sig { params(arel: T.untyped, _context: T.untyped).returns(T.untyped) }
       def self.call(arel, _context)
         arel
       end

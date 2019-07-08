@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/AbcSize
@@ -11,6 +12,7 @@ module Arel
       attr_reader :start
       attr_reader :length
 
+      sig { params(string: T.any(Arel::Nodes::Quoted, Arel::Nodes::TypeCast), substring: T.any(Arel::Nodes::Quoted, Arel::Nodes::TypeCast), start: Integer, length: Integer).void }
       def initialize(string, substring, start, length = nil)
         @string = string
         @substring = substring
@@ -22,6 +24,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Overlay, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Overlay(o, collector)
         collector << 'overlay('
         visit o.string, collector

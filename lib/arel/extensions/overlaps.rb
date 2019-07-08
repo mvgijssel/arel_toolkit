@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -10,6 +11,7 @@ module Arel
       attr_reader :start2
       attr_reader :end2
 
+      sig { params(start1: Arel::Nodes::TypeCast, end1: Arel::Nodes::TypeCast, start2: Arel::Nodes::TypeCast, end2: Arel::Nodes::TypeCast).void }
       def initialize(start1, end1, start2, end2)
         @start1 = start1
         @end1 = end1
@@ -21,6 +23,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Overlaps, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Overlaps(o, collector)
         collector << '('
         visit o.start1, collector

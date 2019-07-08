@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -7,6 +8,7 @@ module Arel
       attr_reader :arg
       attr_reader :indirection
 
+      sig { params(arg: Arel::Nodes::UnboundColumnReference, indirection: T::Array[Integer]).void }
       def initialize(arg, indirection)
         super()
 
@@ -18,6 +20,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(o: Arel::Nodes::Indirection, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Indirection(o, collector)
         visit(o.arg, collector)
         collector << '['

@@ -1,3 +1,4 @@
+# typed: true
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -9,6 +10,7 @@ module Arel
 
   module Visitors
     class ToSql
+      sig { params(_o: Arel::Nodes::CurrentCatalog, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_CurrentCatalog(_o, collector)
         collector << 'current_catalog'
       end

@@ -1,3 +1,4 @@
+# typed: false
 describe Arel::UpdateManager do
   describe 'equality' do
     it 'equals two update managers' do

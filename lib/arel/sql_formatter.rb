@@ -1,6 +1,8 @@
+# typed: true
 module Arel
   module Nodes
     class Node
+      sig { params(engine: T.untyped).returns(T.untyped) }
       def to_formatted_sql(engine = Table.engine)
         collector = Arel::Collectors::SQLString.new
         Arel::SqlFormatter.new(engine.connection).accept self, collector
@@ -10,6 +12,7 @@ module Arel
   end
 
   class TreeManager
+    sig { params(engine: Class).returns(String) }
     def to_formatted_sql(engine = Table.engine)
       collector = Arel::Collectors::SQLString.new
       Arel::SqlFormatter.new(engine.connection).accept @ast, collector
@@ -18,6 +21,7 @@ module Arel
   end
 
   class SqlFormatter < Arel::Visitors::PostgreSQL
+    sig { params(object: Arel::Nodes::SelectStatement, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
     def accept(object, collector)
       super object, collector
       collector << "\n"
@@ -28,6 +32,7 @@ module Arel
     # rubocop:disable Naming/MethodName
     # rubocop:disable Naming/UncommunicativeMethodParamName
     # rubocop:disable Metrics/AbcSize
+    sig { params(o: Arel::Nodes::SelectCore, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
     def visit_Arel_Nodes_SelectCore(o, collector)
       collector << "SELECT\n"
 

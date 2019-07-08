@@ -1,8 +1,10 @@
+# typed: true
 module Arel
   module SqlToArel
     class PgQueryVisitor
       class FrameOptions
         class << self
+          sig { params(frame_options: Integer, start_offset: Integer, end_offset: Integer).returns(T.any(Arel::Nodes::Range, Arel::Nodes::Between, Arel::Nodes::Rows)) }
           def arel(frame_options, start_offset, end_offset)
             frame_option_names = calculate_frame_option_names(frame_options)
             return unless frame_option_names.include?('FRAMEOPTION_NONDEFAULT')
@@ -59,6 +61,7 @@ module Arel
             'FRAMEOPTION_END_VALUE_FOLLOWING' => 0x02000
           }.freeze
 
+          sig { params(number: Integer, candidates: T::Array[Integer]).returns(Integer) }
           def biggest_detractable_number(number, candidates)
             high_to_low_candidates = candidates.sort { |a, b| b <=> a }
             high_to_low_candidates.find do |candidate|
@@ -66,6 +69,7 @@ module Arel
             end
           end
 
+          sig { params(frame_options: Integer, names: T::Array[String]).returns(T::Array[String]) }
           def calculate_frame_option_names(frame_options, names = [])
             return names if frame_options.zero?
 
@@ -76,14 +80,16 @@ module Arel
             )
           end
 
+          sig { params(pattern: String, frame_option_names: T::Array[String], offset: Integer).returns(T.any(Arel::Nodes::CurrentRow, Arel::Nodes::Preceding, Arel::Nodes::Following)) }
           def calculate_frame_node(pattern, frame_option_names, offset)
             node_name = frame_option_names.select { |n| n.start_with?(pattern) }
             raise "Don't know how to handle multiple nodes" if node_name.length > 1
 
-            node_name = node_name.first.gsub(/FRAMEOPTION_(START|END)_/, '')
+            node_name = T.must(node_name.first).gsub(/FRAMEOPTION_(START|END)_/, '')
             name_to_node(node_name, offset)
           end
 
+          sig { params(node_name: String, offset: Integer).returns(T.any(Arel::Nodes::CurrentRow, Arel::Nodes::Preceding, Arel::Nodes::Following)) }
           def name_to_node(node_name, offset)
             case node_name
             when 'UNBOUNDED_PRECEDING'

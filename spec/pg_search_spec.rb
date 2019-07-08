@@ -1,3 +1,4 @@
+# typed: false
 if Gem.loaded_specs.key?('pg_search')
   ActiveRecord::Schema.define do
     self.verbose = false
@@ -63,6 +64,7 @@ if Gem.loaded_specs.key?('pg_search')
 
   describe PgSearch do
     class SomeMiddleware
+      sig { params(arel: T.untyped, _context: T.untyped).returns(T.untyped) }
       def self.call(arel, _context)
         arel
       end

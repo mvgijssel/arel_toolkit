@@ -1,3 +1,4 @@
+# typed: false
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
@@ -15,6 +16,7 @@ module Arel
   module Visitors
     class ToSql
       # rubocop:disable Metrics/AbcSize
+      sig { params(o: Arel::Nodes::Conflict, collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
       def visit_Arel_Nodes_Conflict(o, collector)
         collector << ' ON CONFLICT '
 
