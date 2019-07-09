@@ -165,9 +165,9 @@ module Arel
       end
 
       def mark_as_dirty
-        # return if dirty?
+        return if dirty?
 
-        # @dirty = true
+        @dirty = true
         deep_copy_object
       end
     end
