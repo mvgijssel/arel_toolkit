@@ -44,48 +44,12 @@ module Arel
       end
 
       def remove
-        replace(nil, remove: true)
+        mutate(nil, remove: true)
       end
 
-      # rubocop:disable Metrics/PerceivedComplexity
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/AbcSize
-      def replace(new_node, remove: false)
-        root_node.mark_as_dirty
-
-        parent_object = parent.object
-        new_node = [] if remove && object.is_a?(Array)
-
-        if parent_object.respond_to?("#{path.current.value}=")
-          parent_object.send("#{path.current.value}=", new_node)
-          new_tree = Visitor.new.accept(new_node)
-          parent.add(path.current, new_tree)
-
-        elsif parent_object.instance_values.key?(path.current.value)
-          parent_object.instance_variable_set("@#{path.current.value}", new_node)
-          new_tree = Visitor.new.accept(new_node)
-          parent.add(path.current, new_tree)
-
-        elsif parent_object.is_a?(Array) &&
-              path.current.value.is_a?(Integer) &&
-              path.current.value < parent_object.length
-
-          if remove
-            parent_object.delete_at(path.current.value)
-            parent.children.delete(path.current.value)
-
-          else
-            parent_object[path.current.value] = new_node
-            new_tree = Visitor.new.accept(new_node)
-            parent.add(path.current, new_tree)
-          end
-        else
-          raise "Don't know how to replace `#{path.current.value}` in #{parent_object.inspect}"
-        end
+      def replace(new_node)
+        mutate(new_node)
       end
-      # rubocop:enable Metrics/PerceivedComplexity
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
 
       def add(path_node, node)
         node.path = path.append(path_node)
@@ -170,6 +134,45 @@ module Arel
         @dirty = true
         deep_copy_object
       end
+
+      private
+
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/AbcSize
+      def mutate(new_node, remove: false)
+        root_node.mark_as_dirty
+
+        parent_object = parent.object
+        new_node = [] if remove && object.is_a?(Array)
+
+        if parent_object.respond_to?("#{path.current.value}=")
+          parent_object.send("#{path.current.value}=", new_node)
+
+        elsif parent_object.instance_values.key?(path.current.value)
+          parent_object.instance_variable_set("@#{path.current.value}", new_node)
+
+          # TODO: use path here
+        elsif parent_object.is_a?(Array) &&
+              path.current.value.is_a?(Integer) &&
+              path.current.value < parent_object.length
+
+          if remove
+            parent_object.delete_at(path.current.value)
+
+          else
+            parent_object[path.current.value] = new_node
+          end
+        else
+          raise "Don't know how to replace `#{path.current.value}` in #{parent_object.inspect}"
+        end
+
+        new_parent_tree = Visitor.new.accept(parent_object)
+        parent.parent.add(parent.path.current, new_parent_tree)
+      end
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
     end
   end
 end

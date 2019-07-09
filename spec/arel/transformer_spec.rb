@@ -82,6 +82,23 @@ describe 'Arel.transformer' do
       .to('SELECT 1 FROM "posts"')
   end
 
+  it 'marks a tree as dirty when modified' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+
+    expect do
+      transformer['ast']['cores'][0]['wheres'].remove
+    end.to change { transformer.dirty? }.from(false).to(true)
+  end
+
+  it 'updates the transformer tree when mutating' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+    transformer['ast']['cores'][0]['wheres'].remove
+
+    expect(transformer['ast']['cores'][0]['wheres'].children).to be_empty
+  end
+
   it 'does not change the original arel when replacing' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     transformer = Arel.transformer(result.first)
