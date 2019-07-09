@@ -57,43 +57,39 @@ module Arel
         parent_object = parent.object
         new_node = [] if remove && object.is_a?(Array)
 
-        if parent_object.respond_to?("#{current_path.inspect}=")
-          parent_object.send("#{current_path.inspect}=", new_node)
-          new_tree = Visitor.new.accept(new_node, parent, current_path)
-          parent.add(current_path, new_tree)
+        if parent_object.respond_to?("#{path.current.value}=")
+          parent_object.send("#{path.current.value}=", new_node)
+          new_tree = Visitor.new.accept(new_node, parent, path.current)
+          parent.add(path.current, new_tree)
 
-        elsif parent_object.instance_values.key?(current_path.inspect)
-          parent_object.instance_variable_set("@#{current_path.inspect}", new_node)
-          new_tree = Visitor.new.accept(new_node, parent, current_path)
-          parent.add(current_path, new_tree)
+        elsif parent_object.instance_values.key?(path.current.value)
+          parent_object.instance_variable_set("@#{path.current.value}", new_node)
+          new_tree = Visitor.new.accept(new_node, parent, path.current)
+          parent.add(path.current, new_tree)
 
         elsif parent_object.is_a?(Array) &&
-              current_path.inspect.is_a?(Integer) &&
-              current_path.inspect < parent_object.length
+              path.current.value.is_a?(Integer) &&
+              path.current.value < parent_object.length
 
           if remove
-            parent_object.delete_at(current_path.inspect)
-            parent.children.delete(current_path.inspect)
+            parent_object.delete_at(path.current.value)
+            parent.children.delete(path.current.value)
 
           else
-            parent_object[current_path.inspect] = new_node
-            new_tree = Visitor.new.accept(new_node, parent, current_path)
-            parent.add(current_path, new_tree)
+            parent_object[path.current.value] = new_node
+            new_tree = Visitor.new.accept(new_node, parent, path.current)
+            parent.add(path.current, new_tree)
           end
         else
-          raise "Don't know how to replace `#{current_path.inspect}` in #{parent_object.inspect}"
+          raise "Don't know how to replace `#{path.current.value}` in #{parent_object.inspect}"
         end
       end
       # rubocop:enable Metrics/PerceivedComplexity
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/AbcSize
 
-      def current_path
-        path.last
-      end
-
-      def add(field, object)
-        @children[field.inspect] = object
+      def add(path_node, object)
+        @children[path_node.value] = object
       end
 
       def to_sql(engine = Table.engine)
@@ -158,7 +154,7 @@ module Arel
         @object = new_object
 
         children.each_value do |child|
-          child.recursive_replace_object(new_object.send(*child.current_path.method))
+          child.recursive_replace_object(new_object.send(*child.path.current.method))
         end
       end
 
