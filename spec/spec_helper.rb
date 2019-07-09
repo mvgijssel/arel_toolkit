@@ -14,6 +14,7 @@ require 'pry-alias'
 require 'arel_toolkit'
 
 require 'support/active_record'
+require 'support/compare_arel'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

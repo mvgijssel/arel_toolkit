@@ -6,13 +6,16 @@ module Arel
       attr_reader :path
       attr_reader :fields
       attr_reader :children
+      attr_reader :root_node
 
-      def initialize(object, parent, path)
+      def initialize(object, parent, path, root_node)
         @object = object
         @parent = parent
         @path = path
+        @root_node = root_node || self
         @fields = []
         @children = {}
+        @dirty = false
       end
 
       def inspect
@@ -29,8 +32,70 @@ module Arel
         children.empty?
       end
 
+      def dirty?
+        root_node.instance_values.fetch('dirty')
+      end
+
+      def to_a
+        children_array = children.map do |_name, child|
+          child.to_a
+        end
+
+        [self].concat children_array.flatten
+      end
+
+      def remove
+        replace(nil, remove: true)
+      end
+
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/AbcSize
+      def replace(new_node, remove: false)
+        root_node.mark_as_dirty
+
+        parent_object = parent.object
+        new_node = [] if remove && object.is_a?(Array)
+
+        if parent_object.respond_to?("#{current_path.inspect}=")
+          parent_object.send("#{current_path.inspect}=", new_node)
+          new_tree = Visitor.new.accept(new_node, parent, current_path)
+          parent.add(current_path, new_tree)
+
+        elsif parent_object.instance_values.key?(current_path.inspect)
+          parent_object.instance_variable_set("@#{current_path.inspect}")
+          new_tree = Visitor.new.accept(new_node, parent, current_path)
+          parent.add(current_path, new_tree)
+
+        # TODO: use path object here
+        elsif parent_object.is_a?(Array) &&
+              current_path.inspect.is_a?(Integer) &&
+              current_path.inspect < parent_object.length
+
+          if remove
+            parent_object.delete_at(current_path.inspect)
+            parent.children.delete(current_path.inspect)
+
+          else
+            parent_object[current_path.inspect] = new_node
+            new_tree = Visitor.new.accept(new_node, parent, current_path)
+            parent.add(current_path, new_tree)
+          end
+        else
+          # TODO: handle arrays
+          raise "Don't know how to replace `#{current_path.inspect}` in #{parent_object.inspect}"
+        end
+      end
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
+
+      def current_path
+        path.last
+      end
+
       def add(field, object)
-        @children[field] = object
+        @children[field.inspect] = object
       end
 
       def to_sql(engine = Table.engine)
@@ -83,6 +148,27 @@ module Arel
           memo << '  '
           memo
         end
+      end
+
+      def deep_copy_object
+        # https://github.com/mvgijssel/arel_toolkit/issues/97
+        new_object = Marshal.load(Marshal.dump(object))
+        recursive_replace_object(new_object)
+      end
+
+      def recursive_replace_object(new_object)
+        @object = new_object
+
+        children.each do |_name, child|
+          child.recursive_replace_object(new_object.send(*child.current_path.method))
+        end
+      end
+
+      def mark_as_dirty
+        # return if dirty?
+
+        # @dirty = true
+        deep_copy_object
       end
     end
   end
