@@ -152,11 +152,7 @@ module Arel
         elsif parent_object.instance_values.key?(path.current.value)
           parent_object.instance_variable_set("@#{path.current.value}", new_node)
 
-          # TODO: use path here
-        elsif parent_object.is_a?(Array) &&
-              path.current.value.is_a?(Integer) &&
-              path.current.value < parent_object.length
-
+        elsif path.current.arguments? && parent_object.respond_to?(path.current.method[0])
           if remove
             parent_object.delete_at(path.current.value)
 
