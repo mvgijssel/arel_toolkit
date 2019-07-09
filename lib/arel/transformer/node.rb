@@ -157,7 +157,7 @@ module Arel
       def recursive_replace_object(new_object)
         @object = new_object
 
-        children.each_value do |_name, child|
+        children.each_value do |child|
           child.recursive_replace_object(new_object.send(*child.current_path.method))
         end
       end
