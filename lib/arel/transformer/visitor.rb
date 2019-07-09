@@ -2,13 +2,8 @@ module Arel
   module Transformer
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
-      def accept(object, parent = nil, path = nil)
-        root_node = Arel::Transformer::Node.new(
-          object,
-          parent,
-          parent.nil? ? [] : parent.path + [path],
-          parent.nil? ? nil : parent.root_node,
-        )
+      def accept(object)
+        root_node = Arel::Transformer::Node.new(object)
 
         with_node(root_node) do
           visit object
@@ -22,7 +17,7 @@ module Arel
       def visit_edge(object, method)
         arel_node = object.send(method)
 
-        process_node(arel_node, Path.new(method, method))
+        process_node(arel_node, Arel::Transformer::PathNode.new(method, method))
       end
 
       def nary(object)
@@ -32,28 +27,19 @@ module Arel
 
       def visit_Hash(object)
         object.each do |key, value|
-          process_node(value, Path.new([:[], key], key))
+          process_node(value, Arel::Transformer::PathNode.new([:[], key], key))
         end
       end
 
       def visit_Array(object)
         object.each_with_index do |child, index|
-          process_node(child, Path.new([:[], index], index))
+          process_node(child, Arel::Transformer::PathNode.new([:[], index], index))
         end
       end
 
-      def process_node(arel_node, path)
-        parent = current_node
-        new_path = parent.path + [path]
-
-        node = Arel::Transformer::Node.new(
-          arel_node,
-          parent,
-          new_path,
-          parent.root_node,
-        )
-
-        parent.add(path, node)
+      def process_node(arel_node, path_node)
+        node = Arel::Transformer::Node.new(arel_node)
+        current_node.add(path_node, node)
 
         with_node node do
           visit arel_node

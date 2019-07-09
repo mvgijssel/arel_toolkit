@@ -1,12 +1,25 @@
 module Arel
   module Transformer
     class Path
-      attr_reader :method
-      attr_reader :inspect
+      attr_reader :nodes
 
-      def initialize(method, inspect)
-        @method = method
-        @inspect = inspect
+      def initialize(nodes = [])
+        @nodes = nodes
+      end
+
+      def append(path_node)
+        Path.new(nodes + [path_node])
+      end
+
+      def current
+        nodes.last
+      end
+
+      def inspect
+        nodes.inspect
+        string = '['
+        string << nodes.map(&:inspect).join(', ')
+        string << ']'
       end
     end
   end
