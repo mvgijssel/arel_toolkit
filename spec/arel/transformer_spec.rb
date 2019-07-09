@@ -27,7 +27,7 @@ describe 'Arel.transformer' do
     expect(transformer.to_sql).to eq result.to_sql
   end
 
-  it 'replaces a node' do
+  it 'replaces a node using a setter' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     transformer = Arel.transformer(result.first)
     old_projections = transformer['ast']['cores'][0]['projections']
@@ -41,18 +41,35 @@ describe 'Arel.transformer' do
       .to('SELECT 3, 4 FROM "posts" WHERE "id" = 1')
   end
 
-  it 'does not change the original arel when replacing' do
-    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+  it 'replaces a node using an instance variable' do
+    result = Arel.sql_to_arel('SELECT 1::integer')
     transformer = Arel.transformer(result.first)
-    old_projections = transformer['ast']['cores'][0]['projections']
-    new_projections = [3, 4]
+    old_type_name = transformer['ast']['cores'][0]['projections'][0]['type_name']
+    new_type_name = 'real'
 
     expect do
-      old_projections.replace(new_projections)
-    end.to_not(change { result.to_sql })
+      old_type_name.replace(new_type_name)
+    end
+      .to change { transformer.to_sql }
+      .from('SELECT 1::integer')
+      .to('SELECT 1::real')
   end
 
-  it 'removes a node' do
+  it 'replaces a node using an array modification' do
+    result = Arel.sql_to_arel('SELECT "a", "b"')
+    transformer = Arel.transformer(result.first)
+    old_projection = transformer['ast']['cores'][0]['projections'][0]
+    new_projection = Arel::Nodes::UnboundColumnReference.new('"c"')
+
+    expect do
+      old_projection.replace(new_projection)
+    end
+      .to change { transformer.to_sql }
+      .from('SELECT "a", "b"')
+      .to('SELECT "c", "b"')
+  end
+
+  it 'removes a node using an array modification' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     transformer = Arel.transformer(result.first)
 
@@ -63,6 +80,17 @@ describe 'Arel.transformer' do
       .to change { transformer.to_sql }
       .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1')
       .to('SELECT 1 FROM "posts"')
+  end
+
+  it 'does not change the original arel when replacing' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+    old_projections = transformer['ast']['cores'][0]['projections']
+    new_projections = [3, 4]
+
+    expect do
+      old_projections.replace(new_projections)
+    end.to_not(change { result.to_sql })
   end
 
   it 'makes a deep copy of the arel when modified' do

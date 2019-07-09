@@ -63,7 +63,7 @@ module Arel
           parent.add(current_path, new_tree)
 
         elsif parent_object.instance_values.key?(current_path.inspect)
-          parent_object.instance_variable_set("@#{current_path.inspect}")
+          parent_object.instance_variable_set("@#{current_path.inspect}", new_node)
           new_tree = Visitor.new.accept(new_node, parent, current_path)
           parent.add(current_path, new_tree)
 

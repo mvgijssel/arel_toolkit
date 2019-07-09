@@ -1,15 +1,5 @@
 module Arel
   module Transformer
-    class Path
-      attr_reader :method
-      attr_reader :inspect
-
-      def initialize(method, inspect)
-        @method = method
-        @inspect = inspect
-      end
-    end
-
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
       def accept(object, parent = nil, path = nil)

@@ -1,4 +1,5 @@
 require_relative './transformer/node'
+require_relative './transformer/path'
 require_relative './transformer/visitor'
 
 module Arel
