@@ -94,6 +94,7 @@ require 'arel/extensions/substring'
 require 'arel/extensions/overlaps'
 require 'arel/extensions/trim'
 require 'arel/extensions/named_argument'
+require 'arel/extensions/tree_manager'
 
 module Arel
   module Extensions
