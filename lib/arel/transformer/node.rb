@@ -67,7 +67,6 @@ module Arel
           new_tree = Visitor.new.accept(new_node, parent, current_path)
           parent.add(current_path, new_tree)
 
-        # TODO: use path object here
         elsif parent_object.is_a?(Array) &&
               current_path.inspect.is_a?(Integer) &&
               current_path.inspect < parent_object.length
@@ -82,7 +81,6 @@ module Arel
             parent.add(current_path, new_tree)
           end
         else
-          # TODO: handle arrays
           raise "Don't know how to replace `#{current_path.inspect}` in #{parent_object.inspect}"
         end
       end
@@ -159,7 +157,7 @@ module Arel
       def recursive_replace_object(new_object)
         @object = new_object
 
-        children.each do |_name, child|
+        children.each_value do |_name, child|
           child.recursive_replace_object(new_object.send(*child.current_path.method))
         end
       end

@@ -12,7 +12,6 @@ module Arel
 
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
-      # TODO: refactor how nodes are added to each other
       def accept(object, parent = nil, path = nil)
         root_node = Arel::Transformer::Node.new(
           object,
