@@ -2,6 +2,7 @@ version: "2"
 plugins:
   rubocop:
     enabled: true
+    channel: 0.72.0
   bundler-audit:
     enabled: true
   fixme:

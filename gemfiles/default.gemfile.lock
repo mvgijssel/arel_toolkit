@@ -190,7 +190,7 @@ DEPENDENCIES
   pry-stack_explorer
   rake (~> 10.0)
   rspec (~> 3.8)
-  rubocop (~> 0.69)
+  rubocop (= 0.72.0)
   simplecov (~> 0.16.1)
   simplecov-console (~> 0.4.2)
 
