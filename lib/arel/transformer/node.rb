@@ -30,6 +30,15 @@ module Arel
       def each(&block)
         return enum_for(:each) unless block_given?
 
+
+
+
+
+
+
+
+
+
         yield self
 
         children.each_value do |child|
