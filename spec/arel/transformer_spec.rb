@@ -82,6 +82,39 @@ describe 'Arel.transformer' do
       .to('SELECT 1 FROM "posts"')
   end
 
+  it 'marks a tree as dirty when modified' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+
+    expect do
+      transformer['ast']['cores'][0]['wheres'].remove
+    end.to change { transformer.dirty? }.from(false).to(true)
+  end
+
+  it 'updates the transformer tree when mutating' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+    transformer_nodes = transformer.each.to_a
+    where_nodes = transformer['ast']['cores'][0]['wheres'].remove.each.to_a
+    projections_nodes = transformer['ast']['cores'][0]['projections'][0].remove.each.to_a
+
+    expect(transformer_nodes).to all(satisfy { |n| n.root_node == transformer.root_node })
+    expect(where_nodes).to all(satisfy { |n| n.root_node == transformer.root_node })
+    expect(projections_nodes).to all(satisfy { |n| n.root_node == transformer.root_node })
+
+    expect(where_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
+    expect(projections_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
+  end
+
+  it 'returns the local transformer tree after mutating' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    transformer = Arel.transformer(result.first)
+    where_tree = transformer['ast']['cores'][0]['wheres'].remove
+
+    expect(where_tree.path.to_a).to eq ['ast', 'cores', 0, 'wheres']
+    expect(where_tree.parent.object).to be_a(Arel::Nodes::SelectCore)
+  end
+
   it 'does not change the original arel when replacing' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     transformer = Arel.transformer(result.first)

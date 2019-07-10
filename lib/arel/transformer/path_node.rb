@@ -9,6 +9,10 @@ module Arel
         @value = value
       end
 
+      def arguments?
+        method.is_a?(Array)
+      end
+
       def inspect
         case value
         when String
