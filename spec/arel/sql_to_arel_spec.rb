@@ -343,46 +343,6 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"',
         pg_node: 'PgQuery::WITH_CLAUSE'
 
-  it 'returns an Arel::SelectManager for only the top level SELECT' do
-    sql = 'SELECT 1, (SELECT 2)'
-    result = Arel.sql_to_arel(sql)
-    arel = result.first
-
-    expect(arel.class).to eq Arel::SelectManager
-
-    subquery_grouping = arel.projections[1]
-
-    expect(subquery_grouping.class).to eq Arel::Nodes::Grouping
-
-    subquery = subquery_grouping.expr
-
-    expect(subquery.class).to eq Arel::Nodes::SelectStatement
-  end
-
-  it 'returns an Arel::InsertManager' do
-    sql = 'INSERT INTO a ("b") VALUES (1)'
-    result = Arel.sql_to_arel(sql)
-    arel = result.first
-
-    expect(arel.class).to eq Arel::InsertManager
-  end
-
-  it 'returns an Arel::UpdateManager' do
-    sql = 'UPDATE "some_table" SET "some_column" = 2.0'
-    result = Arel.sql_to_arel(sql)
-    arel = result.first
-
-    expect(arel.class).to eq Arel::UpdateManager
-  end
-
-  it 'returns an Arel::DeleteManager' do
-    sql = 'DELETE FROM "some_table"'
-    result = Arel.sql_to_arel(sql)
-    arel = result.first
-
-    expect(arel.class).to eq Arel::DeleteManager
-  end
-
   it 'implements all operators' do
     sql = 'SELECT ' \
           '11 + (11 + 5), ' \
@@ -1044,6 +1004,46 @@ describe 'Arel.sql_to_arel' do
 
     result = Arel.sql_to_arel(sql)
     expect(result.to_formatted_sql).to eq(strip_sql_comments(sql))
+  end
+
+  it 'returns an Arel::SelectManager for only the top level SELECT' do
+    sql = 'SELECT 1, (SELECT 2)'
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
+
+    expect(arel.class).to eq Arel::SelectManager
+
+    subquery_grouping = arel.projections[1]
+
+    expect(subquery_grouping.class).to eq Arel::Nodes::Grouping
+
+    subquery = subquery_grouping.expr
+
+    expect(subquery.class).to eq Arel::Nodes::SelectStatement
+  end
+
+  it 'returns an Arel::InsertManager' do
+    sql = 'INSERT INTO a ("b") VALUES (1)'
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
+
+    expect(arel.class).to eq Arel::InsertManager
+  end
+
+  it 'returns an Arel::UpdateManager' do
+    sql = 'UPDATE "some_table" SET "some_column" = 2.0'
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
+
+    expect(arel.class).to eq Arel::UpdateManager
+  end
+
+  it 'returns an Arel::DeleteManager' do
+    sql = 'DELETE FROM "some_table"'
+    result = Arel.sql_to_arel(sql)
+    arel = result.first
+
+    expect(arel.class).to eq Arel::DeleteManager
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
