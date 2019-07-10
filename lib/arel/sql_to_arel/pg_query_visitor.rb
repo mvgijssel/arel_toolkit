@@ -495,6 +495,8 @@ module Arel
       end
 
       def visit_IntoClause(rel:, on_commit:)
+        raise "Unknown on_commit `#{on_commit}`" unless on_commit.zero?
+
         Arel::Nodes::Into.new(visit(rel))
       end
 
