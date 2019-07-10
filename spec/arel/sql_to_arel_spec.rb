@@ -342,85 +342,59 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::WINDOW_DEF'
   visit 'sql', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"',
         pg_node: 'PgQuery::WITH_CLAUSE'
-
-  it 'implements all operators' do
-    sql = 'SELECT ' \
-          '11 + (11 + 5), ' \
-          '(12 - 12) - 13, ' \
-          '3 + (10 * 10), ' \
-          '(6 - 13) / 13, ' \
-          '13 % 2, ' \
-          '2.0 ^ 3.0, ' \
-          ' |/ 16, ' \
-          ' ||/ 17, ' \
-          '14 !, ' \
-          '!! 15, ' \
-          ' @ -5, ' \
-          '2 & 3, ' \
-          '2 | 3, ' \
-          '17 # 5, ' \
-          ' ~ 5, ' \
-          '1 << 4, ' \
-          '8 >> 2, ' \
-          '8 < 7, ' \
-          '5 > 4, ' \
-          '9 <= 9, ' \
-          '6 >= 6, ' \
-          '1 = 1, ' \
-          '2 != 3, ' \
-          'ARRAY[1, 4, 3] @> ARRAY[3, 1], ' \
-          'ARRAY[2, 7] <@ ARRAY[1, 7, 4, 2, 6], ' \
-          'ARRAY[1, 4, 3] && ARRAY[2, 1], ' \
-          'ARRAY[1, 2, 3] || ARRAY[4, 5, 6], ' \
-          'ARRAY[1] || ARRAY[ARRAY[4], ARRAY[7]], ' \
-          '3 || ARRAY[4, 5, 6], ' \
-          'ARRAY[4, 5, 6] || 7, ' \
-          "'192.168.1/24'::inet <<= '192.168.1/24'::inet, " \
-          "'192.168.1/24'::inet >>= '192.168.1/24'::inet, " \
-          '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2, ' \
-          '\'{"a": {"b":"foo"}}\'::json -> \'a\', ' \
-          "'[1,2,3]'::json ->> 2, " \
-          '\'{"a":1,"b":2}\'::json ->> \'b\', ' \
-          '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\', ' \
-          '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\', ' \
-          '\'{"a":1, "b":2}\'::jsonb @> \'{"b":2}\'::jsonb, ' \
-          '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb, ' \
-          '\'{"a":1, "b":2}\'::jsonb ? \'b\', ' \
-          '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\'], ' \
-          '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\'], ' \
-          "'thomas' ~ '.*thomas.*', " \
-          "'thomas' ~* '.*Thomas.*', " \
-          "'thomas' !~ '.*Thomas.*', " \
-          "'thomas' !~* '.*vadim.*', " \
-          "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
-
-    parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq sql
-  end
-
-  it 'translates FETCH into LIMIT' do
-    sql = 'SELECT 1 FETCH FIRST 2 ROWS ONLY'
-    parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq 'SELECT 1 LIMIT 2'
-  end
-
-  it 'translates CAST into ::' do
-    sql = 'SELECT CAST(3 AS TEXT)'
-    parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq 'SELECT 3::text'
-  end
-
-  it 'translates SOME into ANY' do
-    sql = 'SELECT "a" <= SOME(SELECT 1)'
-    parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq 'SELECT "a" <= ANY(SELECT 1)'
-  end
-
-  it 'removes ALL inside a function' do
-    sql = 'SELECT SUM(ALL "a")'
-    parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq 'SELECT SUM("a")'
-  end
+  visit 'select', '11 + (11 + 5)'
+  visit 'select', '(12 - 12) - 13'
+  visit 'select', '3 + (10 * 10)'
+  visit 'select', '(6 - 13) / 13'
+  visit 'select', '13 % 2'
+  visit 'select', '2.0 ^ 3.0'
+  visit 'select', ' |/ 16'
+  visit 'select', ' ||/ 17'
+  visit 'select', '14 !'
+  visit 'select', '!! 15'
+  visit 'select', ' @ -5'
+  visit 'select', '2 & 3'
+  visit 'select', '2 | 3'
+  visit 'select', '17 # 5'
+  visit 'select', ' ~ 5'
+  visit 'select', '1 << 4'
+  visit 'select', '8 >> 2'
+  visit 'select', '8 < 7'
+  visit 'select', '5 > 4'
+  visit 'select', '9 <= 9'
+  visit 'select', '6 >= 6'
+  visit 'select', '1 = 1'
+  visit 'select', '2 != 3'
+  visit 'select', 'ARRAY[1, 4, 3] @> ARRAY[3, 1]'
+  visit 'select', 'ARRAY[2, 7] <@ ARRAY[1, 7, 4, 2, 6]'
+  visit 'select', 'ARRAY[1, 4, 3] && ARRAY[2, 1]'
+  visit 'select', 'ARRAY[1, 2, 3] || ARRAY[4, 5, 6]'
+  visit 'select', 'ARRAY[1] || ARRAY[ARRAY[4], ARRAY[7]]'
+  visit 'select', '3 || ARRAY[4, 5, 6]'
+  visit 'select', 'ARRAY[4, 5, 6] || 7'
+  visit 'select', "'192.168.1/24'::inet <<= '192.168.1/24'::inet"
+  visit 'select', "'192.168.1/24'::inet >>= '192.168.1/24'::inet"
+  visit 'select', '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2'
+  visit 'select', '\'{"a": {"b":"foo"}}\'::json -> \'a\''
+  visit 'select', "'[1,2,3]'::json ->> 2"
+  visit 'select', '\'{"a":1,"b":2}\'::json ->> \'b\''
+  visit 'select', '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\''
+  visit 'select', '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\''
+  visit 'select', '\'{"a":1, "b":2}\'::jsonb @> \'{"b":2}\'::jsonb'
+  visit 'select', '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb'
+  visit 'select', '\'{"a":1, "b":2}\'::jsonb ? \'b\''
+  visit 'select', '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\']'
+  visit 'select', '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
+  visit 'select', "'thomas' ~ '.*thomas.*'"
+  visit 'select', "'thomas' ~* '.*Thomas.*'"
+  visit 'select', "'thomas' !~ '.*Thomas.*'"
+  visit 'select', "'thomas' !~* '.*vadim.*'"
+  visit 'select', "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
+  visit 'select', '1 FETCH FIRST 2 ROWS ONLY', expected_sql: 'SELECT 1 LIMIT 2'
+  visit 'select', 'CAST(3 AS TEXT)', expected_sql: 'SELECT 3::text'
+  visit 'select', "inet '192.168.1.6'", expected_sql: "SELECT '192.168.1.6'::inet"
+  visit 'select', '"a" <= SOME(SELECT 1)', expected_sql: 'SELECT "a" <= ANY(SELECT 1)'
+  visit 'select', 'SUM(ALL "a")', expected_sql: 'SELECT SUM("a")'
 
   it 'https://www.postgresql.org/docs/10/functions-math.html#FUNCTIONS-MATH-FUNC-TABLE' do
     sql = <<~SQL
