@@ -95,6 +95,8 @@ require 'arel/extensions/overlaps'
 require 'arel/extensions/trim'
 require 'arel/extensions/named_argument'
 require 'arel/extensions/tree_manager'
+require 'arel/extensions/into'
+require 'arel/extensions/select_core'
 
 module Arel
   module Extensions

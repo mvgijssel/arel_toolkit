@@ -494,6 +494,12 @@ module Arel
         ival
       end
 
+      def visit_IntoClause(rel:, on_commit:)
+        raise "Unknown on_commit `#{on_commit}`" unless on_commit.zero?
+
+        Arel::Nodes::Into.new(visit(rel))
+      end
+
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
         join_class = case jointype
                      when 0
@@ -669,6 +675,7 @@ module Arel
         op:,
         window_clause: nil,
         values_lists: nil,
+        into_clause: nil,
         all: nil,
         larg: nil,
         rarg: nil
@@ -702,6 +709,7 @@ module Arel
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
+        select_core.into = visit(into_clause) if into_clause
 
         if distinct_clause == [nil]
           select_core.set_quantifier = Arel::Nodes::Distinct.new
