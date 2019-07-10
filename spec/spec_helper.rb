@@ -15,6 +15,7 @@ require 'arel_toolkit'
 
 require 'support/active_record'
 require 'support/compare_arel'
+require 'support/pg_ast_contains'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
