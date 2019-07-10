@@ -36,6 +36,20 @@ module Arel
       def visit_Arel_Table(o, collector)
         collector << 'ONLY ' if o.only
 
+        case o.relpersistence
+        when 'p'
+          collector << ''
+
+        when 'u'
+          collector << 'UNLOGGED '
+
+        when 't'
+          collector << 'TEMPORARY '
+
+        else
+          raise "Unknown relpersistence `#{o.relpersistence}`"
+        end
+
         collector << "\"#{o.schema_name}\"." if o.schema_name
 
         old_visit_Arel_Table(o, collector)

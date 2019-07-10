@@ -185,7 +185,9 @@ describe 'Arel.sql_to_arel' do
   # https://github.com/mvgijssel/arel_toolkit/issues/56
   # visit 'pg', '???', 'PgQuery::INT_LIST'
   visit 'select', '1', pg_node: 'PgQuery::INTEGER'
-  visit 'pg', 'SELECT INTO some_table FROM new_table', 'PgQuery::INTO_CLAUSE'
+  visit 'sql', 'SELECT INTO TEMPORARY "a_table" FROM "posts"', pg_node: 'PgQuery::INTO_CLAUSE'
+  visit 'sql', 'SELECT INTO UNLOGGED "a_table" FROM "posts"', pg_node: 'PgQuery::INTO_CLAUSE'
+  visit 'sql', 'SELECT INTO "a_table" FROM "posts"', pg_node: 'PgQuery::INTO_CLAUSE'
   visit 'select', '* FROM "a" INNER JOIN "b" ON 1 = 1', pg_node: 'PgQuery::JOIN_EXPR'
   visit 'select', '* FROM "a" LEFT OUTER JOIN "c" ON 1 = 1', pg_node: 'PgQuery::JOIN_EXPR'
   visit 'select', '* FROM "a" FULL OUTER JOIN "d" ON 1 = 1', pg_node: 'PgQuery::JOIN_EXPR'
