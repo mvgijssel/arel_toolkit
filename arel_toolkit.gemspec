@@ -41,7 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov-console', '~> 0.4.2'
 
   # When updating also update .codeclimate.yml:5
-  spec.add_development_dependency 'rubocop', '= 0.72.0'
+  spec.add_development_dependency 'rubocop', '= 0.71.0'
   spec.add_development_dependency 'guard', '~> 2.15'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'guard-rubocop', '~> 1.3.0'

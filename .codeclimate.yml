@@ -2,7 +2,8 @@ version: "2"
 plugins:
   rubocop:
     enabled: true
-    channel: 0.72.0
+    # When updating also update arel_toolkit.gemspec:44
+    channel: rubocop-0-71
   bundler-audit:
     enabled: true
   fixme:
