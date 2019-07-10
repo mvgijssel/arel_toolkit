@@ -27,20 +27,22 @@ module Arel
         @fields.first
       end
 
+      def each(&block)
+        return enum_for(:each) unless block_given?
+
+        block.call(self)
+
+        children.each_value do |child|
+          child.each(&block)
+        end
+      end
+
       def value?
         children.empty?
       end
 
       def dirty?
         root_node.instance_values.fetch('dirty')
-      end
-
-      def to_a
-        children_array = children.map do |_name, child|
-          child.to_a
-        end
-
-        [self].concat children_array.flatten
       end
 
       def remove
@@ -102,6 +104,7 @@ module Arel
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/PerceivedComplexity
+      attr_writer :object
 
       def inspect_name
         "Node(#{object.class.name})"
@@ -117,14 +120,10 @@ module Arel
       def deep_copy_object
         # https://github.com/mvgijssel/arel_toolkit/issues/97
         new_object = Marshal.load(Marshal.dump(object))
-        recursive_replace_object(new_object)
-      end
 
-      def recursive_replace_object(new_object)
-        @object = new_object
-
-        children.each_value do |child|
-          child.recursive_replace_object(new_object.send(*child.path.current.method))
+        each do |node|
+          selected_object = node.path.dig_send(new_object)
+          node.object = selected_object
         end
       end
 
@@ -163,8 +162,9 @@ module Arel
           raise "Don't know how to replace `#{path.current.value}` in #{parent_object.inspect}"
         end
 
-        new_parent_tree = Visitor.new.accept(parent_object)
+        new_parent_tree = Visitor.new.accept_with_root(parent_object, parent)
         parent.parent.add(parent.path.current, new_parent_tree)
+        new_parent_tree[path.current.value]
       end
       # rubocop:enable Metrics/PerceivedComplexity
       # rubocop:enable Metrics/CyclomaticComplexity

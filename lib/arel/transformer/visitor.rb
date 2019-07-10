@@ -4,7 +4,10 @@ module Arel
     class Visitor < Arel::Visitors::Dot
       def accept(object)
         root_node = Arel::Transformer::Node.new(object)
+        accept_with_root(object, root_node)
+      end
 
+      def accept_with_root(object, root_node)
         with_node(root_node) do
           visit object
         end
