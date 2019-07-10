@@ -291,6 +291,7 @@ describe 'Arel.middleware' do
     expect(ActiveRecord::Base.connection)
       .to receive(:exec_no_cache)
       .and_wrap_original do |m, sql, name, binds|
+
       middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
 
       expect(middleware_sql).to eq(sql)
