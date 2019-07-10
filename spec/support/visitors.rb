@@ -13,17 +13,18 @@ shared_examples 'sql_to_arel' do |sql, expected_sql|
   end
 end
 
-shared_examples 'sql' do |sql, *args, pg_node: nil, sql_to_arel: true, expected_sql: nil|
+shared_examples 'all' do |sql, *args, pg_node: nil, sql_to_arel: true, expected_sql: nil|
   raise "Unknown argument(s) `#{args.inspect}`" unless args.length.zero?
 
   visit 'pg_node', sql, pg_node if pg_node
   visit 'sql_to_arel', sql, expected_sql if sql_to_arel
 end
 
-shared_examples 'select' do |sql, *args, pg_node: nil, sql_to_arel: true, expected_sql: nil|
-  raise "Unknown argument(s) `#{args.inspect}`" unless args.length.zero?
+shared_examples 'sql' do |sql, *args, **kwargs|
+  visit 'all', sql, *args, **kwargs
+end
 
+shared_examples 'select' do |sql, *args, **kwargs|
   sql = "SELECT #{sql}"
-  visit 'pg_node', sql, pg_node if pg_node
-  visit 'sql_to_arel', sql, expected_sql if sql_to_arel
+  visit 'all', sql, *args, **kwargs
 end
