@@ -28,10 +28,8 @@ module Arel
       end
       alias visit_Arel_Nodes_And nary
 
-      def visit_Hash(object)
-        object.each do |key, value|
-          process_node(value, Arel::Transformer::PathNode.new([:[], key], key))
-        end
+      def visit_Hash(_object)
+        raise 'Hash is not supported'
       end
 
       def visit_Array(object)

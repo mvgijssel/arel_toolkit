@@ -38,18 +38,18 @@ module Arel
         collector
       end
     end
-  end
 
-  class Dot
-    module SelectCoreExtension
-      def visit_Arel_Nodes_SelectCore(o)
-        super
+    class Dot
+      module SelectCoreExtension
+        def visit_Arel_Nodes_SelectCore(o)
+          super
 
-        visit_edge o, 'into'
+          visit_edge o, 'into'
+        end
       end
-    end
 
-    prepend SelectCoreExtension
+      prepend SelectCoreExtension
+    end
   end
 end
 

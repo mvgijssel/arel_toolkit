@@ -1,5 +1,4 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
-# rubocop:disable Naming/MethodName
 
 module Arel
   module Nodes
@@ -70,16 +69,26 @@ module Arel
     end
 
     class Dot
-      def visit_Arel_Nodes_Function(o)
-        function o
-        visit_edge o, 'orders'
-        visit_edge o, 'filter'
-        visit_edge o, 'within_group'
-        visit_edge o, 'variardic'
+      module FunctionExtension
+        def function(o)
+          super
+
+          visit_edge o, 'orders'
+          visit_edge o, 'filter'
+          visit_edge o, 'within_group'
+          visit_edge o, 'variardic'
+        end
+
+        alias visit_Arel_Nodes_Exists function
+        alias visit_Arel_Nodes_Min    function
+        alias visit_Arel_Nodes_Max    function
+        alias visit_Arel_Nodes_Avg    function
+        alias visit_Arel_Nodes_Sum    function
       end
+
+      prepend FunctionExtension
     end
   end
 end
 
-# rubocop:enable Naming/MethodName
 # rubocop:enable Naming/UncommunicativeMethodParamName

@@ -27,8 +27,6 @@ RSpec.configure do |config|
 
   config.order = 'random'
 
-  config.full_backtrace = true
-
   config.alias_it_should_behave_like_to :visit, 'visit:'
 
   config.expose_dsl_globally = true

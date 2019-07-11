@@ -82,6 +82,14 @@ describe 'Arel.transformer' do
       .to('SELECT 1 FROM "posts"')
   end
 
+  it 'raises an exception with a hash in the tree' do
+    arel = Arel::Attribute.new(Arel::Table.new(:posts), foo: :bar)
+
+    expect do
+      Arel.transformer(arel)
+    end.to raise_error('Hash is not supported')
+  end
+
   it 'marks a tree as dirty when modified' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     transformer = Arel.transformer(result.first)

@@ -88,6 +88,10 @@
                 <Node(Array) ["ast", "cores", 0, "windows"]
                   parent = Node(Arel::Nodes::SelectCore)
                   value = nil>
+              into =
+                <Node(NilClass) ["ast", "cores", 0, "into"]
+                  parent = Node(Arel::Nodes::SelectCore)
+                  value = nil>
             >
         >
       limit =
