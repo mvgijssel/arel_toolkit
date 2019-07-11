@@ -1,4 +1,3 @@
-# typed: false
 describe Arel::InsertManager do
   describe 'equality' do
     it 'equals two insert managers' do

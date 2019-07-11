@@ -1,4 +1,3 @@
-# typed: false
 describe Arel::SelectManager do
   describe 'equality' do
     it 'equals two select managers' do

@@ -1,6 +1,4 @@
-# typed: true
 # https://github.com/mvgijssel/arel_toolkit/issues/63
-sig { params(arel: Arel::SelectManager).returns(Arel::SelectManager) }
 def replace_active_record_arel(arel)
   arel.ast.each do |node|
     case node
@@ -19,7 +17,6 @@ def replace_active_record_arel(arel)
   arel
 end
 
-sig { params(value: T.any(Integer, T::Boolean)).returns(T.any(Integer, Arel::Nodes::TypeCast)) }
 def cast_for_database(value)
   case value
   when String

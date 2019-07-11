@@ -1,4 +1,3 @@
-# typed: false
 require 'simplecov'
 require 'simplecov-console'
 SimpleCov.start do

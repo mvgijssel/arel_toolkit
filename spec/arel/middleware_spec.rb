@@ -1,14 +1,11 @@
-# typed: false
 describe 'Arel.middleware' do
   class SomeMiddleware
-    sig { params(arel: T.any(ActiveRecord::Relation, Arel::Nodes::Transaction, Arel::UpdateManager, Arel::SelectManager, Arel::InsertManager, Arel::DeleteManager), _context: T::Hash[Symbol, String]).returns(T.any(ActiveRecord::Relation, Arel::Nodes::Transaction, Arel::UpdateManager, Arel::SelectManager, Arel::InsertManager, Arel::DeleteManager)) }
     def self.call(arel, _context)
       arel
     end
   end
 
   class OtherMiddleware
-    sig { params(arel: Arel::SelectManager, _context: T::Hash[Symbol, String]).returns(Arel::SelectManager) }
     def self.call(arel, _context)
       arel
     end
@@ -73,7 +70,6 @@ describe 'Arel.middleware' do
 
   it 'sets the original sql in the context' do
     class ChangeMiddleware
-      sig { params(_arel: Arel::SelectManager, _context: T::Hash[Symbol, String]).returns(ActiveRecord::Relation) }
       def self.call(_arel, _context)
         Post.select(:title)
       end

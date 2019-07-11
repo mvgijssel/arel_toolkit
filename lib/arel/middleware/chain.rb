@@ -67,7 +67,21 @@ module Arel
         continue_chain(updated_middleware, internal_context, &block)
       end
 
-      sig { params(new_context: T::Hash[Symbol, Symbol], block: Proc).returns(T.any(T::Boolean, ActiveRecord::Relation)) }
+      sig do
+        params(
+          new_context: T::Hash[Symbol, Symbol],
+          block: Proc,
+        ).returns(
+          T.any(
+            T::Boolean,
+            T::Array[Class],
+            ActiveRecord::Relation,
+            String,
+            Arel::Middleware::Chain,
+            ActiveRecord::Model,
+          )
+        )
+      end
       def context(new_context = nil, &block)
         if new_context.nil? && !block.nil?
           raise 'You cannot do a block statement while calling context without arguments'
@@ -91,7 +105,21 @@ module Arel
         maybe_execute_block(new_chain, &block)
       end
 
-      sig { params(new_chain: Arel::Middleware::Chain, block: Proc).returns(T.any(T::Array[Class], ActiveRecord::Relation, T::Boolean, Post, String)) }
+      sig do
+        params(
+          new_chain: Arel::Middleware::Chain,
+          block: Proc,
+        ).returns(
+          T.any(
+            T::Array[Class],
+            ActiveRecord::Relation,
+            T::Boolean,
+            Post,
+            String,
+            Arel::Middleware::Chain,
+          ),
+        )
+      end
       def maybe_execute_block(new_chain, &block)
         return new_chain if block.nil?
 

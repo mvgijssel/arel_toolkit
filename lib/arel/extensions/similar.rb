@@ -6,7 +6,13 @@ module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9/functions-matching.html
     class Similar < Arel::Nodes::Matches
-      sig { params(left: Arel::Nodes::Quoted, right: Arel::Nodes::Quoted, escape: Arel::Nodes::Quoted).void }
+      sig do
+        params(
+          left: Arel::Nodes::Quoted,
+          right: Arel::Nodes::Quoted,
+          escape: T.nilable(Arel::Nodes::Quoted),
+        ).void
+      end
       def initialize(left, right, escape = nil)
         super(left, right, escape, false)
       end

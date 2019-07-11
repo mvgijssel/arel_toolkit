@@ -11,7 +11,12 @@ module Arel
       attr_accessor :within_group
       attr_accessor :variardic
 
-      sig { params(expr: T.any(T::Array, Arel::Nodes::SelectStatement), aliaz: T.untyped).void }
+      sig {
+        params(
+          expr: T.any(T::Array, Arel::Nodes::SelectStatement),
+          aliaz: T.nilable(T.untyped)
+        ).void
+      }
       def initialize(expr, aliaz = nil)
         super()
         @expressions = expr
@@ -27,7 +32,23 @@ module Arel
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
-      sig { params(name: String, o: T.any(Arel::Nodes::NamedFunction, Arel::Nodes::Sum, Arel::Nodes::Coalesce, Arel::Nodes::Avg, Arel::Nodes::Least, Arel::Nodes::Greatest, Arel::Nodes::Rank, Arel::Nodes::Count, Arel::Nodes::GenerateSeries, Arel::Nodes::Max, Arel::Nodes::Min), collector: Arel::Collectors::SQLString).returns(Arel::Collectors::SQLString) }
+      sig {
+        params(
+          name: String,
+          o: T.any(
+            Arel::Nodes::NamedFunction,
+            Arel::Nodes::Sum,
+            Arel::Nodes::Coalesce,
+            Arel::Nodes::Avg, Arel::Nodes::Least,
+            Arel::Nodes::Greatest,
+            Arel::Nodes::Rank, Arel::Nodes::Count,
+            Arel::Nodes::GenerateSeries,
+            Arel::Nodes::Max,
+            Arel::Nodes::Min
+          ),
+          collector: Arel::Collectors::SQLString,
+        ).returns(Arel::Collectors::SQLString)
+      }
       def aggregate(name, o, collector)
         collector << "#{name}("
         collector << 'DISTINCT ' if o.distinct
