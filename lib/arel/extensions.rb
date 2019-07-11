@@ -1,3 +1,4 @@
+require 'arel/extensions/dot'
 require 'arel/extensions/unknown'
 require 'arel/extensions/time_with_precision'
 require 'arel/extensions/current_time'
@@ -97,6 +98,15 @@ require 'arel/extensions/named_argument'
 require 'arel/extensions/tree_manager'
 require 'arel/extensions/into'
 require 'arel/extensions/select_core'
+require 'arel/extensions/unary'
+require 'arel/extensions/binary'
+require 'arel/extensions/unary_operation'
+require 'arel/extensions/infix_operation'
+require 'arel/extensions/values_list'
+require 'arel/extensions/case'
+require 'arel/extensions/current_row'
+require 'arel/extensions/false'
+require 'arel/extensions/true'
 
 module Arel
   module Extensions

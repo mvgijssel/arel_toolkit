@@ -3,19 +3,22 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/10/sql-update.html
-    Arel::Nodes::UpdateStatement.class_eval do
-      attr_accessor :with
-      attr_accessor :froms
-      attr_accessor :returning
+    class UpdateStatement
+      module UpdateStatementExtension
+        # https://www.postgresql.org/docs/10/sql-update.html
+        attr_accessor :with
+        attr_accessor :froms
+        attr_accessor :returning
 
-      alias_method :old_initialize, :initialize
-      def initialize
-        old_initialize
+        def initialize
+          super
 
-        @froms = []
-        @returning = []
+          @froms = []
+          @returning = []
+        end
       end
+
+      prepend UpdateStatementExtension
     end
   end
 
@@ -63,6 +66,20 @@ module Arel
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/PerceivedComplexity
+    end
+
+    class Dot
+      module UpdateStatementExtension
+        def visit_Arel_Nodes_UpdateStatement(o)
+          super
+
+          visit_edge o, 'with'
+          visit_edge o, 'froms'
+          visit_edge o, 'returning'
+        end
+      end
+
+      prepend UpdateStatementExtension
     end
   end
 end

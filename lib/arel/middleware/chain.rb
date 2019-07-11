@@ -14,7 +14,7 @@ module Arel
 
         internal_middleware.each do |middleware_item|
           result = result.map do |arel|
-            middleware_item.call(arel, updated_context)
+            middleware_item.call(arel, updated_context.dup)
           end
         end
 
@@ -87,10 +87,6 @@ module Arel
         yield block
       ensure
         Arel::Middleware.current_chain = previous_chain
-      end
-
-      def current_chain
-        Arel::Middleware.current_chain
       end
     end
   end

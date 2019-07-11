@@ -4,14 +4,9 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.2/sql-expressions.html
-    class Row < Arel::Nodes::Unary
-      attr_reader :row_format
-
-      def initialize(args, row_format)
-        super(args)
-
-        @row_format = row_format
-      end
+    class Row < Arel::Nodes::Binary
+      alias expr left
+      alias row_format right
     end
   end
 

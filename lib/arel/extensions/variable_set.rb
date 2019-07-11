@@ -39,6 +39,15 @@ module Arel
         end
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_VariableSet(o)
+        visit_edge o, 'type'
+        visit_edge o, 'args'
+        visit_edge o, 'name'
+        visit_edge o, 'local'
+      end
+    end
   end
 end
 

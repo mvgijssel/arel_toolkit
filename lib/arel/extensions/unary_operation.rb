@@ -2,17 +2,11 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
-  module Nodes
-    class Array < Arel::Nodes::Unary
-    end
-  end
-
   module Visitors
-    class ToSql
-      def visit_Arel_Nodes_Array(o, collector)
-        collector << 'ARRAY['
-        inject_join(o.expr, collector, ', ')
-        collector << ']'
+    class Dot
+      def visit_Arel_Nodes_UnaryOperation(o)
+        visit_edge o, 'operator'
+        visit_edge o, 'expr'
       end
     end
   end

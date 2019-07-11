@@ -40,6 +40,15 @@ module Arel
       end
       # rubocop:enable Metrics/AbcSize
     end
+
+    class Dot
+      def visit_Arel_Nodes_Conflict(o)
+        visit_edge o, 'action'
+        visit_edge o, 'infer'
+        visit_edge o, 'values'
+        visit_edge o, 'wheres'
+      end
+    end
   end
 end
 

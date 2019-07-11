@@ -2,7 +2,7 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
-  SelectManager.class_eval do
+  class SelectManager
     def ==(other)
       @ast == other.ast && @ctx == other.ctx
     end

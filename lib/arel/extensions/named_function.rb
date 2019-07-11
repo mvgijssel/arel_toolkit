@@ -8,6 +8,13 @@ module Arel
         aggregate(o.name, o, collector)
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_NamedFunction(o)
+        visit_edge o, 'name'
+        function(o)
+      end
+    end
   end
 end
 

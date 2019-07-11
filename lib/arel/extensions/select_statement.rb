@@ -3,21 +3,40 @@
 
 module Arel
   module Nodes
-    Arel::Nodes::SelectStatement.class_eval do
-      # For INSERT statements
-      attr_accessor :values_lists
-      attr_accessor :union
-      attr_writer :cores
+    class SelectStatement
+      module SelectStatementExtension
+        # For INSERT statements
+        attr_accessor :values_lists
+        attr_accessor :union
+        attr_writer :cores
+      end
+
+      prepend SelectStatementExtension
     end
   end
 
   module Visitors
     class ToSql
-      alias old_visit_Nodes_SelectStatement visit_Arel_Nodes_SelectStatement
-      def visit_Arel_Nodes_SelectStatement(o, collector)
-        visit(o.union, collector) if o.union
-        old_visit_Nodes_SelectStatement(o, collector)
+      module SelectStatementExtension
+        def visit_Arel_Nodes_SelectStatement(o, collector)
+          visit(o.union, collector) if o.union
+          super
+        end
       end
+
+      prepend SelectStatementExtension
+    end
+
+    class Dot
+      module SelectStatementExtension
+        def visit_Arel_Nodes_SelectStatement(o)
+          super
+
+          visit_edge o, 'union'
+        end
+      end
+
+      prepend SelectStatementExtension
     end
   end
 end

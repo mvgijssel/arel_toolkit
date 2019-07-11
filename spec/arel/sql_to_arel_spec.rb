@@ -10,7 +10,9 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "11 IN (12), 'a' NOT IN ('b')", pg_node: 'PgQuery::A_CONST'
   visit 'select', "'ghi' NOT LIKE 'gh%', 'ghi' LIKE '_h_' ESCAPE 'i'", pg_node: 'PgQuery::A_CONST'
   visit 'select', "'jkl' NOT ILIKE 'jk%', 'jkl' ILIKE '_k_' ESCAPE 'k'", pg_node: 'PgQuery::A_CONST'
-  visit 'select', "'mn' SIMILAR TO '(m|o)', 'mn' NOT SIMILAR TO '_h{1}%' ESCAPE '_'",
+  visit 'select', "'mn' SIMILAR TO '(m|o)' ESCAPE '_', 'mn' NOT SIMILAR TO '_h{1}%' ESCAPE '_'",
+        pg_node: 'PgQuery::A_CONST'
+  visit 'select', "'mn' SIMILAR TO '(m|o)', 'mn' NOT SIMILAR TO '_h{1}%'",
         pg_node: 'PgQuery::A_CONST'
   visit 'select', '14 BETWEEN 13 AND 15', pg_node: 'PgQuery::A_CONST'
   visit 'select', '16 NOT BETWEEN 17 AND 18', pg_node: 'PgQuery::A_CONST'
@@ -131,6 +133,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "trim(both 'xyz')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "trim(leading 'yx' from 'yxTomxx')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "trim(trailing 'xx' from 'yxTomxx')", pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', 'some_func(*)', pg_node: 'PgQuery::FUNC_CALL'
   visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
         pg_node: 'PgQuery::FUNCTION_PARAMETER',
         sql_to_arel: false
