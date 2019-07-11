@@ -3,11 +3,15 @@
 
 module Arel
   module Nodes
-    Arel::Nodes::SelectStatement.class_eval do
-      # For INSERT statements
-      attr_accessor :values_lists
-      attr_accessor :union
-      attr_writer :cores
+    class SelectStatement
+      module SelectStatementExtension
+        # For INSERT statements
+        attr_accessor :values_lists
+        attr_accessor :union
+        attr_writer :cores
+      end
+
+      prepend SelectStatementExtension
     end
   end
 

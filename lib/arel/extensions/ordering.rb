@@ -3,15 +3,19 @@
 
 module Arel
   module Nodes
-    Arel::Nodes::Ordering.class_eval do
-      # Postgres: https://www.postgresql.org/docs/9.4/queries-order.html
-      attr_accessor :nulls
+    class Ordering
+      module OrderingExtension
+        # Postgres: https://www.postgresql.org/docs/9.4/queries-order.html
+        attr_accessor :nulls
 
-      def initialize(expr, nulls = 0)
-        super(expr)
+        def initialize(expr, nulls = 0)
+          super(expr)
 
-        @nulls = nulls
+          @nulls = nulls
+        end
       end
+
+      prepend OrderingExtension
     end
   end
 
