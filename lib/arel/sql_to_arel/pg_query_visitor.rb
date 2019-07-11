@@ -234,11 +234,9 @@ module Arel
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
 
         when PgQuery::BOOLEAN_TEST_FALSE
-          # TODO: replace False with false
           Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
 
         when PgQuery::BOOLEAN_TEST_NOT_FALSE
-          # TODO: replace False with false
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
 
         when PgQuery::BOOLEAN_TEST_UNKNOWN
