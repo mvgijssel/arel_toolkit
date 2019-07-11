@@ -6,14 +6,9 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/8.3/tutorial-transactions.html
-    class Transaction < Arel::Nodes::Node
-      attr_reader :type
-      attr_reader :options
-
-      def initialize(type, options)
-        @type = type
-        @options = options
-      end
+    class Transaction < Arel::Nodes::Binary
+      alias type left
+      alias options right
     end
   end
 

@@ -10,4 +10,10 @@ module Arel
       end
     end
   end
+
+  module Visitors
+    class Dot
+      alias visit_Arel_Nodes_TimeWithPrecision terminal
+    end
+  end
 end

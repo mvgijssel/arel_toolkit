@@ -25,6 +25,18 @@
                         <Node(String) ["ast", "cores", 0, "source", "left", "name"]
                           parent = Node(Arel::Table)
                           value = "posts">
+                      only =
+                        <Node(FalseClass) ["ast", "cores", 0, "source", "left", "only"]
+                          parent = Node(Arel::Table)
+                          value = false>
+                      schema_name =
+                        <Node(NilClass) ["ast", "cores", 0, "source", "left", "schema_name"]
+                          parent = Node(Arel::Table)
+                          value = nil>
+                      relpersistence =
+                        <Node(String) ["ast", "cores", 0, "source", "left", "relpersistence"]
+                          parent = Node(Arel::Table)
+                          value = "p">
                     >
                   right =
                     <Node(Array) ["ast", "cores", 0, "source", "right"]
@@ -88,6 +100,10 @@
           value = nil>
       offset =
         <Node(NilClass) ["ast", "offset"]
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      union =
+        <Node(NilClass) ["ast", "union"]
           parent = Node(Arel::Nodes::SelectStatement)
           value = nil>
     >

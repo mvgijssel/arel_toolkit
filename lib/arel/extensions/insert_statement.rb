@@ -3,21 +3,23 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.5/sql-insert.html
-    module InsertStatementExtensions
-      attr_accessor :with
-      attr_accessor :conflict
-      attr_accessor :override
-      attr_accessor :returning
+    class InsertStatement
+      # https://www.postgresql.org/docs/9.5/sql-insert.html
+      module InsertStatementExtensions
+        attr_accessor :with
+        attr_accessor :conflict
+        attr_accessor :override
+        attr_accessor :returning
 
-      def initialize
-        super
+        def initialize
+          super
 
-        @returning = []
+          @returning = []
+        end
       end
-    end
 
-    Arel::Nodes::InsertStatement.prepend(InsertStatementExtensions)
+      prepend(InsertStatementExtensions)
+    end
   end
 
   module Visitors
@@ -70,6 +72,21 @@ module Arel
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/PerceivedComplexity
+    end
+
+    class Dot
+      module InsertStatementExtension
+        def visit_Arel_Nodes_InsertStatement(o)
+          super
+
+          visit_edge o, 'with'
+          visit_edge o, 'conflict'
+          visit_edge o, 'override'
+          visit_edge o, 'returning'
+        end
+      end
+
+      prepend(InsertStatementExtension)
     end
   end
 end

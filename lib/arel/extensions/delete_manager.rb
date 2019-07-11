@@ -1,9 +1,25 @@
-Arel::DeleteManager.class_eval do
-  def ==(other)
-    @ast == other.ast && @ctx == other.ctx
+# rubocop:disable Naming/MethodName
+# rubocop:disable Naming/UncommunicativeMethodParamName
+
+module Arel
+  class DeleteManager < Arel::TreeManager
+    def ==(other)
+      @ast == other.ast && @ctx == other.ctx
+    end
+
+    protected
+
+    attr_reader :ctx
   end
 
-  protected
-
-  attr_reader :ctx
+  module Visitors
+    class Dot
+      def visit_Arel_DeleteManager(o)
+        visit_edge o, 'ast'
+      end
+    end
+  end
 end
+
+# rubocop:enable Naming/MethodName
+# rubocop:enable Naming/UncommunicativeMethodParamName

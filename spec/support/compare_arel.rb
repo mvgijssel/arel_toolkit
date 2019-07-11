@@ -11,6 +11,10 @@ module RSpec
         case actual_value.object
         when nil
           next false
+        when true
+          next false
+        when false
+          next false
         when Integer
           next false
         else

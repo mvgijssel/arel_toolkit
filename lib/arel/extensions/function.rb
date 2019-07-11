@@ -1,4 +1,5 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
+# rubocop:disable Naming/MethodName
 
 module Arel
   module Nodes
@@ -62,7 +63,18 @@ module Arel
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/AbcSize
     end
+
+    class Dot
+      def visit_Arel_Nodes_Function(o)
+        function o
+        visit_edge o, 'orders'
+        visit_edge o, 'filter'
+        visit_edge o, 'within_group'
+        visit_edge o, 'variardic'
+      end
+    end
   end
 end
 
+# rubocop:enable Naming/MethodName
 # rubocop:enable Naming/UncommunicativeMethodParamName

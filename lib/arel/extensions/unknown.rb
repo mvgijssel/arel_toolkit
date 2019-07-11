@@ -13,6 +13,10 @@ module Arel
         collector << 'UNKNOWN'
       end
     end
+
+    class Dot
+      alias visit_Arel_Nodes_Unknown terminal
+    end
   end
 end
 

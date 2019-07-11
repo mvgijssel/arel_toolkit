@@ -234,9 +234,11 @@ module Arel
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
 
         when PgQuery::BOOLEAN_TEST_FALSE
+          # TODO: replace False with false
           Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
 
         when PgQuery::BOOLEAN_TEST_NOT_FALSE
+          # TODO: replace False with false
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
 
         when PgQuery::BOOLEAN_TEST_UNKNOWN
@@ -444,10 +446,9 @@ module Arel
       end
 
       def visit_InferClause(conname: nil, index_elems: nil)
-        infer = Arel::Nodes::Infer.new
-        infer.name = Arel.sql(conname) if conname
-        infer.indexes = visit(index_elems) if index_elems
-        infer
+        left = Arel.sql(conname) if conname
+        right = visit(index_elems) if index_elems
+        Arel::Nodes::Infer.new left, right
       end
 
       def visit_IndexElem(name:, ordering:, nulls_ordering:)

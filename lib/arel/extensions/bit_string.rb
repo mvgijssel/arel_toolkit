@@ -3,21 +3,14 @@
 
 module Arel
   module Nodes
-    class BitString < Arel::Nodes::Node
-      attr_reader :str
-
-      def initialize(str)
-        super()
-
-        @str = str
-      end
+    class BitString < Arel::Nodes::Unary
     end
   end
 
   module Visitors
     class ToSql
       def visit_Arel_Nodes_BitString(o, collector)
-        collector << "B'#{o.str[1..-1]}'"
+        collector << "B'#{o.expr[1..-1]}'"
       end
     end
   end

@@ -49,6 +49,20 @@ module Arel
       end
       # rubocop:enable Metrics/AbcSize
     end
+
+    class Dot
+      module DeleteStatementExtension
+        def visit_Arel_Nodes_DeleteStatement(o)
+          super
+
+          visit_edge o, 'using'
+          visit_edge o, 'with'
+          visit_edge o, 'returning'
+        end
+      end
+
+      prepend(DeleteStatementExtension)
+    end
   end
 end
 

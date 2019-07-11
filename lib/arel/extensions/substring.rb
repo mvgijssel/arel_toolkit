@@ -31,6 +31,14 @@ module Arel
         collector << ')'
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_Substring(o)
+        visit_edge o, 'string'
+        visit_edge o, 'pattern'
+        visit_edge o, 'escape'
+      end
+    end
   end
 end
 

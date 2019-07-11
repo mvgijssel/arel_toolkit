@@ -13,6 +13,10 @@ module Arel
         collector << 'current_date'
       end
     end
+
+    class Dot
+      alias visit_Arel_Nodes_CurrentDate terminal
+    end
   end
 end
 

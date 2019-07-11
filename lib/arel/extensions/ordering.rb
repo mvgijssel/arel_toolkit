@@ -40,6 +40,17 @@ module Arel
         end
       end
     end
+
+    class Dot
+      module OrderingExtension
+        def visit_Arel_Nodes_Ordering(o)
+          super
+          visit_edge o, 'nulls'
+        end
+      end
+
+      prepend OrderingExtension
+    end
   end
 end
 

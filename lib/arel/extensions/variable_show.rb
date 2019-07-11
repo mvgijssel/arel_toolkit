@@ -4,12 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/sql-show.html
-    class VariableShow < Arel::Nodes::Node
-      attr_reader :name
-
-      def initialize(name)
-        @name = name
-      end
+    class VariableShow < Arel::Nodes::Unary
     end
   end
 
@@ -17,10 +12,10 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_VariableShow(o, collector)
         collector << 'SHOW '
-        collector << if o.name == 'timezone'
+        collector << if o.expr == 'timezone'
                        'TIME ZONE'
                      else
-                       o.name
+                       o.expr
                      end
       end
     end
