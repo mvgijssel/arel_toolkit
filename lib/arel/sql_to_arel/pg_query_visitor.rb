@@ -852,7 +852,6 @@ module Arel
       end
 
       def visit_TypeCast(arg:, type_name:)
-        puts arg
         arg = visit(arg)
         type_name = visit(type_name)
 
