@@ -278,17 +278,22 @@ module Arel
       end
 
       def visit_ColumnRef(fields:)
-        visited_fields = visit(fields)
 
-        if fields.length == 2
+        case fields.length
+        when 1
+          visited_field = visit(fields[0], :operator)
+          Arel::Nodes::UnqualifiedColumn.new Arel::Attribute.new(nil, visited_field)
+
+        when 2
           table_reference, column_reference = fields
           table_reference = visit(table_reference, :operator)
           table = Arel::Table.new(table_reference)
 
           column_reference = visit(column_reference, :operator)
           table[column_reference]
+
         else
-          Arel::Nodes::UnboundColumnReference.new visited_fields.join('.')
+          raise 'Can\'t deal with column refs that have more than 2 fields'
         end
       end
 
@@ -726,7 +731,7 @@ module Arel
                 value
               when Integer
                 Arel.sql(value.to_s)
-              when Arel::Nodes::TypeCast
+              when Arel::Nodes::TypeCast, Arel::Nodes::UnqualifiedColumn
                 Arel.sql(value.to_sql)
               when Arel::Nodes::BindParam
                 value
