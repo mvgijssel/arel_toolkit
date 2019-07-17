@@ -24,9 +24,9 @@ def cast_for_database(value)
   when Integer
     value
   when TrueClass
-    Arel::Nodes::TypeCast.new(Arel.sql('"t"'), 'bool')
+    Arel::Nodes::TypeCast.new(Arel.sql('\'t\''), 'bool')
   when FalseClass
-    Arel::Nodes::TypeCast.new(Arel.sql('"f"'), 'bool')
+    Arel::Nodes::TypeCast.new(Arel.sql('\'f\''), 'bool')
   when Float
     value
   else

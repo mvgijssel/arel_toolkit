@@ -1080,8 +1080,8 @@ describe 'Arel.sql_to_arel' do
     result = Arel.sql_to_arel(sql)
     parsed_arel = result.first
 
-    expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
+    expect(query_arel).to eq parsed_arel
   end
 
   it 'translates an ActiveRecord for a single where argument' do

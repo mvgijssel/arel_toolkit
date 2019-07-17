@@ -278,7 +278,6 @@ module Arel
       end
 
       def visit_ColumnRef(fields:)
-
         case fields.length
         when 1
           visited_field = visit(fields[0], :operator)
@@ -853,6 +852,7 @@ module Arel
       end
 
       def visit_TypeCast(arg:, type_name:)
+        puts arg
         arg = visit(arg)
         type_name = visit(type_name)
 
