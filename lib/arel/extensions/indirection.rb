@@ -3,25 +3,16 @@
 
 module Arel
   module Nodes
-    class Indirection < Arel::Nodes::Node
-      attr_reader :arg
-      attr_reader :indirection
-
-      def initialize(arg, indirection)
-        super()
-
-        @arg = arg
-        @indirection = indirection
-      end
+    class Indirection < Arel::Nodes::Binary
     end
   end
 
   module Visitors
     class ToSql
       def visit_Arel_Nodes_Indirection(o, collector)
-        visit(o.arg, collector)
+        visit(o.left, collector)
         collector << '['
-        visit(o.indirection, collector)
+        visit(o.right, collector)
         collector << ']'
       end
     end

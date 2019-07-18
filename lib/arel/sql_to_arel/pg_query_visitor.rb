@@ -448,10 +448,9 @@ module Arel
       end
 
       def visit_InferClause(conname: nil, index_elems: nil)
-        infer = Arel::Nodes::Infer.new
-        infer.name = Arel.sql(conname) if conname
-        infer.indexes = visit(index_elems) if index_elems
-        infer
+        left = Arel.sql(conname) if conname
+        right = visit(index_elems) if index_elems
+        Arel::Nodes::Infer.new left, right
       end
 
       def visit_IndexElem(name:, ordering:, nulls_ordering:)
@@ -496,6 +495,12 @@ module Arel
 
       def visit_Integer(ival:)
         ival
+      end
+
+      def visit_IntoClause(rel:, on_commit:)
+        raise "Unknown on_commit `#{on_commit}`" unless on_commit.zero?
+
+        Arel::Nodes::Into.new(visit(rel))
       end
 
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
@@ -673,6 +678,7 @@ module Arel
         op:,
         window_clause: nil,
         values_lists: nil,
+        into_clause: nil,
         all: nil,
         larg: nil,
         rarg: nil
@@ -706,6 +712,7 @@ module Arel
         select_core.groups = visit(group_clause) if group_clause
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
+        select_core.into = visit(into_clause) if into_clause
 
         if distinct_clause == [nil]
           select_core.set_quantifier = Arel::Nodes::Distinct.new

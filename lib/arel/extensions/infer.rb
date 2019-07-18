@@ -4,9 +4,9 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    class Infer < Arel::Nodes::Node
-      attr_accessor :name
-      attr_accessor :indexes
+    class Infer < Arel::Nodes::Binary
+      alias name left
+      alias indexes right
     end
   end
 
@@ -15,13 +15,13 @@ module Arel
       def visit_Arel_Nodes_Infer(o, collector)
         if o.name
           collector << 'ON CONSTRAINT '
-          collector << o.name
+          collector << o.left
           collector << SPACE
         end
 
-        if o.indexes
+        if o.right
           collector << '('
-          inject_join o.indexes, collector, ', '
+          inject_join o.right, collector, ', '
           collector << ') '
         end
 

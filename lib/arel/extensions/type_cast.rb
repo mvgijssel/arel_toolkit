@@ -27,6 +27,13 @@ module Arel
         collector << o.type_name
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_TypeCast(o)
+        visit_edge(o, 'arg')
+        visit_edge(o, 'type_name')
+      end
+    end
   end
 end
 

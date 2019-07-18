@@ -4,14 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT
-    class ExtractFrom < Arel::Nodes::Unary
-      attr_reader :field
-
-      def initialize(expr, field)
-        super(expr)
-
-        @field = field
-      end
+    class ExtractFrom < Arel::Nodes::Binary
     end
   end
 
@@ -19,9 +12,9 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_ExtractFrom(o, collector)
         collector << 'extract('
-        visit o.field, collector
+        visit o.right, collector
         collector << ' from '
-        visit o.expr, collector
+        visit o.left, collector
         collector << ')'
       end
     end

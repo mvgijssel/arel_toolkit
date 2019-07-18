@@ -36,6 +36,15 @@ module Arel
         collector << ')'
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_Overlay(o)
+        visit_edge o, 'string'
+        visit_edge o, 'substring'
+        visit_edge o, 'start'
+        visit_edge o, 'length'
+      end
+    end
   end
 end
 

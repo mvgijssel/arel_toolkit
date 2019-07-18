@@ -34,18 +34,21 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'github_changelog_generator', '~> 1.14.3'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
+  spec.add_development_dependency 'approvals', '~> 0.0.24'
   spec.add_development_dependency 'appraisal', '~> 2.2.0'
   spec.add_development_dependency 'database_cleaner', '~> 1.7.0'
   spec.add_development_dependency 'simplecov', '~> 0.16.1'
   spec.add_development_dependency 'simplecov-console', '~> 0.4.2'
 
-  spec.add_development_dependency 'rubocop', '~> 0.69'
+  # When updating also update .codeclimate.yml:5
+  spec.add_development_dependency 'rubocop', '= 0.71.0'
   spec.add_development_dependency 'guard', '~> 2.15'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'guard-rubocop', '~> 1.3.0'
 
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-nav'
+  spec.add_development_dependency 'pry-doc'
   spec.add_development_dependency 'pry-rescue'
   spec.add_development_dependency 'pry-stack_explorer'
   spec.add_development_dependency 'pry-alias'

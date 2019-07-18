@@ -14,6 +14,10 @@ module Arel
         collector << 'DEFAULT'
       end
     end
+
+    class Dot
+      alias visit_Arel_Nodes_SetToDefault terminal
+    end
   end
 end
 

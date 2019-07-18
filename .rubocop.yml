@@ -1,6 +1,7 @@
 AllCops:
   Exclude:
     - 'gemfiles/arel_gems.gemfile'
+    - 'gemfiles/default.gemfile'
 
 Style/FrozenStringLiteralComment:
   Enabled: false

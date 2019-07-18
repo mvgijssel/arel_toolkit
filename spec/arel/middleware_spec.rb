@@ -90,6 +90,27 @@ describe 'Arel.middleware' do
   end
 
   it 'does not allow overriding the original sql in the context' do
+    expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, arel, context|
+      context[:original_sql] = :override
+
+      m.call(arel, context)
+    end
+
+    expect(OtherMiddleware).to receive(:call).and_wrap_original do |m, arel, context|
+      expect(context[:original_sql]).to eq 'SELECT "posts"."content" FROM "posts"'
+
+      m.call(arel, context)
+    end
+
+    Arel.middleware.apply([SomeMiddleware, OtherMiddleware]) do
+      Post.select(:content).load
+    end
+  end
+
+  it 'raises an exception when calling context with a block wihout arguments' do
+    expect do
+      Arel.middleware.context {}
+    end.to raise_error('You cannot do a block statement while calling context without arguments')
   end
 
   it 'only applies middleware given for a block' do
@@ -257,7 +278,6 @@ describe 'Arel.middleware' do
     expect(ActiveRecord::Base.connection)
       .to receive(:exec_no_cache)
       .and_wrap_original do |m, sql, name, binds|
-
       middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
 
       expect(middleware_sql).to eq(sql)
@@ -274,7 +294,6 @@ describe 'Arel.middleware' do
     expect(ActiveRecord::Base.connection)
       .to receive(:exec_no_cache)
       .and_wrap_original do |m, sql, name, binds|
-
       middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
 
       expect(middleware_sql).to eq(sql)
@@ -293,7 +312,6 @@ describe 'Arel.middleware' do
     expect(ActiveRecord::Base.connection)
       .to receive(:exec_no_cache)
       .and_wrap_original do |m, sql, name, binds|
-
       middleware_sql = Arel::Middleware.current_chain.execute(sql, binds)
 
       expect(middleware_sql).to eq(sql)

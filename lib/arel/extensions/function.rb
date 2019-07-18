@@ -3,20 +3,25 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.1/functions-comparison.html
-    Arel::Nodes::Function.class_eval do
-      # postgres only: https://www.postgresql.org/docs/9.5/functions-aggregate.html
-      attr_accessor :orders
-      attr_accessor :filter
-      attr_accessor :within_group
-      attr_accessor :variardic
+    class Function
+      module FunctionExtension
+        # postgres only: https://www.postgresql.org/docs/9.5/functions-aggregate.html
+        attr_accessor :orders
+        attr_accessor :filter
+        attr_accessor :within_group
+        attr_accessor :variardic
 
-      def initialize(expr, aliaz = nil)
-        super()
-        @expressions = expr
-        @alias       = aliaz && SqlLiteral.new(aliaz)
-        @distinct    = false
-        @orders      = []
+        def initialize(expr, aliaz = nil)
+          super
+
+          @expressions = expr
+          @alias       = aliaz && SqlLiteral.new(aliaz)
+          @distinct    = false
+          @orders      = []
+        end
       end
+
+      prepend FunctionExtension
     end
   end
 
@@ -61,6 +66,27 @@ module Arel
       # rubocop:enable Metrics/PerceivedComplexity
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/AbcSize
+    end
+
+    class Dot
+      module FunctionExtension
+        def function(o)
+          super
+
+          visit_edge o, 'orders'
+          visit_edge o, 'filter'
+          visit_edge o, 'within_group'
+          visit_edge o, 'variardic'
+        end
+
+        alias visit_Arel_Nodes_Exists function
+        alias visit_Arel_Nodes_Min    function
+        alias visit_Arel_Nodes_Max    function
+        alias visit_Arel_Nodes_Avg    function
+        alias visit_Arel_Nodes_Sum    function
+      end
+
+      prepend FunctionExtension
     end
   end
 end

@@ -1,9 +1,25 @@
-Arel::UpdateManager.class_eval do
-  def ==(other)
-    @ast == other.ast && @ctx == other.ctx
+# rubocop:disable Naming/MethodName
+# rubocop:disable Naming/UncommunicativeMethodParamName
+
+module Arel
+  class UpdateManager < Arel::TreeManager
+    def ==(other)
+      @ast == other.ast && @ctx == other.ctx
+    end
+
+    protected
+
+    attr_reader :ctx
   end
 
-  protected
-
-  attr_reader :ctx
+  module Visitors
+    class Dot
+      def visit_Arel_UpdateManager(o)
+        visit_edge o, 'ast'
+      end
+    end
+  end
 end
+
+# rubocop:enable Naming/MethodName
+# rubocop:enable Naming/UncommunicativeMethodParamName

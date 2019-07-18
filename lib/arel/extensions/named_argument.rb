@@ -3,14 +3,9 @@
 
 module Arel
   module Nodes
-    class NamedArgument < Arel::Nodes::Node
-      attr_reader :name
-      attr_reader :value
-
-      def initialize(name, value)
-        @name = name
-        @value = value
-      end
+    class NamedArgument < Arel::Nodes::Binary
+      alias name left
+      alias value right
     end
   end
 

@@ -3,8 +3,8 @@
 # rubocop:disable Metrics/ParameterLists
 
 module Arel
-  module Nodes
-    Arel::Table.class_eval do
+  class Table
+    module TableExtension
       # postgres only: https://www.postgresql.org/docs/9.5/sql-select.html
       attr_accessor :only
       # postgres only: https://www.postgresql.org/docs/9.5/ddl-schemas.html
@@ -12,7 +12,6 @@ module Arel
       # postgres only: https://www.postgresql.org/docs/9.1/catalog-pg-class.html
       attr_accessor :relpersistence
 
-      alias_method :old_initialize, :initialize
       def initialize(
         name,
         as: nil,
@@ -25,21 +24,54 @@ module Arel
         @schema_name = schema_name
         @relpersistence = relpersistence
 
-        old_initialize(name, as: as, type_caster: type_caster)
+        super(name, as: as, type_caster: type_caster)
       end
     end
+
+    prepend TableExtension
   end
 
   module Visitors
     class ToSql
-      alias old_visit_Arel_Table visit_Arel_Table
-      def visit_Arel_Table(o, collector)
-        collector << 'ONLY ' if o.only
+      module TableExtension
+        def visit_Arel_Table(o, collector)
+          collector << 'ONLY ' if o.only
 
-        collector << "\"#{o.schema_name}\"." if o.schema_name
+          case o.relpersistence
+          when 'p'
+            collector << ''
 
-        old_visit_Arel_Table(o, collector)
+          when 'u'
+            collector << 'UNLOGGED '
+
+          when 't'
+            collector << 'TEMPORARY '
+
+          else
+            raise "Unknown relpersistence `#{o.relpersistence}`"
+          end
+
+          collector << "\"#{o.schema_name}\"." if o.schema_name
+
+          super
+        end
       end
+
+      prepend TableExtension
+    end
+
+    class Dot
+      module TableExtension
+        def visit_Arel_Table(o)
+          super
+
+          visit_edge o, 'only'
+          visit_edge o, 'schema_name'
+          visit_edge o, 'relpersistence'
+        end
+      end
+
+      prepend TableExtension
     end
   end
 end

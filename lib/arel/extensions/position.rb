@@ -4,14 +4,9 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/functions-string.html#FUNCTIONS-STRING-SQL
-    class Position < Arel::Nodes::Node
-      attr_reader :substring
-      attr_reader :string
-
-      def initialize(substring, string)
-        @substring = substring
-        @string = string
-      end
+    class Position < Arel::Nodes::Binary
+      alias substring left
+      alias string right
     end
   end
 

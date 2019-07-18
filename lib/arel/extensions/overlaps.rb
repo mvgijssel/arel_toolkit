@@ -33,6 +33,15 @@ module Arel
         collector << ')'
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_Overlaps(o)
+        visit_edge o, 'start1'
+        visit_edge o, 'end1'
+        visit_edge o, 'start2'
+        visit_edge o, 'end2'
+      end
+    end
   end
 end
 

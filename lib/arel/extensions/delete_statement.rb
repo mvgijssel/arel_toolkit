@@ -4,17 +4,20 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    Arel::Nodes::DeleteStatement.class_eval do
-      attr_accessor :using
-      attr_accessor :with
-      attr_accessor :returning
+    class DeleteStatement
+      module DeleteStatementExtension
+        attr_accessor :using
+        attr_accessor :with
+        attr_accessor :returning
 
-      alias_method :old_initialize, :initialize
-      def initialize(relation = nil, wheres = [])
-        old_initialize(relation, wheres)
+        def initialize(relation = nil, wheres = [])
+          super
 
-        @returning = []
+          @returning = []
+        end
       end
+
+      prepend DeleteStatementExtension
     end
   end
 
@@ -48,6 +51,20 @@ module Arel
         maybe_visit o.limit, collector
       end
       # rubocop:enable Metrics/AbcSize
+    end
+
+    class Dot
+      module DeleteStatementExtension
+        def visit_Arel_Nodes_DeleteStatement(o)
+          super
+
+          visit_edge o, 'using'
+          visit_edge o, 'with'
+          visit_edge o, 'returning'
+        end
+      end
+
+      prepend(DeleteStatementExtension)
     end
   end
 end

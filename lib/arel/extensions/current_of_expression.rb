@@ -4,14 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/sql-update.html
-    class CurrentOfExpression < Arel::Nodes::Node
-      attr_accessor :cursor_name
-
-      def initialize(cursor_name)
-        super()
-
-        @cursor_name = cursor_name
-      end
+    class CurrentOfExpression < Arel::Nodes::Unary
     end
   end
 
@@ -19,7 +12,7 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_CurrentOfExpression(o, collector)
         collector << 'CURRENT OF '
-        collector << o.cursor_name
+        collector << o.expr
       end
     end
   end

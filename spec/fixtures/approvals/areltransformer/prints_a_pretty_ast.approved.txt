@@ -1,0 +1,114 @@
+<Node(Arel::SelectManager) []
+  sql = SELECT 1, 2 FROM "posts" WHERE "id" = 1
+  parent = nil
+  ast =
+    <Node(Arel::Nodes::SelectStatement) ["ast"]
+      sql = SELECT 1, 2 FROM "posts" WHERE "id" = 1
+      parent = Node(Arel::SelectManager)
+      cores =
+        <Node(Array) ["ast", "cores"]
+          sql = SELECT 1, 2 FROM "posts" WHERE "id" = 1
+          parent = Node(Arel::Nodes::SelectStatement)
+          0 =
+            <Node(Arel::Nodes::SelectCore) ["ast", "cores", 0]
+              sql = SELECT 1, 2 FROM "posts" WHERE "id" = 1
+              parent = Node(Array)
+              source =
+                <Node(Arel::Nodes::JoinSource) ["ast", "cores", 0, "source"]
+                  sql = "posts"
+                  parent = Node(Arel::Nodes::SelectCore)
+                  left =
+                    <Node(Arel::Table) ["ast", "cores", 0, "source", "left"]
+                      sql = "posts"
+                      parent = Node(Arel::Nodes::JoinSource)
+                      name =
+                        <Node(String) ["ast", "cores", 0, "source", "left", "name"]
+                          parent = Node(Arel::Table)
+                          value = "posts">
+                      only =
+                        <Node(FalseClass) ["ast", "cores", 0, "source", "left", "only"]
+                          parent = Node(Arel::Table)
+                          value = false>
+                      schema_name =
+                        <Node(NilClass) ["ast", "cores", 0, "source", "left", "schema_name"]
+                          parent = Node(Arel::Table)
+                          value = nil>
+                      relpersistence =
+                        <Node(String) ["ast", "cores", 0, "source", "left", "relpersistence"]
+                          parent = Node(Arel::Table)
+                          value = "p">
+                    >
+                  right =
+                    <Node(Array) ["ast", "cores", 0, "source", "right"]
+                      parent = Node(Arel::Nodes::JoinSource)
+                      value = nil>
+                >
+              projections =
+                <Node(Array) ["ast", "cores", 0, "projections"]
+                  sql = 1, 2
+                  parent = Node(Arel::Nodes::SelectCore)
+                  0 =
+                    <Node(Integer) ["ast", "cores", 0, "projections", 0]
+                      parent = Node(Array)
+                      value = 1>
+                  1 =
+                    <Node(Integer) ["ast", "cores", 0, "projections", 1]
+                      parent = Node(Array)
+                      value = 2>
+                >
+              wheres =
+                <Node(Array) ["ast", "cores", 0, "wheres"]
+                  sql = "id" = 1
+                  parent = Node(Arel::Nodes::SelectCore)
+                  0 =
+                    <Node(Arel::Nodes::And) ["ast", "cores", 0, "wheres", 0]
+                      sql = "id" = 1
+                      parent = Node(Array)
+                      children =
+                        <Node(Array) ["ast", "cores", 0, "wheres", 0, "children"]
+                          sql = "id" = 1
+                          parent = Node(Arel::Nodes::And)
+                          0 =
+                            <Node(Arel::Nodes::Equality) ["ast", "cores", 0, "wheres", 0, "children", 0]
+                              sql = "id" = 1
+                              parent = Node(Array)
+                              left =
+                                <Node(Arel::Nodes::UnboundColumnReference) ["ast", "cores", 0, "wheres", 0, "children", 0, "left"]
+                                  parent = Node(Arel::Nodes::Equality)
+                                  value = "\"id\"">
+                              right =
+                                <Node(Integer) ["ast", "cores", 0, "wheres", 0, "children", 0, "right"]
+                                  parent = Node(Arel::Nodes::Equality)
+                                  value = 1>
+                            >
+                        >
+                    >
+                >
+              windows =
+                <Node(Array) ["ast", "cores", 0, "windows"]
+                  parent = Node(Arel::Nodes::SelectCore)
+                  value = nil>
+              into =
+                <Node(NilClass) ["ast", "cores", 0, "into"]
+                  parent = Node(Arel::Nodes::SelectCore)
+                  value = nil>
+            >
+        >
+      limit =
+        <Node(NilClass) ["ast", "limit"]
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      orders =
+        <Node(Array) ["ast", "orders"]
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      offset =
+        <Node(NilClass) ["ast", "offset"]
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      union =
+        <Node(NilClass) ["ast", "union"]
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+    >
+>

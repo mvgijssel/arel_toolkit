@@ -13,6 +13,10 @@ module Arel
         collector << 'current_user'
       end
     end
+
+    class Dot
+      alias visit_Arel_Nodes_CurrentUser terminal
+    end
   end
 end
 

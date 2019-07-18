@@ -3,14 +3,7 @@
 
 module Arel
   module Nodes
-    class Array < Arel::Nodes::Node
-      attr_reader :items
-
-      def initialize(items)
-        super()
-
-        @items = items
-      end
+    class Array < Arel::Nodes::Unary
     end
   end
 
@@ -18,7 +11,7 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_Array(o, collector)
         collector << 'ARRAY['
-        inject_join(o.items, collector, ', ')
+        inject_join(o.expr, collector, ', ')
         collector << ']'
       end
     end

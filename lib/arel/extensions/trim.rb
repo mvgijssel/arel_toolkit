@@ -29,6 +29,14 @@ module Arel
         collector << ')'
       end
     end
+
+    class Dot
+      def visit_Arel_Nodes_Trim(o)
+        visit_edge o, 'type'
+        visit_edge o, 'substring'
+        visit_edge o, 'string'
+      end
+    end
   end
 end
 
