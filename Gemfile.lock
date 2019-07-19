@@ -125,6 +125,7 @@ GEM
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
       ffi (~> 1.0)
+    rb-readline (0.5.5)
     retriable (2.1.0)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
@@ -189,6 +190,7 @@ DEPENDENCIES
   pry-rescue
   pry-stack_explorer
   rake (~> 10.0)
+  rb-readline
   rspec (~> 3.8)
   rubocop (= 0.71.0)
   simplecov (~> 0.16.1)

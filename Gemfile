@@ -7,3 +7,5 @@ end
 
 # Specify your gem's dependencies in arel_toolkit.gemspec
 gemspec
+
+gem 'rb-readline'
