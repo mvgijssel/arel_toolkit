@@ -73,9 +73,23 @@
                               sql = "id" = 1
                               parent = Node(Array)
                               left =
-                                <Node(Arel::Nodes::UnboundColumnReference) ["ast", "cores", 0, "wheres", 0, "children", 0, "left"]
+                                <Node(Arel::Nodes::UnqualifiedColumn) ["ast", "cores", 0, "wheres", 0, "children", 0, "left"]
+                                  sql = "id"
                                   parent = Node(Arel::Nodes::Equality)
-                                  value = "\"id\"">
+                                  expr =
+                                    <Node(Arel::Attributes::Attribute) ["ast", "cores", 0, "wheres", 0, "children", 0, "left", "expr"]
+                                      sql = "id"
+                                      parent = Node(Arel::Nodes::UnqualifiedColumn)
+                                      relation =
+                                        <Node(NilClass) ["ast", "cores", 0, "wheres", 0, "children", 0, "left", "expr", "relation"]
+                                          parent = Node(Arel::Attributes::Attribute)
+                                          value = nil>
+                                      name =
+                                        <Node(String) ["ast", "cores", 0, "wheres", 0, "children", 0, "left", "expr", "name"]
+                                          parent = Node(Arel::Attributes::Attribute)
+                                          value = "id">
+                                    >
+                                >
                               right =
                                 <Node(Integer) ["ast", "cores", 0, "wheres", 0, "children", 0, "right"]
                                   parent = Node(Arel::Nodes::Equality)

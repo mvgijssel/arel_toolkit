@@ -85,7 +85,6 @@ require 'arel/extensions/jsonb_key_exists'
 require 'arel/extensions/jsonb_any_key_exists'
 require 'arel/extensions/jsonb_all_key_exists'
 require 'arel/extensions/transaction'
-require 'arel/extensions/unbound_column_reference'
 require 'arel/extensions/assignment'
 require 'arel/extensions/variable_set'
 require 'arel/extensions/variable_show'
@@ -107,6 +106,7 @@ require 'arel/extensions/case'
 require 'arel/extensions/current_row'
 require 'arel/extensions/false'
 require 'arel/extensions/true'
+require 'arel/extensions/to_sql'
 
 module Arel
   module Extensions

@@ -59,7 +59,7 @@ describe 'Arel.transformer' do
     result = Arel.sql_to_arel('SELECT "a", "b"')
     transformer = Arel.transformer(result.first)
     old_projection = transformer['ast']['cores'][0]['projections'][0]
-    new_projection = Arel::Nodes::UnboundColumnReference.new('"c"')
+    new_projection = Arel::Nodes::UnqualifiedColumn.new Arel::Attribute.new(nil, 'c')
 
     expect do
       old_projection.replace(new_projection)
