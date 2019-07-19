@@ -106,6 +106,7 @@ require 'arel/extensions/case'
 require 'arel/extensions/current_row'
 require 'arel/extensions/false'
 require 'arel/extensions/true'
+require 'arel/extensions/to_sql'
 
 module Arel
   module Extensions
