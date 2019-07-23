@@ -28,8 +28,6 @@ RSpec.describe ApplicationController, type: :controller do
       User.create! username: 'Maarten'
       User.create! username: 'Willian'
 
-      puts User.all.map &:username
-
       get :index
 
       expect(response.body).to eq ['Willian'].to_json
