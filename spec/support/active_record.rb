@@ -34,26 +34,26 @@ def cast_for_database(value)
   end
 end
 
-ActiveRecord::Base.establish_connection(
-  adapter: 'postgresql',
-  host: 'localhost',
-  databse: 'arel_toolkit_test',
-  username: 'postgres',
-)
+# ActiveRecord::Base.establish_connection(
+#   adapter: 'postgresql',
+#   host: 'localhost',
+#   databse: 'arel_toolkit_test',
+#   username: 'postgres',
+# )
 
-ActiveRecord::Schema.define do
-  self.verbose = false
+# ActiveRecord::Schema.define do
+#   self.verbose = false
 
-  create_table :posts, force: true do |t|
-    t.string :title
-    t.text :content
-    t.boolean :public
+#   create_table :posts, force: true do |t|
+#     t.string :title
+#     t.text :content
+#     t.boolean :public
 
-    t.timestamps
-  end
-end
+#     t.timestamps
+#   end
+# end
 
-class Post < ActiveRecord::Base
-end
+# class Post < ActiveRecord::Base
+# end
 
-Arel::Middleware::Railtie.insert_postgresql
+# Arel::Middleware::Railtie.insert_postgresql

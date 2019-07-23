@@ -4,8 +4,8 @@ require 'github_changelog_generator/task'
 
 RSpec::Core::RakeTask.new(:spec)
 
-APP_RAKEFILE = File.expand_path('spec/dummy/Rakefile', __dir__)
-load 'rails/tasks/engine.rake'
+# APP_RAKEFILE = File.expand_path('spec/dummy/Rakefile', __dir__)
+# load 'rails/tasks/engine.rake'
 
 task default: :spec
 
