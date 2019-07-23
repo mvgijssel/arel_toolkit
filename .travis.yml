@@ -21,6 +21,7 @@ install:
   - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle install --jobs=3 --retry=3 --deployment --path=${BUNDLE_PATH:-vendor/bundle}
   - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle exec appraisal install
 script:
+  - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle exec db:setup
   - GEM_HOME=vendor/bundle/ruby/2.5.0 bundle exec appraisal rspec
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
