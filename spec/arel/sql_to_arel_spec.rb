@@ -1,4 +1,6 @@
 describe 'Arel.sql_to_arel' do
+  include_context 'post schema'
+
   visit 'select', 'ARRAY[1, 2, 3]', pg_node: 'PgQuery::A_ARRAY_EXPR'
   visit 'select', '1', pg_node: 'PgQuery::A_CONST'
   visit 'select', '1 = 2', pg_node: 'PgQuery::A_CONST'
@@ -102,6 +104,13 @@ describe 'Arel.sql_to_arel' do
         sql_to_arel: false
   visit 'sql', 'EXPLAIN SELECT 1', pg_node: 'PgQuery::EXPLAIN_STMT', sql_to_arel: false
   visit 'sql', 'FETCH some_cursor', pg_node: 'PgQuery::FETCH_STMT', sql_to_arel: false
+  visit 'sql',
+        'PREPARE some_plan (integer) AS (SELECT $1)',
+        pg_node: 'PgQuery::PREPARE_STMT',
+        sql_to_arel: false
+  visit 'sql', 'DEALLOCATE some_prepared_statement',
+        pg_node: 'PgQuery::DEALLOCATE_STMT',
+        sql_to_arel: false
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
   visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'RANK("b")', pg_node: 'PgQuery::FUNC_CALL'
