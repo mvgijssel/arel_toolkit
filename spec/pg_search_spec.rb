@@ -89,9 +89,9 @@ if Gem.loaded_specs.key?('pg_search')
 
     it 'works for searching associations' do
       Arel.middleware.apply([SomeMiddleware]) do
-        salami1 = Salami.create! cracker: Cracker.create!
-        salami2 = Salami.create! cracker: Cracker.create!
-        salami3 = Salami.create! cracker: Cracker.create!
+        salami1 = Salami.create!
+        salami2 = Salami.create!
+        salami3 = Salami.create!
 
         limburger = Cheese.create!(kind: 'Limburger')
         brie = Cheese.create!(kind: 'Brie')

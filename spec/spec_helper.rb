@@ -18,15 +18,6 @@ require 'support/compare_arel'
 require 'support/pg_ast_contains'
 require 'support/visitors'
 
-require File.expand_path('../dummy/config/environment', __FILE__)
-begin
-  ActiveRecord::Migrator.migrations_paths = [File.expand_path('../spec/dummy/db/migrate', __dir__)]
-  ActiveRecord::Migration.maintain_test_schema!
-rescue ActiveRecord::PendingMigrationError => e
-  puts e.to_s.strip
-  exit 1
-end
-
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
@@ -55,6 +46,5 @@ RSpec.configure do |config|
     end
   end
 end
-
 
 RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 1000
