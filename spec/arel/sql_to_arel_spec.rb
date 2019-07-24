@@ -79,12 +79,6 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()',
         pg_node: 'PgQuery::CREATE_TRIG_STMT',
         sql_to_arel: false
-  visit 'sql', 'DEALLOCATE some_prepared_statement',
-        pg_node: 'PgQuery::DEALLOCATE_STMT',
-        sql_to_arel: false
-  visit 'sql', 'DECLARE a CURSOR FOR SELECT 1',
-        pg_node: 'PgQuery::DECLARE_CURSOR_STMT',
-        sql_to_arel: false
   visit 'sql', 'DO $$ a $$', pg_node: 'PgQuery::DEF_ELEM', sql_to_arel: false
   visit 'sql',
         'WITH "some_delete_query" AS (SELECT 1 AS some_column) ' \
@@ -107,10 +101,10 @@ describe 'Arel.sql_to_arel' do
   visit 'sql',
         'PREPARE some_plan (integer) AS (SELECT $1)',
         pg_node: 'PgQuery::PREPARE_STMT',
-        sql_to_arel: false
+        sql_to_arel: true
   visit 'sql', 'DEALLOCATE some_prepared_statement',
         pg_node: 'PgQuery::DEALLOCATE_STMT',
-        sql_to_arel: false
+        sql_to_arel: true
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
   visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'RANK("b")', pg_node: 'PgQuery::FUNC_CALL'
