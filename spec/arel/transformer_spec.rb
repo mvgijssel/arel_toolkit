@@ -154,4 +154,59 @@ describe 'Arel.transformer' do
 
     expect(original_arel).to be_identical_arel(new_arel)
   end
+
+  it 'replaces table references with subqueries' do
+    sql = <<~SQL
+      SELECT
+        COUNT(posts.id),
+        ARRAY_AGG(posts.title)
+      FROM
+        posts
+      INNER JOIN
+        comments
+      ON
+        comments.post_id = posts.id
+      AND
+        comments.message ILIKE '%hello%'
+      WHERE
+        posts.public = TRUE
+      AND
+        posts.id IN (SELECT id FROM posts WHERE id = 3)
+      GROUP BY
+        comments.created_at
+    SQL
+
+    # sql = <<~SQL
+    #   SELECT
+    #     id
+    #   FROM
+    #     posts
+    # SQL
+
+    # sql = <<~SQL
+    #   SELECT
+    #     id
+    #   FROM
+    #     (SELECT id FROM posts) posts,
+    #     users
+    # SQL
+
+    # sql = <<~SQL
+    #   SELECT
+    #     id
+    #   FROM
+    #     users,posts
+    # SQL
+
+    # only the tables inside JOIN and FROM should be replaced
+    # tables inside the JOIN ... ON expression should not be replaced
+
+    arel = Arel.sql_to_arel(sql)
+    tree = Arel.transformer(arel.first)
+
+    binding.pry
+
+    tree.query(class: Arel::Nodes::JoinSource)
+
+  end
 end

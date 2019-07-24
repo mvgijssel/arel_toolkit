@@ -211,6 +211,8 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::RANGE_SUBSELECT'
   visit 'select', '1 FROM "public"."table_is_range_var" "alias", ONLY "b"',
         pg_node: 'PgQuery::RANGE_VAR'
+  # TODO: this one breaks
+  # visit 'select', '1 FROM "b", (SELECT 1) "a", "c"', pg_node: 'PgQuery::RANGE_VAR'
   visit 'select', '1', pg_node: 'PgQuery::RAW_STMT'
   visit 'sql', 'REFRESH MATERIALIZED VIEW view WITH NO DATA',
         pg_node: 'PgQuery::REFRESH_MAT_VIEW_STMT',
