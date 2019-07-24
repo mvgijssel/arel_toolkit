@@ -1,4 +1,19 @@
 describe 'Arel.middleware' do
+  ActiveRecord::Schema.define do
+    self.verbose = false
+
+    create_table :posts, force: true do |t|
+      t.string :title
+      t.text :content
+      t.boolean :public
+
+      t.timestamps
+    end
+  end
+
+  class Post < ActiveRecord::Base
+  end
+
   class SomeMiddleware
     def self.call(arel, _context)
       arel

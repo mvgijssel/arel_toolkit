@@ -1,9 +1,11 @@
 require_relative 'boot'
 
-require 'rails/all'
+require 'rails'
+require 'active_record/railtie'
+require 'action_controller/railtie'
 
 Bundler.require(*Rails.groups)
-require "arel_toolkit"
+require 'arel_toolkit'
 
 module Dummy
   class Application < Rails::Application
