@@ -1,6 +1,4 @@
 describe 'Arel.middleware' do
-  include_context 'post schema'
-
   class SomeMiddleware
     def self.call(arel, _context)
       arel

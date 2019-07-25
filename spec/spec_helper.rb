@@ -18,15 +18,6 @@ require 'support/compare_arel'
 require 'support/pg_ast_contains'
 require 'support/visitors'
 
-require File.expand_path('../dummy/config/environment', __FILE__)
-begin
-  ActiveRecord::Migrator.migrations_paths = [File.expand_path('../spec/dummy/db/migrate', __dir__)]
-  ActiveRecord::Migration.maintain_test_schema!
-rescue ActiveRecord::PendingMigrationError => e
-  puts e.to_s.strip
-  exit 1
-end
-
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'
@@ -53,24 +44,6 @@ RSpec.configure do |config|
     DatabaseCleaner.cleaning do
       example.run
     end
-  end
-end
-
-
-RSpec.shared_context 'post schema' do
-  ActiveRecord::Schema.define do
-    self.verbose = false
-
-    create_table :posts, force: true do |t|
-      t.string :title
-      t.text :content
-      t.boolean :public
-
-      t.timestamps
-    end
-  end
-
-  class Post < ActiveRecord::Base
   end
 end
 

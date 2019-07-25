@@ -1,6 +1,4 @@
 describe 'Arel.sql_to_arel' do
-  include_context 'post schema'
-
   visit 'select', 'ARRAY[1, 2, 3]', pg_node: 'PgQuery::A_ARRAY_EXPR'
   visit 'select', '1', pg_node: 'PgQuery::A_CONST'
   visit 'select', '1 = 2', pg_node: 'PgQuery::A_CONST'
