@@ -17,11 +17,13 @@ module Arel
 
     class ToSql
       def visit_Arel_Nodes_Dealocate(o, collector)
-        collector << 'DEALLOCATE ' << o.name
+        collector << 'DEALLOCATE ' << (o.name || 'ALL')
       end
 
       def visit_Arel_Nodes_Prepare(o, collector)
-        collector << "PREPARE #{o.name} (#{o.argtypes.join(', ')}) AS ("
+        collector << "PREPARE #{o.name}"
+        collector << " (#{o.argtypes.join(', ')})" if o.argtypes
+        collector << " AS ("
         visit(o.query, collector)
         collector << ')'
       end

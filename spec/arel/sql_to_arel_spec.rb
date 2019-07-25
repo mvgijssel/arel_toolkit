@@ -100,11 +100,14 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'FETCH some_cursor', pg_node: 'PgQuery::FETCH_STMT', sql_to_arel: false
   visit 'sql',
         'PREPARE some_plan (integer) AS (SELECT $1)',
-        pg_node: 'PgQuery::PREPARE_STMT',
-        sql_to_arel: true
+        pg_node: 'PgQuery::PREPARE_STMT'
+  visit 'sql',
+        'PREPARE some_plan AS (SELECT $1)',
+        pg_node: 'PgQuery::PREPARE_STMT'
   visit 'sql', 'DEALLOCATE some_prepared_statement',
-        pg_node: 'PgQuery::DEALLOCATE_STMT',
-        sql_to_arel: true
+        pg_node: 'PgQuery::DEALLOCATE_STMT'
+  visit 'sql', 'DEALLOCATE ALL',
+        pg_node: 'PgQuery::DEALLOCATE_STMT'
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
   visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'RANK("b")', pg_node: 'PgQuery::FUNC_CALL'

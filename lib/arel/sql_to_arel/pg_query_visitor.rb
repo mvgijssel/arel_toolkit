@@ -1088,12 +1088,12 @@ module Arel
         end
       end
 
-      def visit_DeallocateStmt(name:)
+      def visit_DeallocateStmt(name: nil)
         Arel::Nodes::Dealocate.new name
       end
 
-      def visit_PrepareStmt(name:, argtypes:, query:)
-        Arel::Nodes::Prepare.new name, visit(argtypes), visit(query)
+      def visit_PrepareStmt(name:, argtypes: nil, query:)
+        Arel::Nodes::Prepare.new name, argtypes && visit(argtypes), visit(query)
       end
 
       def visit(attribute, context = nil)
