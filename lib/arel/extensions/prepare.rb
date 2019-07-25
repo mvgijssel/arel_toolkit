@@ -1,7 +1,6 @@
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
-
 module Arel
   module Visitors
     class Dot
@@ -16,7 +15,7 @@ module Arel
       def visit_Arel_Nodes_Prepare(o, collector)
         collector << "PREPARE #{o.name}"
         collector << " (#{o.argtypes.join(', ')})" if o.argtypes
-        collector << " AS ("
+        collector << ' AS ('
         visit(o.query, collector)
         collector << ')'
       end

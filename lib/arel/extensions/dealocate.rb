@@ -1,7 +1,6 @@
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
-
 module Arel
   module Visitors
     class Dot
