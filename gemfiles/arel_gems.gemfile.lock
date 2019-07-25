@@ -265,7 +265,7 @@ DEPENDENCIES
   pry-stack_explorer
   rake (~> 10.0)
   rspec (~> 3.8)
-  rspec-rails (~> 3.8.0)
+  rspec-rails (~> 3.8)
   rubocop (= 0.71.0)
   simplecov (~> 0.16.1)
   simplecov-console (~> 0.4.2)
