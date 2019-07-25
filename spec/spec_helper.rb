@@ -57,4 +57,21 @@ RSpec.configure do |config|
 end
 
 
+RSpec.shared_context 'post schema' do
+  ActiveRecord::Schema.define do
+    self.verbose = false
+
+    create_table :posts, force: true do |t|
+      t.string :title
+      t.text :content
+      t.boolean :public
+
+      t.timestamps
+    end
+  end
+
+  class Post < ActiveRecord::Base
+  end
+end
+
 RSpec::Support::ObjectFormatter.default_instance.max_formatted_output_length = 1000
