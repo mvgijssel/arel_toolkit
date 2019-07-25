@@ -68,4 +68,4 @@ class User < ActiveRecord::Base
   has_many :posts, foreign_key: :owner_id
 end
 
-Arel::Middleware::Railtie.insert_postgresql
+Arel::Middleware::Railtie.insert_postgresql unless Gem.loaded_specs.key?('railties')
