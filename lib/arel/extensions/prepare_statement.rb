@@ -4,8 +4,15 @@
 module Arel
   module Visitors
     class Dot
-      alias visit_Arel_Nodes_Dealocate terminal
-      alias visit_Arel_Nodes_Prepare terminal
+      def visit_Arel_Nodes_Dealocate(o)
+        visit_edge o, 'name'
+      end
+
+      def visit_Arel_Nodes_Prepare(o)
+        visit_edge o, 'name'
+        visit_edge o, 'argtypes'
+        visit_edge o, 'query'
+      end
     end
 
     class ToSql
