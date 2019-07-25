@@ -107,6 +107,8 @@ require 'arel/extensions/current_row'
 require 'arel/extensions/false'
 require 'arel/extensions/true'
 require 'arel/extensions/to_sql'
+require 'arel/extensions/prepare'
+require 'arel/extensions/dealocate'
 
 module Arel
   module Extensions
