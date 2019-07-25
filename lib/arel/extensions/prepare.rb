@@ -1,13 +1,10 @@
 # rubocop:disable Naming/MethodName
 # rubocop:disable Naming/UncommunicativeMethodParamName
 
+
 module Arel
   module Visitors
     class Dot
-      def visit_Arel_Nodes_Dealocate(o)
-        visit_edge o, 'name'
-      end
-
       def visit_Arel_Nodes_Prepare(o)
         visit_edge o, 'name'
         visit_edge o, 'argtypes'
@@ -16,10 +13,6 @@ module Arel
     end
 
     class ToSql
-      def visit_Arel_Nodes_Dealocate(o, collector)
-        collector << 'DEALLOCATE ' << (o.name || 'ALL')
-      end
-
       def visit_Arel_Nodes_Prepare(o, collector)
         collector << "PREPARE #{o.name}"
         collector << " (#{o.argtypes.join(', ')})" if o.argtypes
@@ -38,14 +31,6 @@ module Arel
         @name = name
         @query = query
         @argtypes = argtypes
-      end
-    end
-
-    class Dealocate < Node
-      attr_reader :name
-
-      def initialize(name)
-        @name = name
       end
     end
   end
