@@ -50,6 +50,12 @@ Creating Arel from SQL is just the beginning, where this gem really shines is th
 
 Middleware sits between ActiveRecord and the database, it allows you to alter the Arel (the SQL query) before it's send to the database. Multiple middlewares are supported by passing the results from a finished middleware to the next. Next to the arel object, a context object is used that acts as a intermediate storage between middlewares.
 
+The middleware works out of the box when using with Rails. If using ActiveRecord standalone you need to run the following after setting up the database connection:
+
+```ruby
+Arel::Middleware::Railtie.insert_postgresql
+```
+
 ### Example
 
 Create some middleware (this can be any Ruby object as long as it responds to `call`). In this example, we're creating a middleware that will reorder any query. Next to reordering, we're adding an additional middleware that prints out the result of the reorder middleware.
