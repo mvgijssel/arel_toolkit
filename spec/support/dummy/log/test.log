@@ -1,0 +1,32 @@
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 12ms (Views: 3.2ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 4ms (Views: 2.4ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 5ms (Views: 2.8ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 4ms (Views: 2.5ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 6ms (Views: 4.1ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 3ms (Views: 2.3ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 5ms (Views: 3.7ms)
+Processing by AnonymousController#index as HTML
+  Rendering text template
+  Rendered text template (0.0ms)
+Completed 200 OK in 4ms (Views: 2.9ms)
