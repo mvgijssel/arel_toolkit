@@ -13,9 +13,6 @@ require 'action_view/railtie'
 # require "sprockets/railtie"
 require 'rails/test_unit/railtie'
 
-# Bundler.require(*Rails.groups)
-# require "dummy"
-
 module Dummy
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
