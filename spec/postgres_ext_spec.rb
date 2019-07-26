@@ -10,8 +10,6 @@ if Gem.loaded_specs.key?('postgres_ext')
       end
 
       create_table :games, force: true, &:timestamps
-
-      create_table :users, force: true, &:timestamps
     end
 
     class Score < ActiveRecord::Base
@@ -20,9 +18,6 @@ if Gem.loaded_specs.key?('postgres_ext')
     end
 
     class Game < ActiveRecord::Base
-    end
-
-    class User < ActiveRecord::Base
     end
 
     class SomeMiddleware

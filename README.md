@@ -27,7 +27,7 @@ Or install it yourself as:
 
     $ gem install arel_toolkit
 
-## sql_to_arel
+## Sql to Arel
 
 Convert your (PostgreSQL) SQL into an Arel AST.
 
@@ -42,23 +42,23 @@ Convert your (PostgreSQL) SQL into an Arel AST.
 
 ## Extensions
 
-Adds missing Arel nodes and extends the existing visitors, [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions) for a full list.
+This gem aims to have full support for PostgreSQL's SQL. In order to do so, it needs to add missing Arel nodes and extends the existing visitors. A full list of extensions on Arel can be found here: [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions).
 
 ## Middleware
 
-The middleware sits between ActiveRecord and the database, which allows you to mutate or log queries before they hit the database. Multiple middleware are supported by passing the results from a finished middleware to the next. User defined context will be passed, which can contains things like the `current_user_id`.
+Creating Arel from SQL is just the beginning, where this gem really shines is the ability to modify Arel ASTs using middleware.
+
+Middleware sits between ActiveRecord and the database, it allows you to alter the Arel (the SQL query) before it's send to the database. Multiple middlewares are supported by passing the results from a finished middleware to the next. Next to the arel object, a context object is used that acts as a intermediate storage between middlewares.
+
+The middleware works out of the box in combination with Rails. If using ActiveRecord standalone you need to run the following **after** setting up the database connection:
+
+```ruby
+Arel::Middleware::Railtie.insert_postgresql
+```
 
 ### Example
 
-Create an initializer in Rails which loads the Arel::Middleware **after** ActiveRecord:
-
-```ruby
-ActiveSupport.on_load :active_record do
-  Arel::Middleware::Railtie.insert_postgresql
-end
-```
-
-Create some middleware (can be any Ruby object which responds to `call`):
+Create some middleware (this can be any Ruby object as long as it responds to `call`). In this example, we're creating a middleware that will reorder any query. Next to reordering, we're adding an additional middleware that prints out the result of the reorder middleware.
 
 ```ruby
 class ReorderMiddleware
@@ -72,12 +72,13 @@ class LoggingMiddleware
     puts "User executing query: `#{context[:current_user_id]}`"
     puts "Original SQL: `#{context[:original_sql]}`"
     puts "Modified SQL: `#{arel.to_sql}`"
+    
     arel
   end
 end
 ```
 
-Run a query with middleware applied
+Now that we've defined our middelwares, it's time to see them in action: 
 
 ```ruby
 [1] > Arel.middleware.apply([ReorderMiddleware, LoggingMiddleware]).context(current_user_id: 1) { Post.all.load }
@@ -88,8 +89,7 @@ Post Load (4.1ms)  SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC, "po
 => []
 ```
 
-There are more methods available to help with ordering and modifying of the current applied middleware:
-
+This gem ships with a couple of middelware methods that allow you to fine-tune what and when to apply middelware.
 - `Arel.middleware.apply([SomeMiddleware]) { ... }`
 - `Arel.middleware.only([OnlyMe]) { ... }`
 - `Arel.middleware.none { ... }`

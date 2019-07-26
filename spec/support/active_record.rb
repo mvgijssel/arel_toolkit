@@ -44,16 +44,28 @@ ActiveRecord::Base.establish_connection(
 ActiveRecord::Schema.define do
   self.verbose = false
 
-  create_table :posts, force: true do |t|
+  create_table :users, force: :cascade do |t|
+    t.string :username
+
+    t.timestamps
+  end
+
+  create_table :posts, force: :cascade do |t|
     t.string :title
     t.text :content
     t.boolean :public
+    t.integer :owner_id
 
     t.timestamps
   end
 end
 
 class Post < ActiveRecord::Base
+  belongs_to :owner, class_name: 'User'
 end
 
-Arel::Middleware::Railtie.insert_postgresql
+class User < ActiveRecord::Base
+  has_many :posts, foreign_key: :owner_id
+end
+
+Arel::Middleware::Railtie.insert_postgresql unless Gem.loaded_specs.key?('railties')
