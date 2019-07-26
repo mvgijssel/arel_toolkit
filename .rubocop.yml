@@ -3,16 +3,10 @@ AllCops:
     - 'gemfiles/arel_gems.gemfile'
     - 'gemfiles/default.gemfile'
 
-Style/FrozenStringLiteralComment:
-  Enabled: false
-
 Bundler/OrderedGems:
   Enabled: false
 
 Gemspec/OrderedDependencies:
-  Enabled: false
-
-Style/MultilineBlockChain:
   Enabled: false
 
 Metrics/LineLength:
@@ -31,6 +25,9 @@ Metrics/BlockLength:
 Style/Documentation:
   Enabled: false
 
+Style/MultilineBlockChain:
+  Enabled: false
+
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 
@@ -39,6 +36,9 @@ Style/TrailingCommaInArrayLiteral:
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
 Layout/MultilineMethodCallIndentation:
   Enabled: true
