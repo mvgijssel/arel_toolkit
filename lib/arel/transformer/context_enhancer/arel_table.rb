@@ -63,7 +63,7 @@ module Arel
             context[:alias] = true
 
           else
-            raise "Unknown AST location for table #{node.inspect}, #{sql}"
+            raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"
           end
         end
         # rubocop:enable Metrics/PerceivedComplexity
