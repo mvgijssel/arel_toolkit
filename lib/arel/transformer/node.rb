@@ -75,7 +75,7 @@ module Arel
         @children.fetch(key)
       end
 
-      def child_at(path_items)
+      def child_at_path(path_items)
         selected_node = self
         path_items.each do |path_item|
           selected_node = selected_node[path_item]

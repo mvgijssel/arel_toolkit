@@ -540,12 +540,12 @@ module Arel
           1 => 'FOR KEY SHARE',
           2 => 'FOR SHARE',
           3 => 'FOR NO KEY UPDATE',
-          4 => 'FOR UPDATE'
+          4 => 'FOR UPDATE',
         }.fetch(strength)
         wait_policy_clause = {
           0 => '',
           1 => ' SKIP LOCKED',
-          2 => ' NOWAIT'
+          2 => ' NOWAIT',
         }.fetch(wait_policy)
 
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")

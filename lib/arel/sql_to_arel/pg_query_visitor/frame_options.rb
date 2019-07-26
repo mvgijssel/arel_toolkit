@@ -56,7 +56,7 @@ module Arel
             'FRAMEOPTION_START_VALUE_PRECEDING' => 0x00400,
             'FRAMEOPTION_END_VALUE_PRECEDING' => 0x00800,
             'FRAMEOPTION_START_VALUE_FOLLOWING' => 0x01000,
-            'FRAMEOPTION_END_VALUE_FOLLOWING' => 0x02000
+            'FRAMEOPTION_END_VALUE_FOLLOWING' => 0x02000,
           }.freeze
 
           def biggest_detractable_number(number, candidates)

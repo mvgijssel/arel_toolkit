@@ -31,6 +31,9 @@ Metrics/BlockLength:
 Style/Documentation:
   Enabled: false
 
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 
