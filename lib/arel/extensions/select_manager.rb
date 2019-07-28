@@ -4,7 +4,7 @@
 module Arel
   class SelectManager
     def ==(other)
-      @ast == other.ast && @ctx == other.ctx
+      other.is_a?(self.class) && @ast == other.ast && @ctx == other.ctx
     end
 
     protected
