@@ -10,4 +10,6 @@ describe Arel::Transformer::ContextEnhancer::ArelTable do
     expect(from_table_node.context).to eq(range_variable: true, column_reference: false)
     expect(projection_table_node.context).to eq(range_variable: false, column_reference: true)
   end
+
+  # TODO: add all cases here :scream:
 end
