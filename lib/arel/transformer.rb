@@ -1,6 +1,7 @@
 require_relative './transformer/node'
 require_relative './transformer/path'
 require_relative './transformer/path_node'
+require_relative './transformer/query'
 require_relative './transformer/visitor'
 
 module Arel
