@@ -7,7 +7,7 @@ module Arel
         @schema_name = schema_name
       end
 
-      def call(arel)
+      def call(arel, _context)
         tree = Arel.transformer(arel)
 
         tree.query(
