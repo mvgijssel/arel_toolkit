@@ -13,5 +13,12 @@ describe Arel::InsertManager do
 
       expect(tree1).to_not eq(tree2)
     end
+
+    it 'works for comparing other objects' do
+      tree = Arel::InsertManager.new.tap { |i| i.into(Arel::Table.new('posts')) }
+      other_object = 'foo'
+
+      expect(tree).to_not eq other_object
+    end
   end
 end

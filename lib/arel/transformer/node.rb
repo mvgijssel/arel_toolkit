@@ -7,6 +7,7 @@ module Arel
       attr_reader :fields
       attr_reader :children
       attr_reader :root_node
+      attr_reader :context
 
       def initialize(object)
         @object = object
@@ -15,6 +16,7 @@ module Arel
         @fields = []
         @children = {}
         @dirty = false
+        @context = {}
       end
 
       def inspect
@@ -63,7 +65,7 @@ module Arel
       def to_sql(engine = Table.engine)
         return nil if children.empty?
 
-        target_object = object.is_a?(Arel::SelectManager) ? object.ast : object
+        target_object = object.is_a?(Arel::TreeManager) ? object.ast : object
         collector = Arel::Collectors::SQLString.new
         collector = engine.connection.visitor.accept target_object, collector
         collector.value
@@ -71,6 +73,19 @@ module Arel
 
       def [](key)
         @children.fetch(key)
+      end
+
+      def child_at_path(path_items)
+        selected_node = self
+        path_items.each do |path_item|
+          selected_node = selected_node[path_item]
+          return nil if selected_node.nil?
+        end
+        selected_node
+      end
+
+      def query(**kwargs)
+        Arel::Transformer::Query.call(self, kwargs)
       end
 
       protected

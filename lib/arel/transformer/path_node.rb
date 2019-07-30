@@ -16,7 +16,7 @@ module Arel
       def inspect
         case value
         when String
-          "\"#{value}\""
+          "'#{value}'"
         else
           value.inspect
         end

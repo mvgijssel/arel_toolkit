@@ -3,7 +3,7 @@
 
 module Arel
   module Nodes
-    # https://www.postgresql.org/docs/9.5/sql-insert.html
+    # https://www.postgresql.org/docs/10/sql-delete.html
     class DeleteStatement
       module DeleteStatementExtension
         attr_accessor :using

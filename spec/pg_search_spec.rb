@@ -57,7 +57,7 @@ if Gem.loaded_specs.key?('pg_search')
 
     pg_search_scope :tasty_search, associated_against: {
       cheeses: %i[kind brand],
-      cracker: :kind
+      cracker: :kind,
     }
   end
 

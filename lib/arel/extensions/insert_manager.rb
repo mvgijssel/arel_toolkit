@@ -4,7 +4,7 @@
 module Arel
   class InsertManager < Arel::TreeManager
     def ==(other)
-      @ast == other.ast
+      other.is_a?(self.class) && @ast == other.ast
     end
   end
 

@@ -1,13 +1,25 @@
+require_relative './context_enhancer/arel_table'
+
 module Arel
   module Transformer
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
-      def accept(object)
+      DEFAULT_CONTEXT_ENHANCERS = {
+        Arel::Table => Arel::Transformer::ContextEnhancer::ArelTable,
+      }.freeze
+
+      attr_reader :context_enhancers
+
+      def accept(object, context_enhancers = DEFAULT_CONTEXT_ENHANCERS)
+        @context_enhancers = context_enhancers
+
         root_node = Arel::Transformer::Node.new(object)
         accept_with_root(object, root_node)
       end
 
-      def accept_with_root(object, root_node)
+      def accept_with_root(object, root_node, context_enhancers = DEFAULT_CONTEXT_ENHANCERS)
+        @context_enhancers = context_enhancers
+
         with_node(root_node) do
           visit object
         end
@@ -42,6 +54,8 @@ module Arel
         node = Arel::Transformer::Node.new(arel_node)
         current_node.add(path_node, node)
 
+        update_context(node)
+
         with_node node do
           visit arel_node
         end
@@ -53,6 +67,13 @@ module Arel
 
       def current_node
         @node_stack.last
+      end
+
+      def update_context(node)
+        enhancer = context_enhancers[node.object.class]
+        return if enhancer.nil?
+
+        enhancer.call(node)
       end
     end
     # rubocop:enable Naming/MethodName
