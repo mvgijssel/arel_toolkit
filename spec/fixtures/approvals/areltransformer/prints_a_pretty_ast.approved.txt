@@ -120,8 +120,20 @@
         <Node(NilClass) ['ast', 'offset']
           parent = Node(Arel::Nodes::SelectStatement)
           value = nil>
+      lock =
+        <Node(NilClass) ['ast', 'lock']
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      with =
+        <Node(NilClass) ['ast', 'with']
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
       union =
         <Node(NilClass) ['ast', 'union']
+          parent = Node(Arel::Nodes::SelectStatement)
+          value = nil>
+      values_lists =
+        <Node(NilClass) ['ast', 'values_lists']
           parent = Node(Arel::Nodes::SelectStatement)
           value = nil>
     >

@@ -32,7 +32,10 @@ module Arel
         def visit_Arel_Nodes_SelectStatement(o)
           super
 
+          visit_edge o, 'lock'
+          visit_edge o, 'with'
           visit_edge o, 'union'
+          visit_edge o, 'values_lists'
         end
       end
 
