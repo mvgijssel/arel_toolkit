@@ -10,6 +10,8 @@ module Arel
         attr_accessor :filter
         attr_accessor :within_group
         attr_accessor :variardic
+        # postgres only: https://www.postgresql.org/docs/10/ddl-schemas.html
+        attr_accessor :schema_name
 
         def initialize(expr, aliaz = nil)
           super
@@ -31,6 +33,7 @@ module Arel
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
       def aggregate(name, o, collector)
+        collector << "#{o.schema_name}." if o.schema_name
         collector << "#{name}("
         collector << 'DISTINCT ' if o.distinct
         collector << 'VARIADIC ' if o.variardic

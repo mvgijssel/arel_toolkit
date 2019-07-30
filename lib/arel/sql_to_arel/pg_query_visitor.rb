@@ -427,11 +427,20 @@ module Arel
                  [Arel::Nodes::Overlaps.new(start1, end1, start2, end2)]
 
                else
-                 if function_names.length > 1
-                   boom "Don't know how to handle function names `#{function_names}`"
-                 end
+                 case function_names.length
+                 when 2
+                   if function_names.first == PG_CATALOG
+                     boom "Missing postgres function `#{function_names.last}`"
+                   end
 
-                 Arel::Nodes::NamedFunction.new(function_names.first, args)
+                   func = Arel::Nodes::NamedFunction.new(function_names.last, args)
+                   func.schema_name = function_names.first
+                   func
+                 when 1
+                   Arel::Nodes::NamedFunction.new(function_names.first, args)
+                 else
+                   boom "Don't know how to handle function names length `#{function_names.length}`"
+                 end
                end
 
         func.distinct = (agg_distinct.nil? ? false : true) unless func.is_a?(::Array)

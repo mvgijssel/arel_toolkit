@@ -7,7 +7,7 @@ module Arel
     module TableExtension
       # postgres only: https://www.postgresql.org/docs/9.5/sql-select.html
       attr_accessor :only
-      # postgres only: https://www.postgresql.org/docs/9.5/ddl-schemas.html
+      # postgres only: https://www.postgresql.org/docs/10/ddl-schemas.html
       attr_accessor :schema_name
       # postgres only: https://www.postgresql.org/docs/9.1/catalog-pg-class.html
       attr_accessor :relpersistence
