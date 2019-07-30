@@ -97,7 +97,6 @@ module Arel
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
-      # TODO: make the scalar values, string/boolean/integer/float more dense
       def recursive_inspect(string, indent = 1)
         string << "<#{inspect_name} #{path.inspect}\n"
         string << "#{spacing(indent)}sql = #{to_sql}\n" unless to_sql.nil?
