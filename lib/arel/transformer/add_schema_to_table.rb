@@ -7,6 +7,7 @@ module Arel
         @schema_name = schema_name
       end
 
+      # https://github.com/mvgijssel/arel_toolkit/issues/110
       def call(arel, _context)
         tree = Arel.transformer(arel)
 
