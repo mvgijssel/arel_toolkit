@@ -13,5 +13,12 @@ describe Arel::SelectManager do
 
       expect(tree1).to_not eq(tree2)
     end
+
+    it 'works for comparing other objects' do
+      tree = Arel::SelectManager.new(Arel::Table.new('posts'))
+      other_object = 'foo'
+
+      expect(tree).to_not eq other_object
+    end
   end
 end
