@@ -2,8 +2,8 @@ module RSpec
   module Matchers
     # rubocop:disable Metrics/AbcSize
     def self.different_arel_nodes(actual, expected, similar)
-      actual_array = Arel.transformer(actual).each.to_a
-      expected_array = Arel.transformer(expected).each.to_a
+      actual_array = Arel.enhance(actual).each.to_a
+      expected_array = Arel.enhance(expected).each.to_a
 
       actual_array.select.each_with_index do |actual_value, index|
         expected_value = expected_array[index]

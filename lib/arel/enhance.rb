@@ -8,7 +8,7 @@ module Arel
   module Enhance
   end
 
-  def self.transformer(object)
+  def self.enhance(object)
     return object if object.is_a?(Arel::Enhance::Node)
 
     Arel::Enhance::Visitor.new.accept(object)
