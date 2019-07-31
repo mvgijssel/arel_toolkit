@@ -109,6 +109,7 @@ require 'arel/extensions/true'
 require 'arel/extensions/to_sql'
 require 'arel/extensions/prepare'
 require 'arel/extensions/dealocate'
+require 'arel/extensions/active_record_type_caster_map'
 
 module Arel
   module Extensions

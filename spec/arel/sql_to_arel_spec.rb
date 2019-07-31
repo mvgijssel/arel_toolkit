@@ -849,7 +849,7 @@ describe 'Arel.sql_to_arel' do
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true)
-    query_arel = replace_active_record_arel(query.arel)
+    query_arel = remove_active_record_info(query.arel)
     sql = query_arel.to_sql
     result = Arel.sql_to_arel(sql)
     parsed_arel = result.first
@@ -860,7 +860,7 @@ describe 'Arel.sql_to_arel' do
 
   it 'translates an ActiveRecord for a single where argument' do
     query = Post.where(id: 7)
-    query_arel = replace_active_record_arel(query.arel)
+    query_arel = remove_active_record_info(query.arel)
     sql = query_arel.to_sql
     result = Arel.sql_to_arel(sql)
     parsed_arel = result.first

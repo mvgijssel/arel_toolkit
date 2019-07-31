@@ -68,6 +68,7 @@ module Arel
           visit_edge o, 'only'
           visit_edge o, 'schema_name'
           visit_edge o, 'relpersistence'
+          visit_edge o, 'type_caster'
         end
       end
 

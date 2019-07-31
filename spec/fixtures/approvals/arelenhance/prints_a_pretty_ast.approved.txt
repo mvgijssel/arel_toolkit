@@ -37,6 +37,10 @@
                         <Node(String) ['ast', 'cores', 0, 'source', 'left', 'relpersistence']
                           parent = Node(Arel::Table)
                           value = "p">
+                      type_caster =
+                        <Node(NilClass) ['ast', 'cores', 0, 'source', 'left', 'type_caster']
+                          parent = Node(Arel::Table)
+                          value = nil>
                     >
                   right =
                     <Node(Array) ['ast', 'cores', 0, 'source', 'right']
