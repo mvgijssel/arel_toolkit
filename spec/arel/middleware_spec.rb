@@ -13,7 +13,9 @@ describe 'Arel.middleware' do
 
   it 'calls the middleware before executing the SQL query' do
     query = Post.where(id: 7)
-    query_arel = replace_active_record_arel(query.arel)
+    query_arel = remove_active_record_info(query.arel)
+    query.instance_variable_set(:@arel, query_arel)
+
     middleware_sql = nil
 
     expect(SomeMiddleware)
