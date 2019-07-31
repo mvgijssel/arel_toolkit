@@ -51,8 +51,8 @@ enhanced_arel = Arel.enhance(arel)
 enhanced_arel.query(class: Arel::Table).each { ... }
 ```
 
-##### Query for Arel nodes with a enhanced context
-An `Arel::Table` is used in multiple different places inside the AST, and those locations will give the `Arel::Table` a different meaning. Used within a projection (_column_reference_) like `SELECT posts.id` has a different meaning than within a from `SELECT * FROM posts` (_range_variable_). The following results in `Arel::Table` nodes where the object is used in the context of referencing a column:
+##### Query for Arel nodes with an enhanced context
+An `Arel::Table` is used in multiple different places inside the AST, and those locations will give the `Arel::Table` a different meaning. Used within a projection (_column_reference_) like `SELECT posts.id` has a different meaning than within a from `SELECT * FROM posts` (_range_variable_). The following example results in `Arel::Table` nodes where the object is used in the context of referencing a column:
 
 ```ruby
 enhanced_arel.query(class: Arel::Table, context: { column_reference: true }).each { ... }
