@@ -1,5 +1,5 @@
 module Arel
-  module Transformer
+  module Enhance
     module ContextEnhancer
       class ArelTable
         # rubocop:disable Metrics/PerceivedComplexity

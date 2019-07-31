@@ -1,5 +1,5 @@
 module Arel
-  module Transformer
+  module Enhance
     class Node
       attr_reader :object
       attr_reader :parent
@@ -85,7 +85,7 @@ module Arel
       end
 
       def query(**kwargs)
-        Arel::Transformer::Query.call(self, kwargs)
+        Arel::Enhance::Query.call(self, kwargs)
       end
 
       protected

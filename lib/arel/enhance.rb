@@ -9,8 +9,8 @@ module Arel
   end
 
   def self.transformer(object)
-    return object if object.is_a?(Arel::Transformer::Node)
+    return object if object.is_a?(Arel::Enhance::Node)
 
-    Arel::Transformer::Visitor.new.accept(object)
+    Arel::Enhance::Visitor.new.accept(object)
   end
 end

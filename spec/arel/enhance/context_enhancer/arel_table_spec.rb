@@ -1,4 +1,4 @@
-describe Arel::Transformer::ContextEnhancer::ArelTable do
+describe Arel::Enhance::ContextEnhancer::ArelTable do
   it 'adds additional context to Arel::Table nodes' do
     result = Arel.sql_to_arel('SELECT posts.id FROM posts')
     original_arel = result.first

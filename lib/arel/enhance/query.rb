@@ -1,5 +1,5 @@
 module Arel
-  module Transformer
+  module Enhance
     class Query
       def self.call(node, kwargs)
         node_attributes = %i[context parent]

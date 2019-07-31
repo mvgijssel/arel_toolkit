@@ -1,4 +1,4 @@
-describe Arel::Transformer::Query do
+describe Arel::Enhance::Query do
   it 'works for a node context' do
     sql = 'SELECT 1 FROM posts'
     tree = Arel.transformer(Arel.sql_to_arel(sql).first)
