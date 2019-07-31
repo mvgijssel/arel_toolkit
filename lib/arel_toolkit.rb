@@ -9,6 +9,7 @@ require 'arel'
 require 'arel/extensions'
 require 'arel/sql_to_arel'
 require 'arel/middleware'
+require 'arel/enhance'
 require 'arel/transformer'
 
 module ArelToolkit
