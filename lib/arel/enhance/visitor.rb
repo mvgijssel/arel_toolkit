@@ -1,11 +1,11 @@
 require_relative './context_enhancer/arel_table'
 
 module Arel
-  module Transformer
+  module Enhance
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
       DEFAULT_CONTEXT_ENHANCERS = {
-        Arel::Table => Arel::Transformer::ContextEnhancer::ArelTable,
+        Arel::Table => Arel::Enhance::ContextEnhancer::ArelTable,
       }.freeze
 
       attr_reader :context_enhancers
@@ -13,7 +13,7 @@ module Arel
       def accept(object, context_enhancers = DEFAULT_CONTEXT_ENHANCERS)
         @context_enhancers = context_enhancers
 
-        root_node = Arel::Transformer::Node.new(object)
+        root_node = Arel::Enhance::Node.new(object)
         accept_with_root(object, root_node)
       end
 
@@ -32,7 +32,7 @@ module Arel
       def visit_edge(object, method)
         arel_node = object.send(method)
 
-        process_node(arel_node, Arel::Transformer::PathNode.new(method, method))
+        process_node(arel_node, Arel::Enhance::PathNode.new(method, method))
       end
 
       def nary(object)
@@ -46,12 +46,12 @@ module Arel
 
       def visit_Array(object)
         object.each_with_index do |child, index|
-          process_node(child, Arel::Transformer::PathNode.new([:[], index], index))
+          process_node(child, Arel::Enhance::PathNode.new([:[], index], index))
         end
       end
 
       def process_node(arel_node, path_node)
-        node = Arel::Transformer::Node.new(arel_node)
+        node = Arel::Enhance::Node.new(arel_node)
         current_node.add(path_node, node)
 
         update_context(node)

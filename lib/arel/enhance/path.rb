@@ -1,5 +1,5 @@
 module Arel
-  module Transformer
+  module Enhance
     class Path
       attr_reader :nodes
 
