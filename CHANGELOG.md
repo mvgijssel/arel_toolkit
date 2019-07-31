@@ -1,5 +1,24 @@
 # Change Log
 
+## [v0.4.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.0) (2019-07-31)
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.3.0...v0.4.0)
+
+**Implemented enhancements:**
+
+- Rename Arel.transformer to Arel.enhance [\#111](https://github.com/mvgijssel/arel_toolkit/issues/111)
+- Ability to query an Arel transformer tree [\#103](https://github.com/mvgijssel/arel_toolkit/issues/103)
+- Implement PREPARE and DEALLOCATE statement [\#101](https://github.com/mvgijssel/arel_toolkit/issues/101)
+- Replace Arel::Nodes::UnboundColumnReference with Arel::Nodes::UnqualifiedColumn [\#91](https://github.com/mvgijssel/arel_toolkit/issues/91)
+- Create Arel transformer class to safely and easily mutate an Arel AST [\#89](https://github.com/mvgijssel/arel_toolkit/issues/89)
+- Test and verify compatibility with Arel extension gems [\#81](https://github.com/mvgijssel/arel_toolkit/issues/81)
+- Automatically load Railtie when gem is included in Rails [\#66](https://github.com/mvgijssel/arel_toolkit/issues/66)
+- Create remove ActiveRecord specifics transformer [\#63](https://github.com/mvgijssel/arel_toolkit/issues/63)
+- Add brakeman to check for security vulnerabilities [\#10](https://github.com/mvgijssel/arel_toolkit/issues/10)
+
+**Fixed bugs:**
+
+- TypeError: superclass mismatch for class Overlap [\#93](https://github.com/mvgijssel/arel_toolkit/issues/93)
+
 ## [v0.3.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.3.0) (2019-07-01)
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.2.0...v0.3.0)
 

@@ -31,7 +31,7 @@ GIT
 PATH
   remote: ..
   specs:
-    arel_toolkit (0.3.0)
+    arel_toolkit (0.4.0)
       activerecord (~> 5.2.0)
       arel (~> 9.0.0)
       pg (~> 1.1.4)

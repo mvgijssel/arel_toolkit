@@ -40,9 +40,15 @@ Convert your (PostgreSQL) SQL into an Arel AST.
 => "SELECT \"id\" FROM \"users\""
 ```
 
-## Extensions
+## Enhanced Arel AST
 
-This gem aims to have full support for PostgreSQL's SQL. In order to do so, it needs to add missing Arel nodes and extends the existing visitors. A full list of extensions on Arel can be found here: [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions).
+
+```ruby
+enhanced_arel = Arel.enhance(arel)
+enhanced_arel.query(class: Arel::Table).each { ... }
+enhanced_arel.child_at_path([''])
+enhanced_arel['ast'].replace(new_ast)
+```
 
 ## Middleware
 
@@ -96,6 +102,10 @@ This gem ships with a couple of middelware methods that allow you to fine-tune w
 - `Arel.middleware.except(RemoveMe) { ... }`
 - `Arel.middleware.insert_before(RunBefore, ThisMiddleware) { ... }`
 - `Arel.middleware.insert_after(RunAfter, ThisMiddleware) { ... }`
+
+## Extensions
+
+This gem aims to have full support for PostgreSQL's SQL. In order to do so, it needs to add missing Arel nodes and extends the existing visitors. A full list of extensions on Arel can be found here: [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions).
 
 ## Development
 
