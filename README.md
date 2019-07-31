@@ -40,13 +40,44 @@ Convert your (PostgreSQL) SQL into an Arel AST.
 => "SELECT \"id\" FROM \"users\""
 ```
 
-## Extensions
+## Enhanced Arel AST
 
-This gem aims to have full support for PostgreSQL's SQL. In order to do so, it needs to add missing Arel nodes and extends the existing visitors. A full list of extensions on Arel can be found here: [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions).
+`Arel.enhance(arel)` adds additional information and helper methods to the existing Arel AST. This allows for mutating the AST, adding contextual information to the AST and querying for nodes. Some examples:
+
+##### Query for Arel nodes with certain properties
+```ruby
+arel = Post.select(:id, :public).where(id: 1).arel
+enhanced_arel = Arel.enhance(arel)
+enhanced_arel.query(class: Arel::Table).each { ... }
+```
+
+##### Query for Arel nodes with an enhanced context
+An `Arel::Table` is used in multiple different places inside the AST, and those locations will give the `Arel::Table` a different meaning. Used within a projection (_column_reference_) like `SELECT posts.id` has a different meaning than within a from `SELECT * FROM posts` (_range_variable_). The following example results in `Arel::Table` nodes where the object is used in the context of referencing a column:
+
+```ruby
+enhanced_arel.query(class: Arel::Table, context: { column_reference: true }).each { ... }
+```
+
+##### Get an Arel node at a certain path
+```ruby
+enhanced_arel.child_at_path(['ast', 'cores', 0, 'projections', 1]).object
+=> #<struct Arel::Attributes::Attribute>
+```
+
+##### Replace or remove nodes without modifying the original arel
+`remove` and `replace` allow for modifications to the Arel AST. The changes are aplied to a new copy of the AST, making sure the original AST is not touched.
+
+```ruby
+enhanced_arel.child_at_path(['ast', 'cores', 0, 'projections', 1]).replace(Post.arel_table[:content])
+enhanced_arel.child_at_path(['ast', 'cores', 0, 'projections', 0]).remove
+enhanced_arel.to_sql
+=> SELECT "posts"."content" FROM "posts" WHERE "posts"."id" = $1
+```
+
 
 ## Middleware
 
-Creating Arel from SQL is just the beginning, where this gem really shines is the ability to modify Arel ASTs using middleware.
+Creating Arel from SQL and enhancing Arel is just the beginning, where this gem really shines is the ability to modify Arel ASTs using middleware.
 
 Middleware sits between ActiveRecord and the database, it allows you to alter the Arel (the SQL query) before it's send to the database. Multiple middlewares are supported by passing the results from a finished middleware to the next. Next to the arel object, a context object is used that acts as a intermediate storage between middlewares.
 
@@ -63,6 +94,12 @@ Create some middleware (this can be any Ruby object as long as it responds to `c
 ```ruby
 class ReorderMiddleware
   def self.call(arel, _context)
+    enhanced_arel = Arel.enhance(arel)
+    enhanced_arel.query(class: Arel::Nodes::SelectStatement).each do |node|
+      arel_table = node.child_at_path(['cores', 0, 'source', 'left']).object
+      node['orders'].replace([arel_table[:id].asc])
+    end
+
     arel.order(Post.arel_table[:id].asc)
   end
 end
@@ -83,9 +120,9 @@ Now that we've defined our middelwares, it's time to see them in action:
 ```ruby
 [1] > Arel.middleware.apply([ReorderMiddleware, LoggingMiddleware]).context(current_user_id: 1) { Post.all.load }
 User executing query: `1`
-Original SQL: `SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC`
-Modified SQL: `SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC, "posts"."id" ASC`
-Post Load (4.1ms)  SELECT "posts".* FROM "posts" ORDER BY "posts"."id" DESC, "posts"."id" ASC
+Original SQL: `SELECT "posts".* FROM "posts"`
+Modified SQL: `SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC`
+Post Load (4.1ms)  SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC
 => []
 ```
 
@@ -96,6 +133,10 @@ This gem ships with a couple of middelware methods that allow you to fine-tune w
 - `Arel.middleware.except(RemoveMe) { ... }`
 - `Arel.middleware.insert_before(RunBefore, ThisMiddleware) { ... }`
 - `Arel.middleware.insert_after(RunAfter, ThisMiddleware) { ... }`
+
+## Extensions
+
+This gem aims to have full support for PostgreSQL's SQL. In order to do so, it needs to add missing Arel nodes and extends the existing visitors. A full list of extensions on Arel can be found here: [lib/arel/extensions](https://github.com/mvgijssel/arel_toolkit/tree/master/lib/arel/extensions).
 
 ## Development
 
