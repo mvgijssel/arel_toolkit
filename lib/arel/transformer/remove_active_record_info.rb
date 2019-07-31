@@ -23,7 +23,7 @@ module Arel
         def cast_for_database(value)
           case value
           when String
-            Arel.sql("\"#{value}\"")
+            Arel::Nodes.build_quoted(value)
           when Integer
             value
           when TrueClass
