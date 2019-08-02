@@ -12,20 +12,7 @@ module Arel
       def execute(sql, binds = [])
         return sql if internal_middleware.length.zero?
 
-        if executing_middleware
-          message = <<~ERROR
-            Middleware is being called from within middleware, aborting execution
-            to prevent endless recursion. You can do the following if you want to execute SQL
-            inside middleware:
-
-              - Set middleware context before entering the middleware
-              - Use `Arel.middleware.none { ... }` to temporarily disable middleware
-
-          ERROR
-
-          raise message
-        end
-
+        check_middleware_recursion(sql)
         @executing_middleware = true
 
         result = Arel.sql_to_arel(sql, binds: binds)
@@ -108,6 +95,24 @@ module Arel
         yield block
       ensure
         Arel::Middleware.current_chain = previous_chain
+      end
+
+      def check_middleware_recursion(sql)
+        return unless executing_middleware
+
+        message = <<~ERROR
+          Middleware is being called from within middleware, aborting execution
+          to prevent endless recursion. You can do the following if you want to execute SQL
+          inside middleware:
+
+            - Set middleware context before entering the middleware
+            - Use `Arel.middleware.none { ... }` to temporarily disable middleware
+
+          SQL that triggered the error:
+          #{sql}
+        ERROR
+
+        raise message
       end
     end
   end
