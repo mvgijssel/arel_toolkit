@@ -14,6 +14,7 @@ describe 'Arel.middleware' do
   before do
     # This makes sure ActiveRecord preloads index, columns, etc
     # So these requests don't show up as middleware calls
+    Post.create!
     Post.where(id: 0).load
   end
 
