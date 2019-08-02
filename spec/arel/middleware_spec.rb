@@ -386,4 +386,10 @@ describe 'Arel.middleware' do
         .to raise_error(/Middleware is being called from within middleware, aborting execution/)
     end
   end
+
+  it 'works when calling .query with a single argument' do
+    Arel.middleware.apply([SomeMiddleware]) do
+      expect(ActiveRecord::Base.connection.query('SELECT 1')).to eq [[1]]
+    end
+  end
 end
