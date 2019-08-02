@@ -11,6 +11,12 @@ describe 'Arel.middleware' do
     end
   end
 
+  before do
+    # This makes sure ActiveRecord preloads index, columns, etc
+    # So these requests don't show up as middleware calls
+    Post.where(id: 0).load
+  end
+
   it 'calls the middleware before executing the SQL query' do
     query = Post.where(id: 7)
     query_arel = remove_active_record_info(query.arel)
@@ -73,7 +79,7 @@ describe 'Arel.middleware' do
   it 'sets the original sql in the context' do
     class ChangeMiddleware
       def self.call(_arel, _context)
-        Post.select(:title)
+        Post.select(:title).arel
       end
     end
 
@@ -85,8 +91,6 @@ describe 'Arel.middleware' do
 
       m.call(arel, context)
     end
-
-    Post.select(:content).load
 
     Arel.middleware.apply([ChangeMiddleware, SomeMiddleware]) do
       Post.select(:content).load
@@ -247,8 +251,6 @@ describe 'Arel.middleware' do
   it 'calls PostgreSQLAdapter#execute' do
     connection = ActiveRecord::Base.connection
 
-    Post.create! # prepare the caches
-
     Post.transaction(requires_new: true) do
       expect(connection).to receive(:execute).and_call_original
       expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
@@ -266,7 +268,6 @@ describe 'Arel.middleware' do
   it 'calls PostgreSQLAdapter#exec_no_cache' do
     connection = ActiveRecord::Base.connection
     query = Post.where(id: [1, 2]) # IN is not a prepared statement (no cache)
-    query.load # prepare the caches
 
     expect(connection).to receive(:exec_no_cache).and_call_original
     expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
@@ -276,14 +277,13 @@ describe 'Arel.middleware' do
     end
 
     Arel.middleware.apply([SomeMiddleware]) do
-      query.reload
+      query.load
     end
   end
 
   it 'calls PostgreSQLAdapter#exec_cache' do
     connection = ActiveRecord::Base.connection
     query = Post.where(id: 1)
-    query.load # prepare the caches
 
     expect(connection).to receive(:exec_cache).and_call_original
     expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
@@ -293,7 +293,7 @@ describe 'Arel.middleware' do
     end
 
     Arel.middleware.apply([SomeMiddleware]) do
-      query.reload
+      query.load
     end
   end
 
@@ -371,5 +371,18 @@ describe 'Arel.middleware' do
         end
       end
     end.join
+  end
+
+  it 'raises an error when middleware calls middleware to prevent endless recursion' do
+    class RecursiveMiddleware
+      def self.call(_arel, _context)
+        Post.first
+      end
+    end
+
+    Arel.middleware.apply([RecursiveMiddleware]) do
+      expect { Post.first }
+        .to raise_error(/Middleware is being called from within middleware, aborting execution/)
+    end
   end
 end
