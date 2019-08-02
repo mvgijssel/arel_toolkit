@@ -429,10 +429,6 @@ module Arel
                else
                  case function_names.length
                  when 2
-                   if function_names.first == PG_CATALOG
-                     boom "Missing postgres function `#{function_names.last}`"
-                   end
-
                    func = Arel::Nodes::NamedFunction.new(function_names.last, args)
                    func.schema_name = function_names.first
                    func
