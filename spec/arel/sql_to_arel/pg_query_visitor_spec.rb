@@ -82,19 +82,6 @@ describe Arel::SqlToArel::PgQueryVisitor do
   end
 
   describe 'visit_FuncCall' do
-    it 'raises an exception when given an unknown pg_catalog function' do
-      funcname = [
-        { 'String' => { 'str' => 'pg_catalog' } },
-        { 'String' => { 'str' => 'some_new_function' } },
-      ]
-
-      expect do
-        described_class.new.send(:visit_FuncCall, funcname: funcname)
-      end.to raise_error do |error|
-        expect(error.message).to include('Missing postgres function `some_new_function`')
-      end
-    end
-
     it 'raises an exception when there are more than 2 function names' do
       funcname = [
         { 'String' => { 'str' => 'some_schema' } },

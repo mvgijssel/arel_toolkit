@@ -86,6 +86,8 @@ describe 'Arel.middleware' do
       m.call(arel, context)
     end
 
+    Post.select(:content).load
+
     Arel.middleware.apply([ChangeMiddleware, SomeMiddleware]) do
       Post.select(:content).load
     end
@@ -245,32 +247,64 @@ describe 'Arel.middleware' do
   it 'calls PostgreSQLAdapter#execute' do
     connection = ActiveRecord::Base.connection
 
-    expect(connection).to receive(:execute).twice.and_call_original
+    Post.create! # prepare the caches
 
-    Post.create!
+    Post.transaction(requires_new: true) do
+      expect(connection).to receive(:execute).and_call_original
+      expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
+        expect(middleware_arel.to_sql)
+          .to eq 'INSERT INTO "posts" ("created_at", "updated_at") VALUES ($1, $2) RETURNING "id"'
+        m.call(middleware_arel, context)
+      end
+
+      Arel.middleware.apply([SomeMiddleware]) do
+        Post.create!
+      end
+    end
   end
 
   it 'calls PostgreSQLAdapter#exec_no_cache' do
     connection = ActiveRecord::Base.connection
+    query = Post.where(id: [1, 2]) # IN is not a prepared statement (no cache)
+    query.load # prepare the caches
 
-    expect(connection).to receive(:exec_no_cache).twice.and_call_original
+    expect(connection).to receive(:exec_no_cache).and_call_original
+    expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
+      expect(remove_active_record_info(middleware_arel)).to eq remove_active_record_info(query.arel)
+
+      m.call(middleware_arel, context)
+    end
 
     Arel.middleware.apply([SomeMiddleware]) do
-      Post.where(id: [1, 2]).load # IN statements are not prepared
-
-      connection.unprepared_statement do
-        Post.where(id: 1).load
-      end
+      query.reload
     end
   end
 
   it 'calls PostgreSQLAdapter#exec_cache' do
     connection = ActiveRecord::Base.connection
+    query = Post.where(id: 1)
+    query.load # prepare the caches
 
     expect(connection).to receive(:exec_cache).and_call_original
+    expect(SomeMiddleware).to receive(:call).and_wrap_original do |m, middleware_arel, context|
+      expect(remove_active_record_info(middleware_arel)).to eq remove_active_record_info(query.arel)
+
+      m.call(middleware_arel, context)
+    end
 
     Arel.middleware.apply([SomeMiddleware]) do
-      Post.where(id: 1).load
+      query.reload
+    end
+  end
+
+  it 'calls PostgreSQLAdapter#query' do
+    connection = ActiveRecord::Base.connection
+
+    expect(connection).to receive(:query).and_call_original
+    expect(SomeMiddleware).to receive(:call).and_call_original
+
+    Arel.middleware.apply([SomeMiddleware]) do
+      ActiveRecord::Base.connection.indexes('posts')
     end
   end
 

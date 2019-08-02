@@ -1,13 +1,20 @@
 module Arel
   module Middleware
     class Chain
+      attr_reader :executing_middleware
+
       def initialize(internal_middleware = [], internal_context = {})
         @internal_middleware = internal_middleware
         @internal_context = internal_context
+        @executing_middleware = false
       end
 
       def execute(sql, binds = [])
         return sql if internal_middleware.length.zero?
+
+        raise "Already executing middleware, cannot continue for `#{sql}`" if executing_middleware
+
+        @executing_middleware = true
 
         result = Arel.sql_to_arel(sql, binds: binds)
         updated_context = context.merge(original_sql: sql)
@@ -19,6 +26,8 @@ module Arel
         end
 
         result.to_sql
+      ensure
+        @executing_middleware = false
       end
 
       def current

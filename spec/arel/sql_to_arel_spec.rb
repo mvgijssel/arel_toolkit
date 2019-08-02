@@ -110,6 +110,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'RANK("b")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'public.rank("c")', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', 'pg_catalog.obj_description("c", \'pg_class\')', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'COUNT("c")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'GENERATE_SERIES(1, 5)', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'MAX("d")', pg_node: 'PgQuery::FUNC_CALL'

@@ -21,6 +21,11 @@ module Arel
         sql = Arel::Middleware.current_chain.execute(sql, binds)
         super(sql, name, binds)
       end
+
+      def query(sql, name)
+        sql = Arel::Middleware.current_chain.execute(sql)
+        super(sql, name)
+      end
     end
   end
 end
