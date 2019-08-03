@@ -15,7 +15,7 @@ module Arel
       )
         @connection = connection
         @schema_priority = schema_priority
-        @table_mapping = database_table_mapping.merge(override_table_mapping)
+        @table_mapping = database_object_mapping.merge(override_table_mapping)
       end
 
       # We don't need to prefix nodes with `pg_catalog`, because that's the default
@@ -81,7 +81,7 @@ module Arel
         possible_schemas = table_mapping[table_name]
 
         if possible_schemas.empty?
-          raise "Table `#{table_name}` is an unknown table and cannot be prefixed"
+          raise "Table `#{table_name}` is an unknown object and cannot be prefixed"
         end
 
         schema_name = schema_priority.find do |possible_schema_name|
@@ -99,16 +99,36 @@ module Arel
         schema_name
       end
 
-      def database_table_mapping
+      def database_object_mapping
         mapping = Hash.new { |m, k| m[k] = [] }
-
-        connection
-          .execute('SELECT tablename, schemaname FROM pg_catalog.pg_tables')
-          .each do |result|
-          mapping[result.fetch('tablename').to_s] << result.fetch('schemaname').to_s
-        end
-
+        update_mapping mapping, database_tables
+        update_mapping mapping, database_views
+        update_mapping mapping, database_materialized_views
         mapping
+      end
+
+      def update_mapping(mapping, objects)
+        objects.each do |object|
+          mapping[object.fetch('object_name').to_s] << object.fetch('schema_name').to_s
+        end
+      end
+
+      def database_tables
+        connection.execute(
+          'SELECT tablename AS object_name, schemaname AS schema_name FROM pg_tables',
+        )
+      end
+
+      def database_views
+        connection.execute(
+          'SELECT viewname AS object_name, schemaname AS schema_name FROM pg_views',
+        )
+      end
+
+      def database_materialized_views
+        connection.execute(
+          'SELECT matviewname AS object_name, schemaname AS schema_name FROM pg_matviews',
+        )
       end
     end
   end

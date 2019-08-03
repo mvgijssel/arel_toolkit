@@ -65,7 +65,7 @@ describe Arel::Transformer::PrefixSchemaName do
 
       expect do
         transformer.call(arel.first, nil).to_sql
-      end.to raise_error('Table `unknown_table` is an unknown table and cannot be prefixed')
+      end.to raise_error('Table `unknown_table` is an unknown object and cannot be prefixed')
     end
   end
 
@@ -96,6 +96,26 @@ describe Arel::Transformer::PrefixSchemaName do
       expect do
         transformer.call(arel.first, nil).to_sql
       end.to raise_error(/Don't know how to handle `3` parts in/)
+    end
+  end
+
+  context 'views' do
+    it 'adds a schema to a view' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = 'SELECT "posts"."id" FROM "public_posts"'
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."public_posts"'
+    end
+
+    it 'adds a schema to a materialized view' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = 'SELECT "comments_count".* FROM "comments_count"'
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq 'SELECT "comments_count".* FROM "public"."comments_count"'
     end
   end
 end
