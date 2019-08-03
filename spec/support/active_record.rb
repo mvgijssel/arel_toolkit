@@ -1,4 +1,3 @@
-# https://github.com/mvgijssel/arel_toolkit/issues/63
 def remove_active_record_info(arel)
   Arel::Transformer::RemoveActiveRecordInfo.call(arel, nil)
 end

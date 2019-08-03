@@ -26,12 +26,12 @@ describe Arel::Transformer::PrefixSchemaName do
         %w[secret public],
         'posts' => ['secret'],
       )
-      sql = 'SELECT "posts"."id" FROM "posts" INNER JOIN "comments" ON TRUE'
+      sql = 'SELECT "posts"."id" FROM "posts" INNER JOIN "users" ON TRUE'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
 
       expect(prefixed_sql).to eq(
-        'SELECT "posts"."id" FROM "secret"."posts" INNER JOIN "public"."comments" ON \'t\'::bool',
+        'SELECT "posts"."id" FROM "secret"."posts" INNER JOIN "public"."users" ON \'t\'::bool',
       )
     end
 
