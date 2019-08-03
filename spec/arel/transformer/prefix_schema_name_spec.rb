@@ -65,7 +65,9 @@ describe Arel::Transformer::PrefixSchemaName do
 
       expect do
         transformer.call(arel.first, nil).to_sql
-      end.to raise_error('Table `unknown_table` is an unknown object and cannot be prefixed')
+      end.to raise_error(
+        'Object `unknown_table` does not exist in the object_mapping and cannot be prefixed',
+      )
     end
   end
 

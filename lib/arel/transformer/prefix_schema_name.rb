@@ -5,36 +5,36 @@ module Arel
       DEFAULT_SCHEMA_PRIORITY = ['public', PG_CATALOG].freeze
 
       attr_reader :connection
-      attr_reader :table_mapping
+      attr_reader :object_mapping
       attr_reader :schema_priority
 
       def initialize(
         connection,
         schema_priority = DEFAULT_SCHEMA_PRIORITY,
-        override_table_mapping = {}
+        override_object_mapping = {}
       )
         @connection = connection
         @schema_priority = schema_priority
-        @table_mapping = database_object_mapping.merge(override_table_mapping)
+        @object_mapping = database_object_mapping.merge(override_object_mapping)
       end
 
       # https://github.com/mvgijssel/arel_toolkit/issues/110
       def call(arel, _context)
         tree = Arel.enhance(arel)
-        update_tables(tree)
+        update_arel_tables(tree)
         update_typecasts(tree)
         tree.object
       end
 
       private
 
-      def update_tables(tree)
+      def update_arel_tables(tree)
         tree.query(
           class: Arel::Table,
           schema_name: nil,
           context: { range_variable: true },
         ).each do |node|
-          schema_name = schema_name_from_table_name(node['name'].object.to_s)
+          schema_name = schema_name_from_object_name(node['name'].object.to_s)
           node['schema_name'].replace(schema_name)
         end
       end
@@ -54,7 +54,7 @@ module Arel
 
         case reference_parts.length
         when 1
-          schema_name = schema_name_from_table_name(table_name)
+          schema_name = schema_name_from_object_name(table_name)
           reference_parts.unshift(schema_name)
           node['arg']['expr'].replace(reference_parts.join('.'))
         when 2
@@ -74,11 +74,11 @@ module Arel
         end
       end
 
-      def schema_name_from_table_name(table_name)
-        possible_schemas = table_mapping[table_name]
+      def schema_name_from_object_name(table_name)
+        possible_schemas = object_mapping[table_name]
 
         if possible_schemas.empty?
-          raise "Table `#{table_name}` is an unknown object and cannot be prefixed"
+          raise "Object `#{table_name}` does not exist in the object_mapping and cannot be prefixed"
         end
 
         schema_name = schema_priority.find do |possible_schema_name|
