@@ -1,6 +1,6 @@
 module Arel
   module Transformer
-    class AddSchemaToTable
+    class PrefixSchemaName
       attr_reader :schema_name
 
       def initialize(schema_name)
