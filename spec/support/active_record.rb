@@ -29,6 +29,15 @@ ActiveRecord::Schema.define do
   end
 end
 
+ActiveRecord::Base.connection.execute(
+  'CREATE OR REPLACE VIEW public_posts AS SELECT * FROM posts WHERE public = true',
+)
+
+ActiveRecord::Base.connection.execute(
+  'DROP MATERIALIZED VIEW IF EXISTS posts_count; ' \
+  'CREATE MATERIALIZED VIEW posts_count AS SELECT COUNT(*) FROM posts',
+)
+
 class Post < ActiveRecord::Base
   belongs_to :owner, class_name: 'User'
 end
@@ -37,21 +46,12 @@ class User < ActiveRecord::Base
   has_many :posts, foreign_key: :owner_id
 end
 
-ActiveRecord::Base.connection.execute(
-  'CREATE OR REPLACE VIEW public_posts AS SELECT * FROM posts WHERE public = true',
-)
-
 class PublicPost < ActiveRecord::Base
   self.table_name = :public_posts
 end
 
-ActiveRecord::Base.connection.execute(
-  'DROP MATERIALIZED VIEW IF EXISTS comments_count; ' \
-  'CREATE MATERIALIZED VIEW comments_count AS SELECT COUNT(*) FROM comments',
-)
-
-class CommentsCount < ActiveRecord::Base
-  self.table_name = :comments_count
+class PostsCount < ActiveRecord::Base
+  self.table_name = :posts_count
 end
 
 Arel::Middleware::Railtie.insert_postgresql unless Gem.loaded_specs.key?('railties')

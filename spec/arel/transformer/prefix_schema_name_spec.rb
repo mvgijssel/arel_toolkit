@@ -111,11 +111,11 @@ describe Arel::Transformer::PrefixSchemaName do
 
     it 'adds a schema to a materialized view' do
       transformer = Arel::Transformer::PrefixSchemaName.new(connection)
-      sql = 'SELECT "comments_count".* FROM "comments_count"'
+      sql = 'SELECT "posts_count".* FROM "posts_count"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT "comments_count".* FROM "public"."comments_count"'
+      expect(prefixed_sql).to eq 'SELECT "posts_count".* FROM "public"."posts_count"'
     end
   end
 end

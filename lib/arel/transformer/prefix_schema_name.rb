@@ -18,9 +18,6 @@ module Arel
         @table_mapping = database_object_mapping.merge(override_table_mapping)
       end
 
-      # We don't need to prefix nodes with `pg_catalog`, because that's the default
-      # even if the search_path does not include `pg_catalog`. Same for `information_schema`
-
       # https://github.com/mvgijssel/arel_toolkit/issues/110
       def call(arel, _context)
         tree = Arel.enhance(arel)
@@ -94,6 +91,8 @@ module Arel
                 "Possible schemas are `#{possible_schemas}`."
         end
 
+        # We don't need to prefix nodes with `pg_catalog`, because that's the default
+        # even if the search_path does not include `pg_catalog`.
         return nil if schema_name == PG_CATALOG
 
         schema_name
