@@ -83,7 +83,6 @@ module Arel
           visit_edge o, 'schema_name'
         end
 
-        alias visit_Arel_Nodes_Exists function
         alias visit_Arel_Nodes_Min    function
         alias visit_Arel_Nodes_Max    function
         alias visit_Arel_Nodes_Avg    function

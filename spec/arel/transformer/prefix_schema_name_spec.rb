@@ -141,7 +141,7 @@ describe Arel::Transformer::PrefixSchemaName do
       expect(prefixed_sql).to eq %(SELECT public.view_count())
     end
 
-    it 'adds a schema to a function' do
+    it 'adds a schema to an aggregate' do
       transformer = Arel::Transformer::PrefixSchemaName.new(connection)
       sql = 'SELECT sum_view_count(id ORDER BY created_at)'
       arel = Arel.sql_to_arel(sql)
@@ -157,6 +157,17 @@ describe Arel::Transformer::PrefixSchemaName do
       prefixed_sql = transformer.call(arel.first, nil).to_sql
 
       expect(prefixed_sql).to eq %(SELECT COUNT(*))
+    end
+
+    it 'does not consider LEAST, GREATEST, NULLIF, COALESCE and EXISTS as a function' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = %(SELECT EXISTS(SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5))
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq(
+        %(SELECT EXISTS (SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5)),
+      )
     end
   end
 end
