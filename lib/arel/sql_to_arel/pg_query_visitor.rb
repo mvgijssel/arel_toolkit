@@ -364,14 +364,8 @@ module Arel
                when ['sum']
                  Arel::Nodes::Sum.new args
 
-               when ['rank']
-                 Arel::Nodes::Rank.new args
-
                when ['count']
                  Arel::Nodes::Count.new args
-
-               when ['generate_series']
-                 Arel::Nodes::GenerateSeries.new args
 
                when ['max']
                  Arel::Nodes::Max.new args
