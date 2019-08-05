@@ -149,5 +149,14 @@ describe Arel::Transformer::PrefixSchemaName do
 
       expect(prefixed_sql).to eq %(SELECT public.sum_view_count("id" ORDER BY "created_at"))
     end
+
+    it 'works for an existing Arel aggregate node without a name' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = 'SELECT COUNT(*)'
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq %(SELECT COUNT(*))
+    end
   end
 end

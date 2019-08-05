@@ -54,7 +54,14 @@ module Arel
           class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function),
           schema_name: nil,
         ).each do |node|
-          schema_name = schema_name_from_object_name(node['name'].object.to_s)
+
+          object_name = if node.object.is_a?(Arel::Nodes::NamedFunction)
+            node['name'].object
+          else
+            node.object.class.to_s.demodulize.underscore
+          end
+
+          schema_name = schema_name_from_object_name(object_name)
           node['schema_name'].replace(schema_name)
         end
       end

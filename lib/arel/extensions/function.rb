@@ -88,6 +88,7 @@ module Arel
         alias visit_Arel_Nodes_Max    function
         alias visit_Arel_Nodes_Avg    function
         alias visit_Arel_Nodes_Sum    function
+        alias visit_Arel_Nodes_Count  function
       end
 
       prepend FunctionExtension
