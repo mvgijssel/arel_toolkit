@@ -81,6 +81,16 @@ describe Arel::Transformer::PrefixSchemaName do
       expect(prefixed_sql).to eq "SELECT 'public.posts'::regclass"
     end
 
+    it 'prefixes a quoted string casted as a regclass' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+
+      sql = %(SELECT '"posts"'::regclass)
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq %(SELECT 'public.\"posts\"'::regclass)
+    end
+
     it 'does not update a string which already has a schema' do
       transformer = Arel::Transformer::PrefixSchemaName.new(connection)
       sql = "SELECT 'secret.posts'::regclass"

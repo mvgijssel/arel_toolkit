@@ -75,9 +75,10 @@ module Arel
       end
 
       def schema_name_from_object_name(table_name)
+        table_name = unquote_string(table_name)
         possible_schemas = object_mapping[table_name]
 
-        if possible_schemas.empty?
+        if possible_schemas.nil?
           raise "Object `#{table_name}` does not exist in the object_mapping and cannot be prefixed"
         end
 
@@ -98,8 +99,23 @@ module Arel
         schema_name
       end
 
+      # https://www.rubydoc.info/github/rubyworks/facets/String:unquote
+      def unquote_string(string)
+        case string[0, 1]
+        when "'", '"', '`'
+          string[0] = ''
+        end
+
+        case string[-1, 1]
+        when "'", '"', '`'
+          string[-1] = ''
+        end
+
+        string
+      end
+
       def database_object_mapping
-        mapping = Hash.new { |m, k| m[k] = [] }
+        mapping = {}
         update_mapping mapping, database_tables
         update_mapping mapping, database_views
         update_mapping mapping, database_materialized_views
@@ -108,7 +124,9 @@ module Arel
 
       def update_mapping(mapping, objects)
         objects.each do |object|
-          mapping[object.fetch('object_name').to_s] << object.fetch('schema_name').to_s
+          name = object.fetch('object_name').to_s
+          mapping[name] ||= []
+          mapping[name] << object.fetch('schema_name').to_s
         end
       end
 
