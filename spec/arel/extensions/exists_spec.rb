@@ -10,7 +10,6 @@ describe Arel::Nodes::Exists do
     node1 = Arel::Nodes::Exists.new(1)
     node1.instance_variable_set(:@other_var, 2)
     node2 = Arel::Nodes::Exists.new(1)
-    pen
 
     expect(node1.hash).to eq node2.hash
   end
