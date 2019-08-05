@@ -49,23 +49,6 @@ module Arel
         end
       end
 
-      def update_functions(tree)
-        tree.query(
-          class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function),
-          schema_name: nil,
-        ).each do |node|
-
-          object_name = if node.object.is_a?(Arel::Nodes::NamedFunction)
-            node['name'].object.downcase
-          else
-            node.object.class.to_s.demodulize.underscore
-          end
-
-          schema_name = schema_name_from_object_name(object_name)
-          node['schema_name'].replace(schema_name)
-        end
-      end
-
       def update_typecast_node(node)
         table_name = table_name_from_arel_node(node['arg'].object)
         reference_parts = table_name.split('.')
@@ -81,6 +64,26 @@ module Arel
           raise "Don't know how to handle `#{reference_parts.length}` parts in " \
                 "`#{reference_parts}` for sql `#{node.to_sql}`"
         end
+      end
+
+      def update_functions(tree)
+        tree.query(
+          class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function),
+          schema_name: nil,
+        ).each do |node|
+          update_function_node(node)
+        end
+      end
+
+      def update_function_node(node)
+        object_name = if node.object.is_a?(Arel::Nodes::NamedFunction)
+                        node['name'].object.downcase
+                      else
+                        node.object.class.to_s.demodulize.underscore
+                      end
+
+        schema_name = schema_name_from_object_name(object_name)
+        node['schema_name'].replace(schema_name)
       end
 
       def table_name_from_arel_node(arel_node)
