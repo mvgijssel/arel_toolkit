@@ -80,6 +80,7 @@ module Arel
           visit_edge o, 'filter'
           visit_edge o, 'within_group'
           visit_edge o, 'variardic'
+          visit_edge o, 'schema_name'
         end
 
         alias visit_Arel_Nodes_Exists function

@@ -27,6 +27,8 @@ module Arel
               matches? object_attribute_value, test_value
             end
           end
+        when Arel::Enhance::QueryMethods::QueryMethod
+          test.matches?(object)
         else
           object == test
         end

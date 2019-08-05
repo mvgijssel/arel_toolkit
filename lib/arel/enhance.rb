@@ -2,6 +2,7 @@ require_relative './enhance/node'
 require_relative './enhance/path'
 require_relative './enhance/path_node'
 require_relative './enhance/query'
+require_relative './enhance/query_methods'
 require_relative './enhance/visitor'
 
 module Arel

@@ -130,4 +130,24 @@ describe Arel::Transformer::PrefixSchemaName do
       expect(prefixed_sql).to eq 'SELECT "posts_count".* FROM "public"."posts_count"'
     end
   end
+
+  context 'aggregate and function' do
+    it 'adds a schema to an function' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = 'SELECT view_count()'
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq %(SELECT public.view_count())
+    end
+
+    it 'adds a schema to a function' do
+      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      sql = 'SELECT sum_view_count(id ORDER BY created_at)'
+      arel = Arel.sql_to_arel(sql)
+      prefixed_sql = transformer.call(arel.first, nil).to_sql
+
+      expect(prefixed_sql).to eq %(SELECT public.sum_view_count("id" ORDER BY "created_at"))
+    end
+  end
 end

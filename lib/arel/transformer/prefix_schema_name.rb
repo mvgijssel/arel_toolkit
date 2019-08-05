@@ -23,6 +23,7 @@ module Arel
         tree = Arel.enhance(arel)
         update_arel_tables(tree)
         update_typecasts(tree)
+        update_functions(tree)
         tree.object
       end
 
@@ -45,6 +46,16 @@ module Arel
           type_name: 'regclass',
         ).each do |node|
           update_typecast_node(node)
+        end
+      end
+
+      def update_functions(tree)
+        tree.query(
+          class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function),
+          schema_name: nil,
+        ).each do |node|
+          schema_name = schema_name_from_object_name(node['name'].object.to_s)
+          node['schema_name'].replace(schema_name)
         end
       end
 
@@ -119,6 +130,8 @@ module Arel
         update_mapping mapping, database_tables
         update_mapping mapping, database_views
         update_mapping mapping, database_materialized_views
+        update_mapping mapping, database_functions
+
         mapping
       end
 
@@ -145,6 +158,13 @@ module Arel
       def database_materialized_views
         connection.execute(
           'SELECT matviewname AS object_name, schemaname AS schema_name FROM pg_matviews',
+        )
+      end
+
+      def database_functions
+        connection.execute(
+          'SELECT pg_proc.proname AS object_name, pg_namespace.nspname AS schema_name ' \
+          'FROM pg_proc INNER JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid',
         )
       end
     end

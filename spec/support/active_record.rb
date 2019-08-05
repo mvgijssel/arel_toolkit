@@ -37,6 +37,22 @@ ActiveRecord::Base.connection.execute(
   'CREATE MATERIALIZED VIEW posts_count AS SELECT COUNT(*) FROM posts',
 )
 
+ActiveRecord::Base.connection.execute(
+  'CREATE OR REPLACE FUNCTION view_count(integer, integer)' \
+  "RETURNS integer LANGUAGE SQL AS 'SELECT 4'",
+)
+
+ActiveRecord::Base.connection.execute(
+  <<~SQL,
+    DROP AGGREGATE IF EXISTS sum_view_count(integer);
+    CREATE AGGREGATE sum_view_count(integer) (
+      SFUNC = public.view_count,
+      STYPE = integer,
+      INITCOND = '0'
+    )
+  SQL
+)
+
 class Post < ActiveRecord::Base
   belongs_to :owner, class_name: 'User'
 end
