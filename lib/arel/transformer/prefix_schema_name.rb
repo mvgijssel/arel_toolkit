@@ -56,7 +56,7 @@ module Arel
         ).each do |node|
 
           object_name = if node.object.is_a?(Arel::Nodes::NamedFunction)
-            node['name'].object
+            node['name'].object.downcase
           else
             node.object.class.to_s.demodulize.underscore
           end
@@ -144,7 +144,7 @@ module Arel
 
       def update_mapping(mapping, objects)
         objects.each do |object|
-          name = object.fetch('object_name').to_s
+          name = object.fetch('object_name').to_s.downcase
           mapping[name] ||= []
           mapping[name] << object.fetch('schema_name').to_s
         end
