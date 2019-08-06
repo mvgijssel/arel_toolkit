@@ -2,6 +2,7 @@ module Arel
   module Transformer
     class RemoveActiveRecordInfo
       class << self
+        # TODO: match new middleware signature
         def call(arel, _context)
           tree = Arel.enhance(arel)
 

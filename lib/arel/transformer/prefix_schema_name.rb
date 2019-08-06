@@ -8,6 +8,7 @@ module Arel
       attr_reader :object_mapping
       attr_reader :schema_priority
 
+      # TODO: change the signature to match new middleware
       # TODO: get the connection from the Table.engine.connection
       def initialize(
         connection,
