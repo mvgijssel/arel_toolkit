@@ -18,6 +18,8 @@ require 'support/compare_arel'
 require 'support/pg_ast_contains'
 require 'support/visitors'
 
+require 'rails_helper' if Gem.loaded_specs.key?('rspec-rails')
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = '.rspec_status'

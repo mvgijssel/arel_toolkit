@@ -1,6 +1,4 @@
 if Gem.loaded_specs.key?('rspec-rails')
-  require 'rails_helper'
-
   RSpec.describe ApplicationController, type: :controller do
     render_views
 
@@ -8,8 +6,11 @@ if Gem.loaded_specs.key?('rspec-rails')
       around_action :test_arel_toolkit
 
       class IgnoreFirstEntry
-        def self.call(arel, _context)
-          arel.skip(1)
+        def self.call(arel, next_middleware)
+          arel.query(class: Arel::Nodes::SelectStatement).each do |node|
+            node.offset.replace(Arel::Nodes::Offset.new(1))
+          end
+          next_middleware.call(arel)
         end
       end
 
