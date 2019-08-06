@@ -45,6 +45,7 @@ module Arel
           super
 
           visit_edge o, 'into'
+          visit_edge o, 'top'
         end
       end
 
