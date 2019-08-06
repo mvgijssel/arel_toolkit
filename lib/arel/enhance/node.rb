@@ -65,10 +65,13 @@ module Arel
       def to_sql(engine = Table.engine)
         return nil if children.empty?
 
-        target_object = object.is_a?(Arel::TreeManager) ? object.ast : object
-        collector = Arel::Collectors::SQLString.new
-        collector = engine.connection.visitor.accept target_object, collector
-        collector.value
+        if object.respond_to?(:to_sql)
+          object.to_sql(engine)
+        else
+          collector = Arel::Collectors::SQLString.new
+          collector = engine.connection.visitor.accept object, collector
+          collector.value
+        end
       end
 
       def method_missing(name, *args, &block)
@@ -79,7 +82,7 @@ module Arel
       end
 
       def [](key)
-        @children.fetch(key)
+        @children.fetch(key.to_s)
       end
 
       def child_at_path(path_items)
@@ -104,6 +107,10 @@ module Arel
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
+
+      # TODO: cool if we can do relative paths in the inspects
+      # to the node calling the inspect method
+      # Meaning calculating paths at runtime?
       def recursive_inspect(string, indent = 1)
         string << "<#{inspect_name} #{path.inspect}\n"
         string << "#{spacing(indent)}sql = #{to_sql}\n" unless to_sql.nil?
