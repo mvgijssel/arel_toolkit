@@ -108,11 +108,11 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::DEALLOCATE_STMT'
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
   visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'RANK("b")', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', 'rank("b")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'public.rank("c")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'pg_catalog.obj_description("c", \'pg_class\')', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'COUNT("c")', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'GENERATE_SERIES(1, 5)', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', 'generate_series(1, 5)', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'MAX("d")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'MIN("e")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'AVG("f")', pg_node: 'PgQuery::FUNC_CALL'
@@ -395,7 +395,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "'thomas' !~ '.*Thomas.*'"
   visit 'select', "'thomas' !~* '.*vadim.*'"
   visit 'select', "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
-  visit 'select', '1 FETCH FIRST 2 ROWS ONLY', expected_sql: 'SELECT 1 LIMIT 2'
+  visit 'select', '1 FETCH FIRST 2 ROWS ONLY', expected_sql: 'SELECT  1 LIMIT 2'
   visit 'select', 'CAST(3 AS TEXT)', expected_sql: 'SELECT 3::text'
   visit 'select', "inet '192.168.1.6'", expected_sql: "SELECT '192.168.1.6'::inet"
   visit 'select', '"a" <= SOME(SELECT 1)', expected_sql: 'SELECT "a" <= ANY(SELECT 1)'
@@ -849,7 +849,7 @@ describe 'Arel.sql_to_arel' do
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do
-    query = Post.select(:id).where(public: true)
+    query = Post.select(:id).where(public: true).limit(10).order(id: :asc).offset(1)
     query_arel = remove_active_record_info(query.arel)
     sql = query_arel.to_sql
     result = Arel.sql_to_arel(sql)

@@ -30,8 +30,6 @@ module Arel
             Arel::Nodes::TypeCast.new(Arel::Nodes::Quoted.new('t'), 'bool')
           when FalseClass
             Arel::Nodes::TypeCast.new(Arel::Nodes::Quoted.new('f'), 'bool')
-          when Float
-            value
           else
             raise "Unknown value cast `#{value}` with class `#{value.class}`"
           end

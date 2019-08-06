@@ -110,6 +110,10 @@
                 <Node(NilClass) ['ast', 'cores', 0, 'into']
                   parent = Node(Arel::Nodes::SelectCore)
                   value = nil>
+              top =
+                <Node(NilClass) ['ast', 'cores', 0, 'top']
+                  parent = Node(Arel::Nodes::SelectCore)
+                  value = nil>
             >
         >
       limit =
