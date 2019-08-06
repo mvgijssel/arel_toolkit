@@ -59,7 +59,7 @@ module Arel
         node.path = path.append(path_node)
         node.parent = self
         node.root_node = root_node
-        @children[path_node.value] = node
+        @children[path_node.value.to_s] = node
       end
 
       def to_sql(engine = Table.engine)
@@ -69,6 +69,13 @@ module Arel
         collector = Arel::Collectors::SQLString.new
         collector = engine.connection.visitor.accept target_object, collector
         collector.value
+      end
+
+      def method_missing(name, *args, &block)
+        child = @children[name.to_s]
+        return super if child.nil?
+
+        child
       end
 
       def [](key)
