@@ -8,6 +8,7 @@ module Arel
       attr_reader :object_mapping
       attr_reader :schema_priority
 
+      # TODO: get the connection from the Table.engine.connection
       def initialize(
         connection,
         schema_priority = DEFAULT_SCHEMA_PRIORITY,

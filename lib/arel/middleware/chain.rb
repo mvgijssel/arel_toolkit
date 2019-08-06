@@ -3,28 +3,73 @@ module Arel
     class Chain
       attr_reader :executing_middleware
 
+      class MiddlewareExecutor
+        attr_reader :middleware
+        attr_reader :next_executor
+        attr_reader :context
+
+        def initialize(middleware, next_executor, context)
+          @middleware = middleware
+          @next_executor = next_executor
+          @context = context
+        end
+
+        def call(next_arel)
+          case middleware.method(:call).arity
+          when 2
+            middleware.call(next_arel, next_executor)
+          else
+            middleware.call(next_arel, next_executor, context)
+          end
+        end
+      end
+
+      class SqlExecutor
+        attr_reader :execute_sql
+        attr_reader :binds
+
+        def initialize(execute_sql, binds)
+          @execute_sql = execute_sql
+          @binds = binds
+        end
+
+        def call(next_arel)
+          sql = next_arel.to_sql
+          execute_sql.call(sql, binds)
+        end
+      end
+
       def initialize(internal_middleware = [], internal_context = {})
         @internal_middleware = internal_middleware
         @internal_context = internal_context
         @executing_middleware = false
       end
 
-      def execute(sql, binds = [])
-        return sql if internal_middleware.length.zero?
+      def execute(sql, binds = [], &execute_sql)
+        return execute_sql.call(sql, binds) if internal_middleware.length.zero?
 
         check_middleware_recursion(sql)
         @executing_middleware = true
 
-        result = Arel.sql_to_arel(sql, binds: binds)
+        current_executor = SqlExecutor.new(execute_sql, binds)
         updated_context = context.merge(original_sql: sql)
 
-        internal_middleware.each do |middleware_item|
-          result = result.map do |arel|
-            middleware_item.call(arel, updated_context.dup)
-          end
+        internal_middleware.reverse.each do |middleware|
+          current_executor = MiddlewareExecutor
+            .new(middleware, current_executor, updated_context.dup)
         end
 
-        result.to_sql
+        enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
+        result = current_executor.call(enhanced_arel)
+
+        case result
+        when PG::Result
+          result
+        when Array
+          result
+        else
+          raise "Datatype returned from middleware `#{result.class}` should be a SQL result"
+        end
       ensure
         @executing_middleware = false
       end

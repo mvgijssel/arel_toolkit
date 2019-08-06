@@ -8,23 +8,27 @@ module Arel
       end
 
       def execute(sql, name = nil)
-        sql = Arel::Middleware.current_chain.execute(sql)
-        super(sql, name)
-      end
-
-      def exec_no_cache(sql, name, binds)
-        sql = Arel::Middleware.current_chain.execute(sql, binds)
-        super(sql, name, binds)
-      end
-
-      def exec_cache(sql, name, binds)
-        sql = Arel::Middleware.current_chain.execute(sql, binds)
-        super(sql, name, binds)
+        Arel::Middleware.current_chain.execute(sql) do |processed_sql|
+          super(processed_sql, name)
+        end
       end
 
       def query(sql, name = nil)
-        sql = Arel::Middleware.current_chain.execute(sql)
-        super(sql, name)
+        Arel::Middleware.current_chain.execute(sql) do |processed_sql|
+          super(processed_sql, name)
+        end
+      end
+
+      def exec_no_cache(sql, name, binds)
+        Arel::Middleware.current_chain.execute(sql, binds) do |processed_sql, processed_binds|
+          super(processed_sql, name, processed_binds)
+        end
+      end
+
+      def exec_cache(sql, name, binds)
+        Arel::Middleware.current_chain.execute(sql, binds) do |processed_sql, processed_binds|
+          super(processed_sql, name, processed_binds)
+        end
       end
     end
   end
