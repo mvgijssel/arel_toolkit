@@ -1,9 +1,7 @@
 describe Arel::Transformer::PrefixSchemaName do
-  let(:connection) { ActiveRecord::Base.connection }
-
   context 'table' do
     it 'adds a schema to a table' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "posts"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -12,7 +10,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'does not add a schema when a schema is already defined' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "some_schema"."posts"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -22,7 +20,6 @@ describe Arel::Transformer::PrefixSchemaName do
 
     it 'allows to override the default schema' do
       transformer = Arel::Transformer::PrefixSchemaName.new(
-        connection,
         %w[secret public],
         'posts' => ['secret'],
       )
@@ -37,7 +34,6 @@ describe Arel::Transformer::PrefixSchemaName do
 
     it 'uses the schema with the highest priority' do
       transformer = Arel::Transformer::PrefixSchemaName.new(
-        connection,
         %w[priority normal],
         'posts' => %w[normal priority],
         'comments' => ['normal'],
@@ -50,7 +46,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'does not prefix a table in the pg_catalog namespace' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT * FROM "pg_class"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -59,7 +55,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'fails for an unknown table' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT 1 FROM unknown_table'
       arel = Arel.sql_to_arel(sql)
 
@@ -73,7 +69,7 @@ describe Arel::Transformer::PrefixSchemaName do
 
   context 'regclass' do
     it 'prefixes a string casted as a regclass' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = "SELECT 'posts'::regclass"
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -82,7 +78,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'prefixes a quoted string casted as a regclass' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
 
       sql = %(SELECT '"posts"'::regclass)
       arel = Arel.sql_to_arel(sql)
@@ -92,7 +88,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'does not update a string which already has a schema' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = "SELECT 'secret.posts'::regclass"
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -101,7 +97,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'raises when the regclass consists of three or more parts' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = "SELECT 'something.secret.posts'::regclass"
       arel = Arel.sql_to_arel(sql)
 
@@ -113,7 +109,7 @@ describe Arel::Transformer::PrefixSchemaName do
 
   context 'views' do
     it 'adds a schema to a view' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "public_posts"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -122,7 +118,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'adds a schema to a materialized view' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts_count".* FROM "posts_count"'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -133,7 +129,7 @@ describe Arel::Transformer::PrefixSchemaName do
 
   context 'aggregate and function' do
     it 'adds a schema to an function' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT view_count()'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -142,7 +138,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'adds a schema to an aggregate' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT sum_view_count(id ORDER BY created_at)'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -151,7 +147,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'works for an existing Arel aggregate node without a name' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT COUNT(*)'
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql
@@ -160,7 +156,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     it 'does not consider LEAST, GREATEST, NULLIF, COALESCE and EXISTS as a function' do
-      transformer = Arel::Transformer::PrefixSchemaName.new(connection)
+      transformer = Arel::Transformer::PrefixSchemaName.new
       sql = %(SELECT EXISTS(SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5))
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, nil).to_sql

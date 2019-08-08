@@ -4,18 +4,14 @@ module Arel
       PG_CATALOG = 'pg_catalog'.freeze
       DEFAULT_SCHEMA_PRIORITY = ['public', PG_CATALOG].freeze
 
-      attr_reader :connection
       attr_reader :object_mapping
       attr_reader :schema_priority
 
       # TODO: change the signature to match new middleware
-      # TODO: get the connection from the Table.engine.connection
       def initialize(
-        connection,
         schema_priority = DEFAULT_SCHEMA_PRIORITY,
         override_object_mapping = {}
       )
-        @connection = connection
         @schema_priority = schema_priority
         @object_mapping = database_object_mapping.merge(override_object_mapping)
       end
@@ -178,6 +174,10 @@ module Arel
           'SELECT pg_proc.proname AS object_name, pg_namespace.nspname AS schema_name ' \
           'FROM pg_proc INNER JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid',
         )
+      end
+
+      def connection
+        Arel::Table.engine.connection
       end
     end
   end
