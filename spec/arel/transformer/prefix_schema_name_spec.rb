@@ -1,10 +1,12 @@
 describe Arel::Transformer::PrefixSchemaName do
+  let(:next_middleware) { ->(new_arel) { new_arel } }
+
   context 'table' do
     it 'adds a schema to a table' do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "posts"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."posts"'
     end
@@ -13,7 +15,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "some_schema"."posts"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "some_schema"."posts"'
     end
@@ -25,7 +27,7 @@ describe Arel::Transformer::PrefixSchemaName do
       )
       sql = 'SELECT "posts"."id" FROM "posts" INNER JOIN "users" ON TRUE'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq(
         'SELECT "posts"."id" FROM "secret"."posts" INNER JOIN "public"."users" ON \'t\'::bool',
@@ -40,7 +42,7 @@ describe Arel::Transformer::PrefixSchemaName do
       )
       sql = 'SELECT * FROM "posts", "comments"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq 'SELECT * FROM "priority"."posts", "normal"."comments"'
     end
@@ -49,7 +51,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT * FROM "pg_class"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq sql
     end
@@ -60,7 +62,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
 
       expect do
-        transformer.call(arel.first, nil).to_sql
+        transformer.call(arel.first, next_middleware).to_sql
       end.to raise_error(
         'Object `unknown_table` does not exist in the object_mapping and cannot be prefixed',
       )
@@ -72,7 +74,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = "SELECT 'posts'::regclass"
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq "SELECT 'public.posts'::regclass"
     end
@@ -82,7 +84,7 @@ describe Arel::Transformer::PrefixSchemaName do
 
       sql = %(SELECT '"posts"'::regclass)
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq %(SELECT 'public.\"posts\"'::regclass)
     end
@@ -91,7 +93,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = "SELECT 'secret.posts'::regclass"
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq "SELECT 'secret.posts'::regclass"
     end
@@ -102,7 +104,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
 
       expect do
-        transformer.call(arel.first, nil).to_sql
+        transformer.call(arel.first, next_middleware).to_sql
       end.to raise_error(/Don't know how to handle `3` parts in/)
     end
   end
@@ -112,7 +114,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts"."id" FROM "public_posts"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."public_posts"'
     end
@@ -121,7 +123,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT "posts_count".* FROM "posts_count"'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq 'SELECT "posts_count".* FROM "public"."posts_count"'
     end
@@ -132,7 +134,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT view_count()'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq %(SELECT public.view_count())
     end
@@ -141,7 +143,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT sum_view_count(id ORDER BY created_at)'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq %(SELECT public.sum_view_count("id" ORDER BY "created_at"))
     end
@@ -150,7 +152,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = 'SELECT COUNT(*)'
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq %(SELECT COUNT(*))
     end
@@ -159,7 +161,7 @@ describe Arel::Transformer::PrefixSchemaName do
       transformer = Arel::Transformer::PrefixSchemaName.new
       sql = %(SELECT EXISTS(SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5))
       arel = Arel.sql_to_arel(sql)
-      prefixed_sql = transformer.call(arel.first, nil).to_sql
+      prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq(
         %(SELECT EXISTS (SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5)),

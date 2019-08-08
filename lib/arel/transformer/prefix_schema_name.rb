@@ -7,7 +7,6 @@ module Arel
       attr_reader :object_mapping
       attr_reader :schema_priority
 
-      # TODO: change the signature to match new middleware
       def initialize(
         schema_priority = DEFAULT_SCHEMA_PRIORITY,
         override_object_mapping = {}
@@ -16,13 +15,13 @@ module Arel
         @object_mapping = database_object_mapping.merge(override_object_mapping)
       end
 
-      # https://github.com/mvgijssel/arel_toolkit/issues/110
-      def call(arel, _context)
+      def call(arel, next_middleware)
         tree = Arel.enhance(arel)
         update_arel_tables(tree)
         update_typecasts(tree)
         update_functions(tree)
-        tree.object
+
+        next_middleware.call tree.object
       end
 
       private
