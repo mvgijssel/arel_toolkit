@@ -112,10 +112,6 @@ module Arel
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
-
-      # TODO: cool if we can do relative paths in the inspects
-      # to the node calling the inspect method
-      # Meaning calculating paths at runtime?
       def recursive_inspect(string, indent = 1)
         string << "<#{inspect_name} #{path.inspect}\n"
         string << "#{spacing(indent)}sql = #{to_sql}\n" unless to_sql.nil?
