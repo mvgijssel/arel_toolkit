@@ -1,4 +1,6 @@
 describe Arel::Transformer::RemoveActiveRecordInfo do
+  let(:next_middleware) { ->(arel) { arel } }
+
   it 'removes the type_caster stored on the Arel::Table' do
     arel = Post.where(id: 1).arel
     arel_table = Arel
@@ -6,7 +8,7 @@ describe Arel::Transformer::RemoveActiveRecordInfo do
       .child_at_path(['ast', 'cores', 0, 'source', 'left'])
       .object
 
-    new_arel = Arel::Transformer::RemoveActiveRecordInfo.call(arel, nil)
+    new_arel = Arel::Transformer::RemoveActiveRecordInfo.call(arel, next_middleware)
     new_arel_table = Arel
       .enhance(new_arel)
       .child_at_path(['ast', 'cores', 0, 'source', 'left'])
@@ -33,7 +35,7 @@ describe Arel::Transformer::RemoveActiveRecordInfo do
     children = target_children(query.arel)
 
     expect do
-      transformed_arel = Arel::Transformer::RemoveActiveRecordInfo.call(query.arel, nil)
+      transformed_arel = Arel::Transformer::RemoveActiveRecordInfo.call(query.arel, next_middleware)
       children = target_children(transformed_arel)
     end
       .to change { children }
@@ -59,7 +61,7 @@ describe Arel::Transformer::RemoveActiveRecordInfo do
     end
 
     expect do
-      Arel::Transformer::RemoveActiveRecordInfo.call(tree.object, nil)
+      Arel::Transformer::RemoveActiveRecordInfo.call(tree.object, next_middleware)
     end.to raise_error(/Unknown value cast/)
   end
 end

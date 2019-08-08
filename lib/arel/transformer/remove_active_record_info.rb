@@ -2,8 +2,7 @@ module Arel
   module Transformer
     class RemoveActiveRecordInfo
       class << self
-        # TODO: match new middleware signature
-        def call(arel, _context)
+        def call(arel, next_middleware)
           tree = Arel.enhance(arel)
 
           tree.query(class: Arel::Table).each do |node|
@@ -16,7 +15,7 @@ module Arel
             )
           end
 
-          tree.object
+          next_middleware.call tree.object
         end
 
         private
