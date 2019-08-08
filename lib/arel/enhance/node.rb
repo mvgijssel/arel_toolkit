@@ -81,6 +81,11 @@ module Arel
         child
       end
 
+      def respond_to_missing?(method, include_private = false)
+        child = @children[name.to_s]
+        child.present? || super
+      end
+
       def [](key)
         @children.fetch(key.to_s)
       end
