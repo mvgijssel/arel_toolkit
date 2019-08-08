@@ -2,46 +2,12 @@ module Arel
   module Middleware
     class Chain
       attr_reader :executing_middleware
-
-      class MiddlewareExecutor
-        attr_reader :middleware
-        attr_reader :next_executor
-        attr_reader :context
-
-        def initialize(middleware, next_executor, context)
-          @middleware = middleware
-          @next_executor = next_executor
-          @context = context
-        end
-
-        def call(next_arel)
-          case middleware.method(:call).arity
-          when 2
-            middleware.call(next_arel, next_executor)
-          else
-            middleware.call(next_arel, next_executor, context)
-          end
-        end
-      end
-
-      class SqlExecutor
-        attr_reader :execute_sql
-        attr_reader :binds
-
-        def initialize(execute_sql, binds)
-          @execute_sql = execute_sql
-          @binds = binds
-        end
-
-        def call(next_arel)
-          sql = next_arel.to_sql
-          execute_sql.call(sql, binds)
-        end
-      end
+      attr_reader :executor
 
       def initialize(internal_middleware = [], internal_context = {})
         @internal_middleware = internal_middleware
         @internal_context = internal_context
+        @executor = Arel::Middleware::Executor.new(internal_middleware)
         @executing_middleware = false
       end
 
@@ -51,17 +17,12 @@ module Arel
         check_middleware_recursion(sql)
         @executing_middleware = true
 
-        current_executor = SqlExecutor.new(execute_sql, binds)
         updated_context = context.merge(original_sql: sql)
-
-        internal_middleware.reverse.each do |middleware|
-          current_executor = MiddlewareExecutor
-            .new(middleware, current_executor, updated_context.dup)
-        end
-
         enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
-        result = current_executor.call(enhanced_arel)
 
+        result = executor.run(enhanced_arel, updated_context, execute_sql, binds)
+
+        # TODO: pass this type in from the postgres adapter
         case result
         when PG::Result
           result
