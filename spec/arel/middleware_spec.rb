@@ -99,7 +99,7 @@ describe 'Arel.middleware' do
   it 'sets the original sql in the context' do
     class ChangeMiddleware
       def self.call(_arel, next_middleware)
-        next_middleware.call(Post.select(:title).arel)
+        next_middleware.call(Arel.enhance(Post.select(:title).arel))
       end
     end
 
