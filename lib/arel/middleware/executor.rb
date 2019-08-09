@@ -24,9 +24,7 @@ module Arel
       end
 
       def call(next_arel)
-        unless next_arel.is_a?(Arel::Enhance::Node)
-          raise "Only `Arel::Enhance::Node` is valid for middleware, passed `#{next_arel.class}`"
-        end
+        check_type next_arel
 
         current_middleware = middleware[index]
 
@@ -51,6 +49,12 @@ module Arel
 
       def connection
         Arel::Table.engine.connection
+      end
+
+      def check_type(next_arel)
+        return if next_arel.is_a?(Arel::Enhance::Node)
+
+        raise "Only `Arel::Enhance::Node` is valid for middleware, passed `#{next_arel.class}`"
       end
     end
   end
