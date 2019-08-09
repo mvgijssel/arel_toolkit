@@ -7,12 +7,28 @@ describe 'Arel.enhance' do
   end
 
   it 'fails when a child does not exist using brackets' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    tree = Arel.enhance(result.first)
+
+    expect do
+      tree['unknown']
+    end.to raise_error(/key not found/)
   end
 
   it 'uses regular method accessors to access children' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    tree = Arel.enhance(result.first)
+
+    expect(tree.ast.cores[0].source.left.object).to eq Arel::Table.new('posts')
   end
 
   it 'fails when a child does not exist using accessors' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    tree = Arel.enhance(result.first)
+
+    expect do
+      tree.unknown
+    end.to raise_error(/undefined method `unknown'/)
   end
 
   it 'returns the same enhanced AST when the AST is already enhanced' do
