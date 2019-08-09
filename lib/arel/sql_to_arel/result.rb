@@ -2,9 +2,8 @@ module Arel
   module SqlToArel
     class Result < Array
       def to_sql(engine = Arel::Table.engine)
-        map do |item|
-          item.to_sql(engine)
-        end.join('; ')
+        sql, _binds = to_sql_and_binds(engine)
+        sql
       end
 
       def to_sql_and_binds(engine = Arel::Table.engine)
