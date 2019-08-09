@@ -433,4 +433,16 @@ describe 'Arel.middleware' do
       expect(ActiveRecord::Base.connection.query('SELECT 1')).to eq [[1]]
     end
   end
+
+  it 'raises an ActiveRecord::StatementInvalid for invalid SQL' do
+    expect do
+      ActiveRecord::Base.connection.execute('invalid')
+    end.to raise_error(ActiveRecord::StatementInvalid)
+
+    Arel.middleware.apply([NoopMiddleware]) do
+      expect do
+        ActiveRecord::Base.connection.execute('invalid')
+      end.to raise_error(ActiveRecord::StatementInvalid)
+    end
+  end
 end

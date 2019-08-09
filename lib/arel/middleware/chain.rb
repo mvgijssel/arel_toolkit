@@ -30,6 +30,8 @@ module Arel
         else
           raise "Datatype returned from middleware `#{result.class}` should be a SQL result"
         end
+      rescue ::PgQuery::ParseError
+        execute_sql.call(sql, binds)
       ensure
         @executing_middleware = false
       end

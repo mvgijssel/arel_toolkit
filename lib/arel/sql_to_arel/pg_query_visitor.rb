@@ -26,6 +26,9 @@ module Arel
         @sql = sql
 
         Result.new visit(object, :top)
+      rescue ::PgQuery::ParseError => e
+        new_error = ::PgQuery::ParseError.new(e.message, __FILE__, __LINE__, -1)
+        raise new_error, e.message, e.backtrace
       rescue ::StandardError => e
         raise e.class, e.message, e.backtrace if e.is_a?(Arel::SqlToArel::Error)
 
