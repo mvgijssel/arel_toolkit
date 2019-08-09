@@ -74,6 +74,10 @@ module Arel
         end
       end
 
+      def to_sql_and_binds(engine = Table.engine)
+        object.to_sql_and_binds(engine)
+      end
+
       def method_missing(name, *args, &block)
         child = @children[name.to_s]
         return super if child.nil?

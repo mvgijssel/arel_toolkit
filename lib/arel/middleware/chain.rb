@@ -20,7 +20,7 @@ module Arel
         updated_context = context.merge(original_sql: sql)
         enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
 
-        result = executor.run(enhanced_arel, updated_context, execute_sql, binds)
+        result = executor.run(enhanced_arel, updated_context, execute_sql)
 
         # TODO: pass this type in from the postgres adapter
         case result

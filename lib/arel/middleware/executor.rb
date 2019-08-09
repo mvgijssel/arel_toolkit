@@ -6,27 +6,28 @@ module Arel
       attr_accessor :index
       attr_reader :context
       attr_reader :final_block
-      attr_reader :binds
 
       def initialize(middleware)
         @middleware = middleware
       end
 
-      def run(enhanced_arel, context, final_block, binds)
+      def run(enhanced_arel, context, final_block)
         @index = 0
         @context = context
         @final_block = final_block
-        @binds = binds
 
         call(enhanced_arel)
       ensure
         @index = 0
         @context = nil
         @final_block = nil
-        @binds = nil
       end
 
       def call(next_arel)
+        unless next_arel.is_a?(Arel::Enhance::Node)
+          raise "Only `Arel::Enhance::Node` is valid for middleware, passed `#{next_arel.class}`"
+        end
+
         current_middleware = middleware[index]
 
         return execute_sql(next_arel) if current_middleware.nil?
@@ -44,8 +45,12 @@ module Arel
       private
 
       def execute_sql(next_arel)
-        sql = next_arel.to_sql
+        sql, binds = next_arel.to_sql_and_binds
         final_block.call(sql, binds)
+      end
+
+      def connection
+        Arel::Table.engine.connection
       end
     end
   end

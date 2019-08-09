@@ -7,6 +7,22 @@ module Arel
         end.join('; ')
       end
 
+      def to_sql_and_binds(engine = Arel::Table.engine)
+        sql_collection = []
+        binds_collection = []
+
+        each do |item|
+          sql, binds = item.to_sql_and_binds(engine)
+          sql_collection << sql
+          binds_collection.concat(binds)
+        end
+
+        [
+          sql_collection.join('; '),
+          binds_collection,
+        ]
+      end
+
       def map(&block)
         Result.new super
       end
