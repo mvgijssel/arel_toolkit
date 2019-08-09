@@ -52,6 +52,26 @@ describe 'Arel.enhance' do
     expect(tree.to_sql).to eq result.to_sql
   end
 
+  it 'returns sql and binds for multiple queries' do
+    bind1 = Post.predicate_builder.build_bind_attribute(:id, 1)
+    sql1 = 'SELECT 1 FROM posts WHERE id = $1'
+    bind2 = Post.predicate_builder.build_bind_attribute(:id, 2)
+    sql2 = 'SELECT 1 FROM posts WHERE id = $2'
+
+    binds = [bind1, bind2]
+    sql = "#{sql1}; #{sql2}"
+
+    result = Arel.sql_to_arel(sql, binds: binds)
+    tree = Arel.enhance(result)
+    parsed_sql, binds = tree.to_sql_and_binds
+
+    expect(parsed_sql).to_not eq(sql)
+
+    expect do
+      ActiveRecord::Base.connection.exec_cache(parsed_sql, 'TEST', binds)
+    end.to raise_error(/cannot insert multiple commands into a prepared statement/)
+  end
+
   it 'replaces a node using a setter' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result)
