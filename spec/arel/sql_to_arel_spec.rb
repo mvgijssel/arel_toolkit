@@ -206,6 +206,7 @@ describe 'Arel.sql_to_arel' do
   # https://github.com/mvgijssel/arel_toolkit/issues/57
   # visit 'sql', '???', pg_node: 'PgQuery::OID_LIST', sql_to_arel: false
   visit 'select', '$1', pg_node: 'PgQuery::PARAM_REF'
+  visit 'select', '?, ?', pg_node: 'PgQuery::PARAM_REF', expected_sql: 'SELECT $1, $2'
   # https://github.com/mvgijssel/arel_toolkit/issues/101
   visit 'sql',
         'PREPARE some_plan (integer) AS (SELECT $1)',

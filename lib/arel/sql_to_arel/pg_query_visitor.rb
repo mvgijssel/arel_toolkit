@@ -592,7 +592,7 @@ module Arel
         conflict
       end
 
-      def visit_ParamRef(number:)
+      def visit_ParamRef(number: nil)
         value = (binds[number - 1] unless binds.empty?)
 
         Arel::Nodes::BindParam.new(value)
