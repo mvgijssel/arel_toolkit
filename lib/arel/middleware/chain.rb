@@ -15,7 +15,6 @@ module Arel
         return execute_sql.call(sql, binds) if internal_middleware.length.zero?
 
         check_middleware_recursion(sql)
-        @executing_middleware = true
 
         updated_context = context.merge(original_sql: sql)
         enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
@@ -104,21 +103,23 @@ module Arel
       end
 
       def check_middleware_recursion(sql)
-        return unless executing_middleware
+        if executing_middleware
+          message = <<~ERROR
+            Middleware is being called from within middleware, aborting execution
+            to prevent endless recursion. You can do the following if you want to execute SQL
+            inside middleware:
 
-        message = <<~ERROR
-          Middleware is being called from within middleware, aborting execution
-          to prevent endless recursion. You can do the following if you want to execute SQL
-          inside middleware:
+              - Set middleware context before entering the middleware
+              - Use `Arel.middleware.none { ... }` to temporarily disable middleware
 
-            - Set middleware context before entering the middleware
-            - Use `Arel.middleware.none { ... }` to temporarily disable middleware
+            SQL that triggered the error:
+            #{sql}
+          ERROR
 
-          SQL that triggered the error:
-          #{sql}
-        ERROR
-
-        raise message
+          raise message
+        else
+          @executing_middleware = true
+        end
       end
     end
   end
