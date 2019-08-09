@@ -34,6 +34,16 @@ if Gem.loaded_specs.key?('rspec-rails')
 
         expect(response.body).to eq ['Willian'].to_json
       end
+
+      it 'has loaded the Railtie' do
+        initializer_names = Rails.application.railties.map do |railtie|
+          railtie.initializers.map do |initializer|
+            initializer.name.to_s
+          end
+        end.flatten
+
+        expect(initializer_names).to include('arel.middleware.insert')
+      end
     end
   end
 end
