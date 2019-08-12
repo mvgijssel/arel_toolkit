@@ -12,7 +12,7 @@ module Arel
       end
 
       def execute(sql, binds = [], &execute_sql)
-        return execute_sql.call(sql, binds) if internal_middleware.length.zero?
+        return execute_sql.call(sql, binds).to_original_result if internal_middleware.length.zero?
 
         check_middleware_recursion(sql)
 
@@ -21,15 +21,7 @@ module Arel
 
         result = executor.run(enhanced_arel, updated_context, execute_sql)
 
-        # TODO: pass this type in from the postgres adapter
-        case result
-        when PG::Result
-          result
-        when Array
-          result
-        else
-          raise "Datatype returned from middleware `#{result.class}` should be a SQL result"
-        end
+        result.to_original_result
       rescue ::PgQuery::ParseError
         execute_sql.call(sql, binds)
       ensure

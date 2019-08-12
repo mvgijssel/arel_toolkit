@@ -93,7 +93,7 @@ describe 'Arel.middleware' do
       Arel.middleware.apply([WrongMiddleware]) do
         Post.all.load
       end
-    end.to raise_error(/returned from middleware `Arel::Enhance::Node` should be a SQL result/)
+    end.to raise_error(/returned from middleware needs to be wrapped in `Arel::Middleware::Result`/)
   end
 
   it 'sets the original sql in the context' do
@@ -345,61 +345,88 @@ describe 'Arel.middleware' do
   end
 
   it 'has the same SQL before and after middleware for UPDATE' do
-    post = Post.create!(title: 'some title', content: 'some content', public: false)
+    before_sql = []
+    after_sql = []
 
-    expect(ActiveRecord::Base.connection)
-      .to receive(:exec_no_cache)
-      .and_wrap_original do |m, sql, name, binds|
-      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds) do |final_sql|
-        [final_sql]
-      end.first
-
-      expect(middleware_sql).to eq(sql)
-
-      m.call(sql, name, binds)
+    logger = lambda do |next_arel, next_middleware, context|
+      after_sql << next_arel.to_sql
+      before_sql << context[:original_sql]
+      next_middleware.call(next_arel)
     end
 
-    Arel.middleware.apply([NoopMiddleware]) do
-      post.update title: nil, content: nil, public: true
+    post = Post.create!
+
+    Arel.middleware.apply([logger]) do
+      post.update! title: 'updated title'
     end
+
+    expect(before_sql).to eq [
+      'SAVEPOINT active_record_1',
+      'UPDATE "posts" SET "title" = $1, "updated_at" = $2 WHERE "posts"."id" = $3',
+      'RELEASE SAVEPOINT active_record_1',
+    ]
+
+    expect(after_sql).to eq [
+      'SAVEPOINT "active_record_1"',
+      'UPDATE "posts" SET "title" = $1, "updated_at" = $2 WHERE "posts"."id" = $3',
+      'RELEASE SAVEPOINT "active_record_1"',
+    ]
   end
 
-  it 'has the same SQL before and next_middleware middleware for INSERT' do
-    expect(ActiveRecord::Base.connection)
-      .to receive(:exec_no_cache)
-      .and_wrap_original do |m, sql, name, binds|
-      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds) do |final_sql|
-        [final_sql]
-      end.first
+  it 'has similar SQL before and after calling middleware for INSERT' do
+    before_sql = []
+    after_sql = []
 
-      expect(middleware_sql).to eq(sql)
-
-      m.call(sql, name, binds)
+    logger = lambda do |next_arel, next_middleware, context|
+      after_sql << next_arel.to_sql
+      before_sql << context[:original_sql]
+      next_middleware.call(next_arel)
     end
 
-    Arel.middleware.apply([NoopMiddleware]) do
-      Post.create!(title: 'some title', content: 'some content')
+    Arel.middleware.apply([logger]) do
+      Post.create! title: 't'
     end
+
+    # rubocop:disable Metrics/LineLength
+    expect(before_sql).to eq [
+      'SAVEPOINT active_record_1',
+      'INSERT INTO "posts" ("title", "created_at", "updated_at") VALUES ($1, $2, $3) RETURNING "id"',
+      'RELEASE SAVEPOINT active_record_1',
+    ]
+    expect(after_sql).to eq [
+      'SAVEPOINT "active_record_1"',
+      'INSERT INTO "posts" ("title", "created_at", "updated_at") VALUES ($1, $2, $3) RETURNING "id"',
+      'RELEASE SAVEPOINT "active_record_1"',
+    ]
+    # rubocop:enable Metrics/LineLength
   end
 
   it 'has the same SQL before and next_middleware middleware for DELETE' do
-    post = Post.create!(title: 'some title', content: 'some content')
+    before_sql = []
+    after_sql = []
 
-    expect(ActiveRecord::Base.connection)
-      .to receive(:exec_no_cache)
-      .and_wrap_original do |m, sql, name, binds|
-      middleware_sql = Arel::Middleware.current_chain.execute(sql, binds) do |final_sql|
-        [final_sql]
-      end.first
-
-      expect(middleware_sql).to eq(sql)
-
-      m.call(sql, name, binds)
+    logger = lambda do |next_arel, next_middleware, context|
+      after_sql << next_arel.to_sql
+      before_sql << context[:original_sql]
+      next_middleware.call(next_arel)
     end
 
-    Arel.middleware.apply([NoopMiddleware]) do
+    post = Post.create! title: 't'
+
+    Arel.middleware.apply([logger]) do
       post.destroy!
     end
+
+    expect(before_sql).to eq [
+      'SAVEPOINT active_record_1',
+      'DELETE FROM "posts" WHERE "posts"."id" = $1',
+      'RELEASE SAVEPOINT active_record_1',
+    ]
+    expect(after_sql).to eq [
+      'SAVEPOINT "active_record_1"',
+      'DELETE FROM "posts" WHERE "posts"."id" = $1',
+      'RELEASE SAVEPOINT "active_record_1"',
+    ]
   end
 
   it 'does not use middleware when configuring a connection to prevent endless checkouts' do
