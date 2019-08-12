@@ -86,7 +86,7 @@ module Arel
       end
 
       def respond_to_missing?(method, include_private = false)
-        child = @children[name.to_s]
+        child = @children[method.to_s]
         child.present? || super
       end
 

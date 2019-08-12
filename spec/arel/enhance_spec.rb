@@ -31,6 +31,14 @@ describe 'Arel.enhance' do
     end.to raise_error(/undefined method `unknown'/)
   end
 
+  it 'correctly handles respond_to and method for method missing' do
+    result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
+    tree = Arel.enhance(result.first)
+
+    expect(tree).to respond_to(:ast)
+    expect(tree.method(:ast)).to_not be_nil
+  end
+
   it 'returns the same enhanced AST when the AST is already enhanced' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result.first)
