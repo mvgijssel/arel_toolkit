@@ -220,11 +220,35 @@ describe 'Arel.middleware' do
     expect(middleware).to eq([ReorderMiddleware, NoopMiddleware])
   end
 
-  it 'allows middleware to be appended next_middleware other middleware' do
+  it 'allows middleware to be inserted before all other middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([NoopMiddleware]) do
+      Arel.middleware.prepend(ReorderMiddleware) do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([ReorderMiddleware, NoopMiddleware])
+  end
+
+  it 'allows middleware to be appended after other middleware' do
     middleware = nil
 
     Arel.middleware.apply([NoopMiddleware]) do
       Arel.middleware.insert_after(ReorderMiddleware, NoopMiddleware) do
+        middleware = Arel.middleware.current
+      end
+    end
+
+    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware])
+  end
+
+  it 'allows middleware to be appended after all middleware' do
+    middleware = nil
+
+    Arel.middleware.apply([NoopMiddleware]) do
+      Arel.middleware.append(ReorderMiddleware) do
         middleware = Arel.middleware.current
       end
     end

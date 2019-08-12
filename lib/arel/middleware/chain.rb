@@ -58,9 +58,19 @@ module Arel
         continue_chain(updated_middleware, internal_context, &block)
       end
 
+      def prepend(new_middleware, &block)
+        updated_middleware = [new_middleware] + internal_middleware
+        continue_chain(updated_middleware, internal_context, &block)
+      end
+
       def insert_after(new_middleware, existing_middleware, &block)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index + 1, new_middleware)
+        continue_chain(updated_middleware, internal_context, &block)
+      end
+
+      def append(new_middleware, &block)
+        updated_middleware = internal_middleware + [new_middleware]
         continue_chain(updated_middleware, internal_context, &block)
       end
 
