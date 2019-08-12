@@ -135,12 +135,24 @@ describe 'Arel.enhance' do
       .to('SELECT 1 FROM "posts"')
   end
 
-  it 'raises an exception with a hash in the tree' do
-    arel = Arel::Attribute.new(Arel::Table.new(:posts), foo: :bar)
+  it 'can enhance a Hash like object' do
+    sql = nil
+    binds = nil
 
-    expect do
-      Arel.enhance(arel)
-    end.to raise_error('Hash is not supported')
+    middleware = lambda do |next_arel, next_middleware, _context|
+      next_arel.query(class: Arel::InsertManager).each do
+        sql, binds = next_arel.to_sql_and_binds
+      end
+
+      next_middleware.call(next_arel)
+    end
+
+    Arel.middleware.append(middleware) do
+      Post.create additional_data: { foo: :bar }
+    end
+
+    expect(sql).to eq 'INSERT INTO "posts" ("additional_data", "created_at", "updated_at") ' \
+                      'VALUES ($1, $2, $3) RETURNING "id"'
   end
 
   it 'marks a tree as dirty when modified', focus: true do

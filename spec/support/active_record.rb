@@ -24,6 +24,7 @@ ActiveRecord::Schema.define do
     t.text :content
     t.boolean :public
     t.integer :owner_id
+    t.json :additional_data
 
     t.timestamps
   end
