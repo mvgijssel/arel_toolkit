@@ -4,27 +4,24 @@ module Arel
       PG_CATALOG = 'pg_catalog'.freeze
       DEFAULT_SCHEMA_PRIORITY = ['public', PG_CATALOG].freeze
 
-      attr_reader :connection
       attr_reader :object_mapping
       attr_reader :schema_priority
 
       def initialize(
-        connection,
         schema_priority = DEFAULT_SCHEMA_PRIORITY,
         override_object_mapping = {}
       )
-        @connection = connection
         @schema_priority = schema_priority
         @object_mapping = database_object_mapping.merge(override_object_mapping)
       end
 
-      # https://github.com/mvgijssel/arel_toolkit/issues/110
-      def call(arel, _context)
+      def call(arel, next_middleware)
         tree = Arel.enhance(arel)
         update_arel_tables(tree)
         update_typecasts(tree)
         update_functions(tree)
-        tree.object
+
+        next_middleware.call tree
       end
 
       private
@@ -176,6 +173,10 @@ module Arel
           'SELECT pg_proc.proname AS object_name, pg_namespace.nspname AS schema_name ' \
           'FROM pg_proc INNER JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid',
         )
+      end
+
+      def connection
+        Arel::Table.engine.connection
       end
     end
   end

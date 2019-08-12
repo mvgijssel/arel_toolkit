@@ -1,5 +1,6 @@
 def remove_active_record_info(arel)
-  Arel::Transformer::RemoveActiveRecordInfo.call(arel, nil)
+  next_middleware = ->(next_arel) { next_arel }
+  Arel::Transformer::RemoveActiveRecordInfo.call(arel, next_middleware)
 end
 
 ActiveRecord::Base.establish_connection(
@@ -23,6 +24,7 @@ ActiveRecord::Schema.define do
     t.text :content
     t.boolean :public
     t.integer :owner_id
+    t.json :additional_data
 
     t.timestamps
   end

@@ -40,8 +40,10 @@ module Arel
       end
       alias visit_Arel_Nodes_And nary
 
-      def visit_Hash(_object)
-        raise 'Hash is not supported'
+      def visit_Hash(object)
+        object.each do |key, child|
+          process_node(child, Arel::Enhance::PathNode.new([:[], key], key))
+        end
       end
 
       def visit_Array(object)

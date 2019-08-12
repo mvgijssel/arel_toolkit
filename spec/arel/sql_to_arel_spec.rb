@@ -206,6 +206,7 @@ describe 'Arel.sql_to_arel' do
   # https://github.com/mvgijssel/arel_toolkit/issues/57
   # visit 'sql', '???', pg_node: 'PgQuery::OID_LIST', sql_to_arel: false
   visit 'select', '$1', pg_node: 'PgQuery::PARAM_REF'
+  visit 'select', '?, ?', pg_node: 'PgQuery::PARAM_REF', expected_sql: 'SELECT $1, $2'
   # https://github.com/mvgijssel/arel_toolkit/issues/101
   visit 'sql',
         'PREPARE some_plan (integer) AS (SELECT $1)',
@@ -846,6 +847,15 @@ describe 'Arel.sql_to_arel' do
     arel = result.first
 
     expect(arel.class).to eq Arel::DeleteManager
+  end
+
+  it 'returns a result object when calling map' do
+    sql = 'SELECT 1'
+    result = Arel.sql_to_arel(sql)
+    new_result = result.map { 10 }
+
+    expect(result).to be_a(Arel::SqlToArel::Result)
+    expect(new_result).to be_a(Arel::SqlToArel::Result)
   end
 
   it 'translates an ActiveRecord query ast into the same ast and sql' do

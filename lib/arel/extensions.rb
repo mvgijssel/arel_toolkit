@@ -112,6 +112,7 @@ require 'arel/extensions/active_record_relation_query_attribute'
 require 'arel/extensions/active_model_attribute_with_cast_value'
 require 'arel/extensions/exists'
 require 'arel/extensions/bind_param'
+require 'arel/extensions/node'
 
 module Arel
   module Extensions

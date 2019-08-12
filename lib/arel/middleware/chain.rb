@@ -2,29 +2,28 @@ module Arel
   module Middleware
     class Chain
       attr_reader :executing_middleware
+      attr_reader :executor
 
       def initialize(internal_middleware = [], internal_context = {})
         @internal_middleware = internal_middleware
         @internal_context = internal_context
+        @executor = Arel::Middleware::Executor.new(internal_middleware)
         @executing_middleware = false
       end
 
-      def execute(sql, binds = [])
-        return sql if internal_middleware.length.zero?
+      def execute(sql, binds = [], &execute_sql)
+        return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
         check_middleware_recursion(sql)
-        @executing_middleware = true
 
-        result = Arel.sql_to_arel(sql, binds: binds)
         updated_context = context.merge(original_sql: sql)
+        enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
 
-        internal_middleware.each do |middleware_item|
-          result = result.map do |arel|
-            middleware_item.call(arel, updated_context.dup)
-          end
-        end
+        result = executor.run(enhanced_arel, updated_context, execute_sql)
 
-        result.to_sql
+        result.to_casted_result
+      rescue ::PgQuery::ParseError
+        execute_sql.call(sql, binds)
       ensure
         @executing_middleware = false
       end
@@ -59,9 +58,19 @@ module Arel
         continue_chain(updated_middleware, internal_context, &block)
       end
 
+      def prepend(new_middleware, &block)
+        updated_middleware = [new_middleware] + internal_middleware
+        continue_chain(updated_middleware, internal_context, &block)
+      end
+
       def insert_after(new_middleware, existing_middleware, &block)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index + 1, new_middleware)
+        continue_chain(updated_middleware, internal_context, &block)
+      end
+
+      def append(new_middleware, &block)
+        updated_middleware = internal_middleware + [new_middleware]
         continue_chain(updated_middleware, internal_context, &block)
       end
 
@@ -98,21 +107,23 @@ module Arel
       end
 
       def check_middleware_recursion(sql)
-        return unless executing_middleware
+        if executing_middleware
+          message = <<~ERROR
+            Middleware is being called from within middleware, aborting execution
+            to prevent endless recursion. You can do the following if you want to execute SQL
+            inside middleware:
 
-        message = <<~ERROR
-          Middleware is being called from within middleware, aborting execution
-          to prevent endless recursion. You can do the following if you want to execute SQL
-          inside middleware:
+              - Set middleware context before entering the middleware
+              - Use `Arel.middleware.none { ... }` to temporarily disable middleware
 
-            - Set middleware context before entering the middleware
-            - Use `Arel.middleware.none { ... }` to temporarily disable middleware
+            SQL that triggered the error:
+            #{sql}
+          ERROR
 
-          SQL that triggered the error:
-          #{sql}
-        ERROR
-
-        raise message
+          raise message
+        else
+          @executing_middleware = true
+        end
       end
     end
   end

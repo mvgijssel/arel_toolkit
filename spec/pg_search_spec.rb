@@ -62,14 +62,14 @@ if Gem.loaded_specs.key?('pg_search')
   end
 
   describe PgSearch do
-    class SomeMiddleware
-      def self.call(arel, _context)
-        arel
+    class PgSearchMiddleware
+      def self.call(arel, next_middleware)
+        next_middleware.call(arel)
       end
     end
 
     it 'works for a simple search scope' do
-      Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.apply([PgSearchMiddleware]) do
         post1 = BlogPost.create!(title: 'Recent Developments in the World of Pastrami')
         BlogPost.create!(title: 'Prosciutto and You: A Retrospective')
 
@@ -78,7 +78,7 @@ if Gem.loaded_specs.key?('pg_search')
     end
 
     it 'works for multiple columns' do
-      Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.apply([PgSearchMiddleware]) do
         person1 = Person.create!(first_name: 'Grant', last_name: 'Hill')
         person2 = Person.create!(first_name: 'Hugh', last_name: 'Grant')
 
@@ -88,7 +88,7 @@ if Gem.loaded_specs.key?('pg_search')
     end
 
     it 'works for searching associations' do
-      Arel.middleware.apply([SomeMiddleware]) do
+      Arel.middleware.apply([PgSearchMiddleware]) do
         salami1 = Salami.create!
         salami2 = Salami.create!
         salami3 = Salami.create!

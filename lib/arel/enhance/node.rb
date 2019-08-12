@@ -59,20 +59,39 @@ module Arel
         node.path = path.append(path_node)
         node.parent = self
         node.root_node = root_node
-        @children[path_node.value] = node
+        @children[path_node.value.to_s] = node
       end
 
       def to_sql(engine = Table.engine)
         return nil if children.empty?
 
-        target_object = object.is_a?(Arel::TreeManager) ? object.ast : object
-        collector = Arel::Collectors::SQLString.new
-        collector = engine.connection.visitor.accept target_object, collector
-        collector.value
+        if object.respond_to?(:to_sql)
+          object.to_sql(engine)
+        else
+          collector = Arel::Collectors::SQLString.new
+          collector = engine.connection.visitor.accept object, collector
+          collector.value
+        end
+      end
+
+      def to_sql_and_binds(engine = Table.engine)
+        object.to_sql_and_binds(engine)
+      end
+
+      def method_missing(name, *args, &block)
+        child = @children[name.to_s]
+        return super if child.nil?
+
+        child
+      end
+
+      def respond_to_missing?(method, include_private = false)
+        child = @children[method.to_s]
+        child.present? || super
       end
 
       def [](key)
-        @children.fetch(key)
+        @children.fetch(key.to_s)
       end
 
       def child_at_path(path_items)
