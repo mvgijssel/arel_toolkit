@@ -429,6 +429,33 @@ describe 'Arel.middleware' do
     ]
   end
 
+  it 'allows to fetch and remove additional data from the database' do
+    add_projection = lambda do |next_arel, next_middleware, _context|
+      projections = next_arel.child_at_path([0, 'ast', 'cores', 0, 'projections'])
+      new_projection = Post.arel_table[:content]
+      projections.replace(projections.object + [new_projection])
+
+      result = next_middleware.call(next_arel)
+
+      column_data = result.remove_column('content')
+
+      expect(column_data).to eq(['some content'])
+      expect(result.hash_rows).to eq([{ 'title' => 'some title' }])
+
+      result
+    end
+
+    new_post = Post.create! title: 'some title', content: 'some content'
+
+    Arel.middleware.apply([add_projection]) do
+      post = Post.all.select(:title).find(new_post.id)
+      expect(post.attributes).to eq('id' => nil, 'title' => 'some title')
+    end
+
+    post = Post.all.select(:title).find(new_post.id)
+    expect(post.attributes).to eq('id' => nil, 'title' => 'some title')
+  end
+
   it 'does not use middleware when configuring a connection to prevent endless checkouts' do
     # New thread makes sure we're not reusing the same connection
     Thread.new do

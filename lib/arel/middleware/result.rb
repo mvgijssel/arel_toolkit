@@ -1,37 +1,66 @@
 module Arel
   module Middleware
+    class Column
+      attr_reader :name
+      attr_reader :metadata
+
+      def initialize(name, metadata)
+        @name = name
+        @metadata = metadata
+      end
+    end
+
     # Class is very similar to ActiveRecord::Result
     # activerecord/lib/active_record/result.rb
     class Result
+      attr_reader :original_data
+
       def self.create(from:, to:, data:)
         Result.new from, to, data
       end
 
-      def initialize(from_caster, to_caster, data)
+      def initialize(from_caster, to_caster, original_data)
         @from_caster = from_caster
         @to_caster = to_caster
-        @data = data
+        @original_data = original_data
+        @modified = false
       end
 
       def columns
-        @columns ||= from_caster.columns(data)
+        @columns ||= column_objects.map(&:name)
+      end
+
+      def column_objects
+        @column_objects ||= from_caster.column_objects(original_data)
       end
 
       def rows
-        @rows ||= from_caster.rows(data)
+        @rows ||= from_caster.rows(original_data)
+      end
+
+      def remove_column(column_name)
+        column_index = columns.index(column_name)
+        raise "Unknown column `#{column_name}`. Existing columns: `#{columns}`" if column_index.nil?
+
+        @hash_rows = nil
+        @columns = nil
+        @modified = true
+
+        column_objects.delete_at(column_index)
+        deleted_rows = []
+
+        rows.map! do |row|
+          deleted_rows << row.delete_at(column_index)
+          row
+        end
+
+        deleted_rows
       end
 
       def hash_rows
         @hash_rows ||=
           begin
-            # We freeze the strings to prevent them getting duped when
-            # used as keys in ActiveRecord::Base's @attributes hash
-            columns = @columns.map { |c| c.dup.freeze }
-            @rows.map do |row|
-              # In the past we used Hash[columns.zip(row)]
-              #  though elegant, the verbose way is much more efficient
-              #  both time and memory wise cause it avoids a big array allocation
-              #  this method is called a lot and needs to be micro optimised
+            rows.map do |row|
               hash = {}
 
               index = 0
@@ -47,31 +76,74 @@ module Arel
           end
       end
 
-      def to_original_result
+      def to_casted_result
         to_caster.cast_to(self)
+      end
+
+      def modified?
+        @modified
       end
 
       private
 
-      attr_reader :to_caster, :from_caster, :data
+      attr_reader :to_caster, :from_caster
     end
 
     class PGResult
-      def self.columns(data)
-        data.fields
+      class << self
+        def column_objects(pg_result)
+          pg_result.fields.each_with_index.map do |field, index|
+            Column.new(
+              field,
+              fmod: pg_result.fmod(index),
+              ftype: pg_result.ftype(index),
+            )
+          end
+        end
+
+        def rows(data)
+          data.values
+        end
+
+        def cast_to(result)
+          if result.modified?
+            instance = new(result)
+            result.original_data.clear
+            instance
+          else
+            result.original_data
+          end
+        end
       end
 
-      def self.rows(data)
-        data.values
+      attr_reader :fields, :values, :original
+
+      # Object based on https://github.com/ged/ruby-pg/blob/v1.1.4/lib/pg/result.rb
+      # The object is instantiated in C, so we cannot simply make a new PG::Result
+      # Therefore we're ducktyping, with similar methods as the original object.
+      def initialize(result)
+        @fields = result.columns
+        @fmods = []
+        @ftypes = []
+
+        result.column_objects.each do |column_object|
+          @fmods << column_object.metadata.fetch(:fmod)
+          @ftypes << column_object.metadata.fetch(:ftype)
+        end
+
+        @values = result.rows
+        @original = result
       end
 
-      # .fields
-      # .values
-      # .clear
-      def self.cast_to(result)
-        # TODO: make a PG::Result object
-        result.send(:data)
+      def ftype(index)
+        @ftypes[index]
       end
+
+      def fmod(index)
+        @fmods[index]
+      end
+
+      def clear; end
     end
 
     class ArrayResult
