@@ -147,14 +147,6 @@ module Arel
     end
 
     class ArrayResult
-      def self.columns(data)
-        raise "ArrayResult data does not have columns: #{data}"
-      end
-
-      def self.rows(data)
-        data
-      end
-
       def self.cast_to(result)
         result.rows
       end
