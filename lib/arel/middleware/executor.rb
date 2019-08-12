@@ -51,10 +51,6 @@ module Arel
         sql_result
       end
 
-      def connection
-        Arel::Table.engine.connection
-      end
-
       def check_argument_type(next_arel)
         return if next_arel.is_a?(Arel::Enhance::Node)
 

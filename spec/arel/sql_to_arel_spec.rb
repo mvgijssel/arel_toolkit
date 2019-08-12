@@ -849,6 +849,15 @@ describe 'Arel.sql_to_arel' do
     expect(arel.class).to eq Arel::DeleteManager
   end
 
+  it 'returns a result object when calling map' do
+    sql = 'SELECT 1'
+    result = Arel.sql_to_arel(sql)
+    new_result = result.map { 10 }
+
+    expect(result).to be_a(Arel::SqlToArel::Result)
+    expect(new_result).to be_a(Arel::SqlToArel::Result)
+  end
+
   it 'translates an ActiveRecord query ast into the same ast and sql' do
     query = Post.select(:id).where(public: true).limit(10).order(id: :asc).offset(1)
     query_arel = remove_active_record_info(query.arel)

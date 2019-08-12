@@ -96,6 +96,20 @@ describe 'Arel.middleware' do
     end.to raise_error(/returned from middleware needs to be wrapped in `Arel::Middleware::Result`/)
   end
 
+  it 'raises an error when a wrong object is passed to the next middleware' do
+    class WrongMiddleware
+      def self.call(_arel, next_middleware)
+        next_middleware.call('this is not arel')
+      end
+    end
+
+    expect do
+      Arel.middleware.apply([WrongMiddleware]) do
+        Post.all.load
+      end
+    end.to raise_error(/Only `Arel::Enhance::Node` is valid for middleware, passed `String`/)
+  end
+
   it 'sets the original sql in the context' do
     class ChangeMiddleware
       def self.call(_arel, next_middleware)
