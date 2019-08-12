@@ -21,7 +21,7 @@ module Arel
         update_typecasts(tree)
         update_functions(tree)
 
-        next_middleware.call tree.object
+        next_middleware.call tree
       end
 
       private
