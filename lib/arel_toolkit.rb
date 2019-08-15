@@ -14,3 +14,15 @@ require 'arel/transformer'
 
 module ArelToolkit
 end
+
+require 'ffi'
+
+module Test
+  extend FFI::Library
+
+  dir = Gem.loaded_specs.fetch('pg').stub.extension_dir
+  file = 'pg_ext.bundle'
+  path = File.join(dir, file)
+
+  ffi_lib path
+end
