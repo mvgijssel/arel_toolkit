@@ -4,10 +4,14 @@ module Arel
       attr_reader :executing_middleware
       attr_reader :executor
 
-      def initialize(internal_middleware = [], internal_context = {})
+      def initialize(
+        internal_middleware = [],
+        internal_context = {},
+        executor_class = Arel::Middleware::DatabaseExecutor
+      )
         @internal_middleware = internal_middleware
         @internal_context = internal_context
-        @executor = Arel::Middleware::Executor.new(internal_middleware)
+        @executor = executor_class.new(internal_middleware)
         @executing_middleware = false
       end
 
@@ -82,6 +86,20 @@ module Arel
         return internal_context if new_context.nil?
 
         continue_chain(internal_middleware, new_context, &block)
+      end
+
+      def to_sql(type, &block)
+        middleware = Arel::Middleware::ToSqlMiddleware.new(type)
+
+        new_chain = Arel::Middleware::Chain.new(
+          internal_middleware + [middleware],
+          internal_context,
+          Arel::Middleware::ToSqlExecutor,
+        )
+
+        maybe_execute_block(new_chain, &block)
+
+        middleware.sql
       end
 
       protected

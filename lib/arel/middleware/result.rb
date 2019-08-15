@@ -107,8 +107,10 @@ module Arel
 
         def cast_to(result)
           if result.modified?
+            original_data = result.original_data
             instance = new(result)
-            result.original_data.clear
+            instance.cmd_tuples = original_data.cmd_tuples
+            original_data.clear
             instance
           else
             result.original_data
@@ -117,6 +119,7 @@ module Arel
       end
 
       attr_reader :fields, :values, :original
+      attr_accessor :cmd_tuples
 
       # Object based on https://github.com/ged/ruby-pg/blob/v1.1.4/lib/pg/result.rb
       # The object is instantiated in C, so we cannot simply make a new PG::Result
@@ -132,7 +135,9 @@ module Arel
         end
 
         @values = result.rows
-        @original = result
+        @cmd_tuples = 0
+        @original = result.original_data
+        @hash_rows = result.hash_rows
       end
 
       def ftype(index)
@@ -144,11 +149,41 @@ module Arel
       end
 
       def clear; end
+
+      def map(&block)
+        @hash_rows.each do
+          yield block
+        end
+      end
+    end
+
+    class EmptyPGResult < PGResult
+      class << self
+        def cast_to(result)
+          new(result)
+        end
+      end
     end
 
     class ArrayResult
       def self.cast_to(result)
         result.rows
+      end
+    end
+
+    class StringResult
+      class << self
+        def column_objects(_string)
+          []
+        end
+
+        def rows(_string)
+          []
+        end
+
+        def cast_to(result)
+          result.original_data
+        end
       end
     end
   end

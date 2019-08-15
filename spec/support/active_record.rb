@@ -71,4 +71,4 @@ class PostsCount < ActiveRecord::Base
   self.table_name = :posts_count
 end
 
-Arel::Middleware::Railtie.insert_postgresql unless Gem.loaded_specs.key?('railties')
+Arel::Middleware::Railtie.insert unless Gem.loaded_specs.key?('railties')

@@ -4,16 +4,20 @@ module Arel
       class Railtie < Rails::Railtie
         initializer 'arel.middleware.insert' do
           ActiveSupport.on_load :active_record do
-            Arel::Middleware::Railtie.insert_postgresql
+            Arel::Middleware::Railtie.insert
           end
         end
       end
     end
 
     class Railtie
-      def self.insert_postgresql
+      def self.insert
         ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.prepend(
           Arel::Middleware::PostgreSQLAdapter,
+        )
+
+        ActiveRecord::Base.singleton_class.prepend(
+          Arel::Middleware::ActiveRecordExtension,
         )
       end
     end

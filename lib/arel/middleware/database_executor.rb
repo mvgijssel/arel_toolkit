@@ -1,6 +1,6 @@
 module Arel
   module Middleware
-    class Executor
+    class DatabaseExecutor
       attr_reader :middleware
 
       attr_accessor :index

@@ -537,4 +537,80 @@ describe 'Arel.middleware' do
       end.to raise_error(ActiveRecord::StatementInvalid)
     end
   end
+
+  describe '#to_sql' do
+    it 'returns INSERT SQL for a block without execution' do
+      Post.all.delete_all
+
+      sql = Arel.middleware.to_sql(:insert) do
+        Post.create!
+      end
+
+      expect(Post.all.load).to eq []
+      expect(sql).to eq [
+        'INSERT INTO "posts" ("created_at", "updated_at") VALUES ($1, $2) RETURNING "id"',
+      ]
+    end
+
+    it 'returns UPDATE SQL for a block without execution' do
+      post = Post.create! title: 'initial title'
+
+      sql = Arel.middleware.to_sql(:update) do
+        post.update! title: 'updated title'
+      end
+
+      expect(post.reload.title).to eq 'initial title'
+      expect(sql).to eq [
+        'UPDATE "posts" SET "title" = $1, "updated_at" = $2 WHERE "posts"."id" = $3',
+      ]
+    end
+
+    it 'returns DELETE SQL for a block without execution' do
+      post = Post.create! title: 'initial title'
+
+      sql = Arel.middleware.to_sql(:delete) do
+        post.destroy!
+      end
+
+      expect(Post.find_by(id: post.id)).to be_present
+      expect(sql).to eq [
+        'DELETE FROM "posts" WHERE "posts"."id" = $1',
+      ]
+    end
+
+    it 'returns SELECT SQL for a block without execution' do
+      Post.all.delete_all
+      Post.create! title: 'some title'
+      posts = nil
+
+      sql = Arel.middleware.to_sql(:select) do
+        posts = Post.all.load
+      end
+
+      expect(posts).to eq []
+      expect(sql).to eq ['SELECT "posts".* FROM "posts"']
+    end
+
+    it 'works for columns and does not cache the wrong columns' do
+      Post.reset_column_information
+
+      sql = Arel.middleware.to_sql(:select) do
+        Post.columns
+        Post.connection.indexes('posts')
+      end
+
+      expect(Post.columns.map(&:name)).to eq %w[
+        id
+        title
+        content
+        public
+        owner_id
+        additional_data
+        created_at
+        updated_at
+      ]
+
+      expect(sql.length).to eq 2
+    end
+  end
 end
