@@ -34,6 +34,7 @@ PATH
     arel_toolkit (0.4.0)
       activerecord (~> 5.2.0)
       arel (~> 9.0.0)
+      ffi (~> 1.11.1)
       pg (~> 1.1.4)
       pg_query (~> 1.1.0)
 
