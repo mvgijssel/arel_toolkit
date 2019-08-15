@@ -1,4 +1,5 @@
 require 'active_record'
+require_relative './middleware/active_record_extension'
 require_relative './middleware/railtie'
 require_relative './middleware/chain'
 require_relative './middleware/database_executor'

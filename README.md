@@ -84,7 +84,7 @@ Middleware sits between ActiveRecord and the database, it allows you to alter th
 The middleware works out of the box in combination with Rails. If using ActiveRecord standalone you need to run the following **after** setting up the database connection:
 
 ```ruby
-Arel::Middleware::Railtie.insert_postgresql
+Arel::Middleware::Railtie.insert
 ```
 
 ### Example

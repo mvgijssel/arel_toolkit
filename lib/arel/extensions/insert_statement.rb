@@ -5,7 +5,7 @@ module Arel
   module Nodes
     class InsertStatement
       # https://www.postgresql.org/docs/9.5/sql-insert.html
-      module InsertStatementExtensions
+      module InsertStatementExtension
         attr_accessor :with
         attr_accessor :conflict
         attr_accessor :override
@@ -18,7 +18,7 @@ module Arel
         end
       end
 
-      prepend(InsertStatementExtensions)
+      prepend(InsertStatementExtension)
     end
   end
 

@@ -591,13 +591,24 @@ describe 'Arel.middleware' do
       expect(sql).to eq ['SELECT "posts".* FROM "posts"']
     end
 
-    it 'works for schema statements' do
+    it 'works for columns and does not cache the wrong columns' do
       Post.reset_column_information
 
       sql = Arel.middleware.to_sql(:select) do
         Post.columns
         Post.connection.indexes('posts')
       end
+
+      expect(Post.columns.map(&:name)).to eq %w[
+        id
+        title
+        content
+        public
+        owner_id
+        additional_data
+        created_at
+        updated_at
+      ]
 
       expect(sql.length).to eq 2
     end
