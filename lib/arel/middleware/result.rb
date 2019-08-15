@@ -137,6 +137,7 @@ module Arel
         @values = result.rows
         @cmd_tuples = 0
         @original = result.original_data
+        @hash_rows = result.hash_rows
       end
 
       def ftype(index)
@@ -148,6 +149,12 @@ module Arel
       end
 
       def clear; end
+
+      def map(&block)
+        @hash_rows.each do
+          yield block
+        end
+      end
     end
 
     class EmptyPGResult < PGResult
