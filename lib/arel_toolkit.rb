@@ -28,6 +28,8 @@ require 'inline'
 # somehow get a VALUE object for pg_conn
 # instantiate a PG::Result object in ruby
 module Test
+  # Great article:
+  # https://medium.com/@astantona/fiddling-with-rubys-fiddle-39f991dd0565
   extend FFI::Library
 
   # # https://stackoverflow.com/questions/41516431/can-i-pass-a-ruby-object-pointer-to-a-ruby-ffi-callback
@@ -56,7 +58,11 @@ module Test
 
   # https://stackoverflow.com/questions/41516431/can-i-pass-a-ruby-object-pointer-to-a-ruby-ffi-callback
   def self.ruby_to_pointer(obj)
-    obj.object_id << 1 # <<-- get the memory address, don't make it a pointer
+    # obj.object_id << 1 # <<-- get the memory address, don't make it a pointer
+    # https://stackoverflow.com/questions/2818602/in-ruby-why-does-inspect-print-out-some-kind-of-object-id-which-is-different/2818916#2818916
+    # Read the article why this works
+    address = obj.object_id << 1
+    # ffi_pointer = ::FFI::Pointer.new(:pointer, address)
   end
 
   def self.do_it
