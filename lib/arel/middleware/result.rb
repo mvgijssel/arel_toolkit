@@ -159,8 +159,11 @@ module Arel
 
     class EmptyPGResult < PGResult
       class << self
-        def cast_to(result)
-          new(result)
+        def cast_to(_result)
+          # This will make an empty PG::Result object
+          # with status PGRES_TUPLES_OK, which is the same
+          # as any query returning data
+          ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
         end
       end
     end

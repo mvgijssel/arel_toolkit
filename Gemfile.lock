@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     arel_toolkit (0.4.0)
+      RubyInline (~> 3.12.4)
       activerecord (~> 5.2.0)
       arel (~> 9.0.0)
       ffi (~> 1.11.1)
@@ -11,6 +12,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    RubyInline (3.12.4)
+      ZenTest (~> 4.3)
+    ZenTest (4.11.2)
     activemodel (5.2.3)
       activesupport (= 5.2.3)
     activerecord (5.2.3)
