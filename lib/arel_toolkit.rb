@@ -66,13 +66,47 @@ module Test
 
   # src/interfaces/libpq/libpq-fe.h:235
   class PGresAttDesc < FFI::Struct
-    layout :name, :string,
+    layout :name, :pointer,
            :tableid, :oid,
            :columnid, :int,
            :format, :int,
            :typid, :oid,
            :typlen, :int,
            :atttypmod, :int
+
+    # Scary. Ruby strings to C String pointer is hard apparently.
+    # Can't simply do
+    # layout :name, :string
+    # and try to assign to that string, will result in "Cannot set string field"
+    # because this is not a safe operation.
+
+    # Can use a macro https://stackoverflow.com/questions/50917280/ruby-ffi-string-not-getting-to-char-function-argument
+    # to safe convert a ruby string into a c string
+    # which can then be used as a column name?
+
+    # copied setter from
+    # https://github.com/Paxa/fast_excel/issues/30
+    def name=(val)
+      pos = offset_of(:name)
+
+      if val.is_a?(String)
+        val = FFI::MemoryPointer.from_string(val)
+      end
+
+      if val.nil?
+        pointer.put_pointer(pos, FFI::MemoryPointer::NULL)
+      elsif val.is_a?(FFI::MemoryPointer)
+        pointer.put_pointer(pos, val)
+      else
+        raise("keywords= requires an FFI::MemoryPointer or nil")
+      end
+
+      val
+    end
+
+    def name
+      self[:name].read_string
+    end
 
     def to_h
       result = {}
@@ -109,14 +143,27 @@ module Test
   end
 
   def self.test3
-    # result = ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
     result = ActiveRecord::Base.connection.execute("SELECT 1 AS kerk, 'hello' AS shine")
+    # result = ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
     result_pointer = Test.ruby_to_pointer(result)
     pg_result_pointer = Test.pgresult_get(result_pointer)
+
+    column = Test::PGresAttDesc.new
+    column.name = 'kerk'
+    column[:tableid] = 0
+    column[:columnid] = 0
+    column[:format] = 0
+    column[:typid] = 23
+    column[:typlen] = 4
+
+    Test.pq_set_result_attrs(pg_result_pointer, 1, column.pointer)
+
     r = Test::PGData.new(pg_result_pointer)
+
+    binding.pry
+
     # att_desc = Test::PGresAttDesc.new
     # att_desc[:name] = 'test'
-    # Test.pq_set_result_attrs(pg_result_pointer, 1, nil)
   end
 
   # Instead of duplicating the struct here, modify the struct using public methods
