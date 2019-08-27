@@ -44,8 +44,8 @@ module Test
   attach_function :pgresult_get, [:self], :pg_result
 
   # https://www.postgresql.org/docs/10/libpq-misc.html
-  typedef :string, :value
-  attach_function :pq_set_value, :PQsetvalue, [:pg_result, :int, :int, :value, :int], :int
+  # typedef :string, :value
+  attach_function :pq_set_value, :PQsetvalue, [:pg_result, :int, :int, :pointer, :int], :int
 
   # Maybe use PQcopyResult to make a copy of an existing result object
   # pass proper flags to not copy the attributes and tuples
@@ -63,6 +63,34 @@ module Test
   # src/include/postgres_ext.h:31
   # typedef unsigned int Oid;
   typedef :uint, :oid
+
+  # src/interfaces/libpq/libpq-int.h:135
+  class PGresAttValue < FFI::Struct
+    layout :len, :int, # length in bytes of the value
+           :value, :pointer # actual value, plus terminating zero byte
+
+    def value=(val)
+      pos = offset_of(:value)
+
+      if val.is_a?(String)
+        val = FFI::MemoryPointer.from_string(val)
+      end
+
+      if val.nil?
+        pointer.put_pointer(pos, FFI::MemoryPointer::NULL)
+      elsif val.is_a?(FFI::MemoryPointer)
+        pointer.put_pointer(pos, val)
+      else
+        raise("keywords= requires an FFI::MemoryPointer or nil")
+      end
+
+      val
+    end
+
+    def value
+      self[:value].read_string
+    end
+  end
 
   # src/interfaces/libpq/libpq-fe.h:235
   class PGresAttDesc < FFI::Struct
@@ -83,6 +111,8 @@ module Test
     # Can use a macro https://stackoverflow.com/questions/50917280/ruby-ffi-string-not-getting-to-char-function-argument
     # to safe convert a ruby string into a c string
     # which can then be used as a column name?
+
+    # Maybe use the approach at https://github.com/ffi/ffi/wiki/Pointers
 
     # copied setter from
     # https://github.com/Paxa/fast_excel/issues/30
@@ -131,13 +161,30 @@ module Test
   class PGData < FFI::Struct
     layout :ntups, :int,
            :numAttributes, :int,
-           :attDescs, :pointer
+           :attDescs, :pointer,
+           :tuples, :pointer
 
     def attributes
       val_array = FFI::Pointer.new(Test::PGresAttDesc, self[:attDescs])
 
       0.upto(self[:numAttributes] - 1).map do |i|
         Test::PGresAttDesc.new(val_array[i])
+      end
+    end
+
+    # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
+    # tuples are stored in a multi dimensional array, pointers of pointers
+    def values
+      tuple_pointers = FFI::Pointer.new(:pointer, self[:tuples])
+
+      0.upto(self[:ntups] - 1).map do |tuple_index|
+        tuple_pointer = tuple_pointers[tuple_index].read_pointer
+
+        column_pointer = FFI::Pointer.new(Test::PGresAttValue, tuple_pointer)
+
+        0.upto(self[:numAttributes] - 1).map do |column_index|
+          Test::PGresAttValue.new(column_pointer[column_index])
+        end
       end
     end
   end
@@ -148,17 +195,26 @@ module Test
     result_pointer = Test.ruby_to_pointer(result)
     pg_result_pointer = Test.pgresult_get(result_pointer)
 
-    column = Test::PGresAttDesc.new
-    column.name = 'kerk'
-    column[:tableid] = 0
-    column[:columnid] = 0
-    column[:format] = 0
-    column[:typid] = 23
-    column[:typlen] = 4
+    # column = Test::PGresAttDesc.new
+    # column.name = 'kerk'
+    # column[:tableid] = 0
+    # column[:columnid] = 0
+    # column[:format] = 0
+    # column[:typid] = 23
+    # column[:typlen] = 4
 
-    Test.pq_set_result_attrs(pg_result_pointer, 1, column.pointer)
+    # Test.pq_set_result_attrs(pg_result_pointer, 1, column.pointer)
+
+    # char_pointer = FFI::MemoryPointer.from_string('9')
+    # Test.pq_set_value(pg_result_pointer, 0, 0, char_pointer, char_pointer.size)
 
     r = Test::PGData.new(pg_result_pointer)
+
+    result.each { |node| puts node }
+
+    r.values.first.first.value = '2' # <-- change the 1 value to 2
+
+    result.each { |node| puts node }
 
     binding.pry
 
