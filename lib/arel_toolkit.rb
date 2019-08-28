@@ -4,6 +4,7 @@ require 'active_record_upsert' if Gem.loaded_specs.key?('active_record_upsert')
 require 'pg_search' if Gem.loaded_specs.key?('pg_search')
 require 'rails/railtie' if Gem.loaded_specs.key?('railties')
 require 'arel'
+require 'ffi'
 
 require 'arel_toolkit/version'
 require 'arel/extensions'
@@ -15,7 +16,6 @@ require 'arel/transformer'
 module ArelToolkit
 end
 
-require 'ffi'
 require 'inline'
 
 # header file is useful src/interfaces/libpq/libpq-fe.h
@@ -188,7 +188,6 @@ module Test
       end
     end
   end
-
 
   attach_function :pq_f_size, :PQfsize, [:pg_result, :int], :int
 

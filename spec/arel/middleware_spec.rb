@@ -478,20 +478,20 @@ describe 'Arel.middleware' do
       column_data = result.remove_column('content')
 
       expect(column_data).to eq(['some content'])
-      expect(result.hash_rows).to eq([{ 'title' => 'some title' }])
+      expect(result.hash_rows).to eq([{ 'id' => 0, 'title' => 'some title' }])
 
       result
     end
 
-    new_post = Post.create! title: 'some title', content: 'some content'
+    new_post = Post.create! id: 0, title: 'some title', content: 'some content'
 
     Arel.middleware.apply([add_projection]) do
-      post = Post.all.select(:title).find(new_post.id)
-      expect(post.attributes).to eq('id' => nil, 'title' => 'some title')
+      post = Post.all.select(:id, :title).find(new_post.id)
+      expect(post.attributes).to eq('id' => 0, 'title' => 'some title')
     end
 
-    post = Post.all.select(:title).find(new_post.id)
-    expect(post.attributes).to eq('id' => nil, 'title' => 'some title')
+    post = Post.all.select(:id, :title).find(new_post.id)
+    expect(post.attributes).to eq('id' => 0, 'title' => 'some title')
   end
 
   it 'does not use middleware when configuring a connection to prevent endless checkouts' do

@@ -4,8 +4,17 @@ module Arel
       class Result
         class << self
           def columns(pg_result)
-            pg_result.fields.each_with_index.map do |field, _index|
-              Arel::Middleware::Column.new(field)
+            pg_result.fields.each_with_index.map do |field, index|
+              Arel::Middleware::Column.new(
+                field,
+                name: Postgresql::Bridge.result_column_name(pg_result, index),
+                tableid: Postgresql::Bridge.result_column_table_id(pg_result, index),
+                columnid: Postgresql::Bridge.result_column_id(pg_result, index),
+                format: Postgresql::Bridge.result_column_format(pg_result, index),
+                typid: Postgresql::Bridge.result_column_type_id(pg_result, index),
+                typlen: Postgresql::Bridge.result_column_type_length(pg_result, index),
+                atttypmod: Postgresql::Bridge.result_column_type_modifier(pg_result, index),
+              )
             end
           end
 
@@ -14,12 +23,36 @@ module Arel
           end
 
           def cast_to(result)
-            if result.modified?
-              # result.original_data.clear
-              result.original_data
-            else
-              result.original_data
+            return result.original_data unless result.modified?
+
+            # Instantiate an empty PG::Result
+            pg_result = Postgresql::Bridge.new_result
+
+            # Create and add the columns to the result object
+            pg_columns = result.columns.map do |column|
+              Postgresql::Bridge.new_column(
+                name: column.name,
+                tableid: column.metadata.fetch(:tableid),
+                columnid: column.metadata.fetch(:columnid),
+                format: column.metadata.fetch(:format),
+                typid: column.metadata.fetch(:typid),
+                typlen: column.metadata.fetch(:typlen),
+                atttypmod: column.metadata.fetch(:atttypmod),
+              )
             end
+
+            Postgresql::Bridge.result_set_columns(pg_result, pg_columns)
+
+            # Add the rows to the result object
+            result.rows.each_with_index do |row, row_index|
+              row.each_with_index do |value, column_index|
+                Postgresql::Bridge.result_set_value(pg_result, row_index, column_index, value)
+              end
+            end
+
+            binding.pry
+
+            pg_result
           end
         end
       end
