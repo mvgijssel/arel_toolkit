@@ -98,10 +98,16 @@ module Arel
           end
 
           def result_set_value(pg_result, row_index, column_index, value)
-            # TODO: remove the null character \u0000
-            value_pointer = FFI::MemoryPointer.from_string(value.to_s)
+            value_string = value.to_s
+            value_pointer = FFI::MemoryPointer.from_string(value_string)
 
-            pq_set_value pg_result_pointer(pg_result), row_index, column_index, value_pointer, value_pointer.size
+            pq_set_value(
+              pg_result_pointer(pg_result),
+              row_index,
+              column_index,
+              value_pointer,
+              value_string.length,
+            )
           end
 
           private
