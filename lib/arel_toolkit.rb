@@ -189,8 +189,25 @@ module Test
     end
   end
 
+
+  attach_function :pq_f_size, :PQfsize, [:pg_result, :int], :int
+
+  def self.test4
+    result = ActiveRecord::Base.connection.execute("SELECT 1 AS kerk, 'papi' AS shine")
+    result_pointer = Test.ruby_to_pointer(result)
+    pg_result_pointer = Test.pgresult_get(result_pointer)
+
+    puts Test.pq_f_size(pg_result_pointer, 0)
+    puts Test.pq_f_size(pg_result_pointer, 1)
+
+    # 1. create an empty result object / copy existing one without tuples
+    # 2. create all the columns based on original result
+    #    - use existing methods, like PQftable, PQftablecol, PQfformat, PQftype, PQfmod, PQfsize
+    # 3. create all the tuples based on original result
+  end
+
   def self.test3
-    result = ActiveRecord::Base.connection.execute("SELECT 1 AS kerk, 'hello' AS shine")
+    result = ActiveRecord::Base.connection.execute("SELECT 1 AS kerk")
     # result = ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
     result_pointer = Test.ruby_to_pointer(result)
     pg_result_pointer = Test.pgresult_get(result_pointer)
@@ -205,16 +222,18 @@ module Test
 
     # Test.pq_set_result_attrs(pg_result_pointer, 1, column.pointer)
 
-    # char_pointer = FFI::MemoryPointer.from_string('9')
+    # char_pointer = FFI::MemoryPointer.from_string('1')
     # Test.pq_set_value(pg_result_pointer, 0, 0, char_pointer, char_pointer.size)
 
     r = Test::PGData.new(pg_result_pointer)
 
-    result.each { |node| puts node }
+    puts "Number of bytes: ", r.values.first.first[:len]
 
-    r.values.first.first.value = '2' # <-- change the 1 value to 2
+    # result.each { |node| puts node }
 
-    result.each { |node| puts node }
+    # r.values.first.first.value = '2' # <-- change the 1 value to 2
+
+    # result.each { |node| puts node }
 
     binding.pry
 
