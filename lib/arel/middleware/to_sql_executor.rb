@@ -4,11 +4,7 @@ module Arel
       private
 
       def execute_sql(next_arel)
-        Arel::Middleware::Result.create(
-          data: next_arel.to_sql,
-          from: Arel::Middleware::StringResult,
-          to: Arel::Middleware::EmptyPGResult,
-        )
+        Arel::Table.engine.connection.sql_without_execution(next_arel.to_sql)
       end
     end
   end

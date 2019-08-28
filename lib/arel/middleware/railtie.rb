@@ -13,7 +13,7 @@ module Arel
     class Railtie
       def self.insert
         ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.prepend(
-          Arel::Middleware::PostgreSQLAdapter,
+          Arel::Middleware::Postgresql::Adapter,
         )
 
         ActiveRecord::Base.singleton_class.prepend(

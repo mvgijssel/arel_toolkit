@@ -6,7 +6,8 @@ require_relative './middleware/database_executor'
 require_relative './middleware/to_sql_executor'
 require_relative './middleware/to_sql_middleware'
 require_relative './middleware/result'
-require_relative './middleware/postgresql_adapter'
+require_relative './middleware/column'
+require_relative './middleware/postgresql'
 
 module Arel
   module Middleware

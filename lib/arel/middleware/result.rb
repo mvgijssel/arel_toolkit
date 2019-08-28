@@ -1,15 +1,5 @@
 module Arel
   module Middleware
-    class Column
-      attr_reader :name
-      attr_reader :metadata
-
-      def initialize(name, metadata)
-        @name = name
-        @metadata = metadata
-      end
-    end
-
     # Class is very similar to ActiveRecord::Result
     # activerecord/lib/active_record/result.rb
     class Result
@@ -27,11 +17,7 @@ module Arel
       end
 
       def columns
-        @columns ||= column_objects.map(&:name)
-      end
-
-      def column_objects
-        @column_objects ||= from_caster.column_objects(original_data)
+        @columns ||= from_caster.columns(original_data)
       end
 
       def rows
@@ -39,14 +25,15 @@ module Arel
       end
 
       def remove_column(column_name)
-        column_index = columns.index(column_name)
-        raise "Unknown column `#{column_name}`. Existing columns: `#{columns}`" if column_index.nil?
+        column_index = column_names.index(column_name)
 
-        @hash_rows = nil
-        @columns = nil
-        @modified = true
+        if column_index.nil?
+          raise "Unknown column `#{column_name}`. Existing columns: `#{column_names}`"
+        end
 
-        column_objects.delete_at(column_index)
+        mark_modified
+
+        columns.delete_at(column_index)
         deleted_rows = []
 
         rows.map! do |row|
@@ -64,10 +51,10 @@ module Arel
               hash = {}
 
               index = 0
-              length = columns.length
+              length = column_names.length
 
               while index < length
-                hash[columns[index]] = row[index]
+                hash[column_names[index]] = row[index]
                 index += 1
               end
 
@@ -87,105 +74,40 @@ module Arel
       private
 
       attr_reader :to_caster, :from_caster
+
+      def mark_modified
+        @hash_rows = nil
+        @column_names = nil
+        @modified = true
+      end
+
+      def column_names
+        @column_names ||= columns.map(&:name)
+      end
     end
 
-    class PGResult
-      class << self
-        def column_objects(pg_result)
-          pg_result.fields.each_with_index.map do |field, index|
-            Column.new(
-              field,
-              fmod: pg_result.fmod(index),
-              ftype: pg_result.ftype(index),
-            )
+    class Result
+      class Array
+        def self.cast_to(result)
+          result.rows
+        end
+      end
+    end
+
+    class Result
+      class String
+        class << self
+          def column_objects(_string)
+            []
           end
-        end
 
-        def rows(data)
-          data.values
-        end
+          def rows(_string)
+            []
+          end
 
-        def cast_to(result)
-          if result.modified?
-            original_data = result.original_data
-            instance = new(result)
-            instance.cmd_tuples = original_data.cmd_tuples
-            original_data.clear
-            instance
-          else
+          def cast_to(result)
             result.original_data
           end
-        end
-      end
-
-      attr_reader :fields, :values, :original
-      attr_accessor :cmd_tuples
-
-      # Object based on https://github.com/ged/ruby-pg/blob/v1.1.4/lib/pg/result.rb
-      # The object is instantiated in C, so we cannot simply make a new PG::Result
-      # Therefore we're ducktyping, with similar methods as the original object.
-      def initialize(result)
-        @fields = result.columns
-        @fmods = []
-        @ftypes = []
-
-        result.column_objects.each do |column_object|
-          @fmods << column_object.metadata.fetch(:fmod)
-          @ftypes << column_object.metadata.fetch(:ftype)
-        end
-
-        @values = result.rows
-        @cmd_tuples = 0
-        @original = result.original_data
-        @hash_rows = result.hash_rows
-      end
-
-      def ftype(index)
-        @ftypes[index]
-      end
-
-      def fmod(index)
-        @fmods[index]
-      end
-
-      def clear; end
-
-      def map(&block)
-        @hash_rows.each do
-          yield block
-        end
-      end
-    end
-
-    class EmptyPGResult < PGResult
-      class << self
-        def cast_to(_result)
-          # This will make an empty PG::Result object
-          # with status PGRES_TUPLES_OK, which is the same
-          # as any query returning data
-          ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
-        end
-      end
-    end
-
-    class ArrayResult
-      def self.cast_to(result)
-        result.rows
-      end
-    end
-
-    class StringResult
-      class << self
-        def column_objects(_string)
-          []
-        end
-
-        def rows(_string)
-          []
-        end
-
-        def cast_to(result)
-          result.original_data
         end
       end
     end
