@@ -78,7 +78,7 @@ module Arel
           def result_set_columns(pg_result, pg_columns)
             # Create a memory pointer to hold the columns
             pg_columns_pointer = FFI::MemoryPointer.new(
-              Postgresql::Bridge::PGresAttDesc,
+              Postgresql::Bridge::Column,
               pg_columns.length,
             )
 
@@ -86,9 +86,9 @@ module Arel
             # the right place in the memory pointer
             pg_columns.each_with_index do |pg_column, index|
               column_bytes = pg_column
-                .send(:data)
+                .internal
                 .pointer
-                .get_bytes(0, Postgresql::Bridge::PGresAttDesc.size)
+                .get_bytes(0, Postgresql::Bridge::Column.size)
 
               pg_columns_pointer[index].put_bytes(0, column_bytes)
             end
