@@ -4,34 +4,28 @@ module Arel
       module FFI
         # postgres/src/interfaces/libpq/libpq-int.h:167
         class Result < ::FFI::ExtendedStruct
-          attribute :ntups, :int
-          attribute :numAttributes, :int
-          attribute :attDescs, :pointer
-          attribute :tuples, :pointer
+          attribute :ntups, :int, as: :num_rows
+          attribute :numAttributes, :int, as: :num_attributes
+          attribute :attDescs, :pointer,
+                    caster: ::FFI::StructArrayCaster.new(Postgresql::FFI::Column, :num_attributes),
+                    as: :attributes
+          attribute :tuples, :pointer, as: :rows
 
-          def attributes
-            val_array = ::FFI::Pointer.new(Postgresql::FFI::Column, self[:attDescs])
+          # # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
+          # # tuples are stored in a multi dimensional array, pointers of pointers
+          # def values
+          #   tuple_pointers = ::FFI::Pointer.new(:pointer, self[:tuples])
 
-            0.upto(self[:numAttributes] - 1).map do |i|
-              Postgresql::FFI::Column.new(val_array[i])
-            end
-          end
+          #   0.upto(self[:ntups] - 1).map do |tuple_index|
+          #     tuple_pointer = tuple_pointers[tuple_index].read_pointer
 
-          # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
-          # tuples are stored in a multi dimensional array, pointers of pointers
-          def values
-            tuple_pointers = ::FFI::Pointer.new(:pointer, self[:tuples])
+          #     column_pointer = ::FFI::Pointer.new(Postgresql::FFI::PGresAttValue, tuple_pointer)
 
-            0.upto(self[:ntups] - 1).map do |tuple_index|
-              tuple_pointer = tuple_pointers[tuple_index].read_pointer
-
-              column_pointer = ::FFI::Pointer.new(Postgresql::FFI::PGresAttValue, tuple_pointer)
-
-              0.upto(self[:numAttributes] - 1).map do |column_index|
-                Postgresql::FFI::PGresAttValue.new(column_pointer[column_index])
-              end
-            end
-          end
+          #     0.upto(self[:numAttributes] - 1).map do |column_index|
+          #       Postgresql::FFI::PGresAttValue.new(column_pointer[column_index])
+          #     end
+          #   end
+          # end
         end
       end
     end

@@ -43,7 +43,7 @@ module Arel
           end
 
           def new_column(**kwargs)
-            Postgresql::FFI::Column.data kwargs
+            Postgresql::FFI::Column.from_data kwargs
           end
 
           def result_struct(pg_result)
@@ -79,24 +79,8 @@ module Arel
           end
 
           def result_set_columns(pg_result, pg_columns)
-            # Create a memory pointer to hold the columns
-            pg_columns_pointer = ::FFI::MemoryPointer.new(
-              Postgresql::FFI::Column,
-              pg_columns.length,
-            )
+            pg_columns_pointer = Postgresql::FFI::Column.to_array_pointer(pg_columns)
 
-            # Read the bytes of each struct and store these bytes in
-            # the right place in the memory pointer
-            pg_columns.each_with_index do |pg_column, index|
-              column_bytes = pg_column
-                .internal
-                .pointer
-                .get_bytes(0, Postgresql::FFI::Column.size)
-
-              pg_columns_pointer[index].put_bytes(0, column_bytes)
-            end
-
-            # Set the columns on the result object
             pq_set_result_attrs pg_result_pointer(pg_result), pg_columns.length, pg_columns_pointer
           end
 

@@ -5,7 +5,7 @@ module Arel
         # postgres/src/interfaces/libpq/libpq-int.h:135
         class Value < ::FFI::ExtendedStruct
           attribute :len, :int
-          attribute :value, :pointer, ::FFI::StringCaster
+          attribute :value, :pointer, caster: ::FFI::StringCaster
         end
       end
     end

@@ -1,12 +1,12 @@
 module FFI
   class NativeCaster
     class << self
-      def to_native(value, struct, attribute_name)
-        struct.internal[attribute_name] = value
+      def to_native(value, struct, _external_name, internal_name)
+        struct.internal[internal_name] = value
       end
 
-      def from_native(struct, attribute_name)
-        struct.internal[attribute_name]
+      def from_native(struct, external_name, internal_name)
+        struct.internal[internal_name]
       end
     end
   end

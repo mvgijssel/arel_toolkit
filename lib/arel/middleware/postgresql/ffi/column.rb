@@ -4,7 +4,7 @@ module Arel
       module FFI
         # postgres/src/interfaces/libpq/libpq-fe.h:235
         class Column < ::FFI::ExtendedStruct
-          attribute :name, :pointer, ::FFI::StringCaster
+          attribute :name, :pointer, caster: ::FFI::StringCaster
           attribute :tableid, :oid
           attribute :columnid, :int
           attribute :format, :int
