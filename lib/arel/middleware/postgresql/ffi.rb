@@ -1,7 +1,6 @@
 module Arel
   module Middleware
     module Postgresql
-      # TODO: maybe rename bridge module to FFI?
       module FFI
         extend ::FFI::Library
         dir = Gem.loaded_specs.fetch('pg').stub.extension_dir
@@ -38,79 +37,17 @@ module Arel
         attach_function :pq_set_result_attrs, :PQsetResultAttrs, [:pg_result, :numAttributes, :att_descs], :int
         attach_function :pq_set_value, :PQsetvalue, [:pg_result, :tup_num, :field_num, :value, :len], :int
 
-        # src/interfaces/libpq/libpq-int.h:135
-        class PGresAttValue < ::FFI::Struct
-          layout :len, :int, # length in bytes of the value
-                 :value, :pointer # actual value, plus terminating zero byte
-
-          def value=(val)
-            pos = offset_of(:value)
-
-            if val.is_a?(String)
-              val = ::FFI::MemoryPointer.from_string(val)
-            end
-
-            if val.nil?
-              pointer.put_pointer(pos, ::FFI::MemoryPointer::NULL)
-            elsif val.is_a?(::FFI::MemoryPointer)
-              pointer.put_pointer(pos, val)
-            else
-              raise("keywords= requires an FFI::MemoryPointer or nil")
-            end
-
-            val
-          end
-
-          def value
-            self[:value].read_string
-
-            #   self[:name].read_string.force_encoding('UTF-8')
-          end
-        end
-
-        # src/interfaces/libpq/libpq-int.h:167
-        class PGData < ::FFI::Struct
-          layout :ntups, :int,
-                 :numAttributes, :int,
-                 :attDescs, :pointer,
-                 :tuples, :pointer
-
-          def attributes
-            val_array = ::FFI::Pointer.new(Postgresql::FFI::Column, self[:attDescs])
-
-            0.upto(self[:numAttributes] - 1).map do |i|
-              Postgresql::FFI::Column.new(val_array[i])
-            end
-          end
-
-          # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
-          # tuples are stored in a multi dimensional array, pointers of pointers
-          def values
-            tuple_pointers = ::FFI::Pointer.new(:pointer, self[:tuples])
-
-            0.upto(self[:ntups] - 1).map do |tuple_index|
-              tuple_pointer = tuple_pointers[tuple_index].read_pointer
-
-              column_pointer = ::FFI::Pointer.new(Postgresql::FFI::PGresAttValue, tuple_pointer)
-
-              0.upto(self[:numAttributes] - 1).map do |column_index|
-                Postgresql::FFI::PGresAttValue.new(column_pointer[column_index])
-              end
-            end
-          end
-        end
-
         class << self
           def new_result
             ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
           end
 
           def new_column(**kwargs)
-            Postgresql::FFI::Column.new kwargs
+            Postgresql::FFI::Column.data kwargs
           end
 
           def result_struct(pg_result)
-            PGData.new pg_result_pointer(pg_result)
+            Postgresql::FFI::Result.from_pointer pg_result_pointer(pg_result)
           end
 
           def result_column_name(pg_result, column_index)
