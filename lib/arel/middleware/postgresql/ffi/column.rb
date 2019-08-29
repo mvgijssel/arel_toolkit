@@ -1,10 +1,10 @@
 module Arel
   module Middleware
     module Postgresql
-      module Bridge
+      module FFI
         # postgres/src/interfaces/libpq/libpq-fe.h:235
-        class Column < FFI::ExtendedStruct
-          attribute :name, :pointer, FFI::StringCaster
+        class Column < ::FFI::ExtendedStruct
+          attribute :name, :pointer, ::FFI::StringCaster
           attribute :tableid, :oid
           attribute :columnid, :int
           attribute :format, :int
