@@ -1,5 +1,8 @@
 module FFI
   class StringCaster
+    extend FFI::DataConverter
+    native_type :pointer
+
     class << self
       def to_native(value, struct, external_name, internal_name)
         pointer = case value

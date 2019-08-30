@@ -5,7 +5,7 @@ require 'pg_search' if Gem.loaded_specs.key?('pg_search')
 require 'rails/railtie' if Gem.loaded_specs.key?('railties')
 require 'arel'
 require 'ffi'
-require 'ffi_extensions'
+require 'ffi/extensions'
 
 require 'arel_toolkit/version'
 require 'arel/extensions'

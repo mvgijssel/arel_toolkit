@@ -6,11 +6,16 @@ module Arel
         class Result < ::FFI::ExtendedStruct
           attribute :ntups, :int, as: :num_rows
           attribute :numAttributes, :int, as: :num_attributes
+
           attribute :attDescs, :pointer,
-                    caster: ::FFI::StructArrayCaster.new(Postgresql::FFI::Column, :num_attributes),
+                    caster: ::FFI::ArrayCaster.new(Postgresql::FFI::Column, :num_attributes),
                     as: :attributes
+
           attribute :tuples, :pointer,
-                    caster: ::FFI::StructMultiArrayCaster.new(Postgresql::FFI::Value, :num_rows, :num_attributes),
+                    caster: ::FFI::ArrayCaster.new(
+                      ::FFI::ArrayCaster.new(Postgresql::FFI::Column, :num_attributes),
+                      :num_rows,
+                    ),
                     as: :rows
         end
       end

@@ -1,5 +1,0 @@
-require_relative './ffi/native_caster'
-require_relative './ffi/string_caster'
-require_relative './ffi/struct_array_caster'
-require_relative './ffi/struct_multi_array_caster'
-require_relative './ffi/extended_struct'
