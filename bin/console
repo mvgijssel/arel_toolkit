@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'pry'
+require 'pry-alias'
 require 'arel_toolkit'
 require_relative '../spec/support/active_record'
 
@@ -10,6 +12,4 @@ def conn
   ActiveRecord::Base.connection
 end
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-require 'pry'
 Pry.start
