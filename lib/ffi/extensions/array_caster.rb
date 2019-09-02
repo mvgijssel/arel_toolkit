@@ -13,85 +13,36 @@ module FFI
       @length_attribute = length_attribute
     end
 
+    # TODO: handle nil
     def to_native(values, struct, external_name, internal_name)
-      pointer = ::FFI::MemoryPointer.new(type, values.length)
-      pointer.write_array_of(cast_type(type), cast_values(values))
+      builtin_type = find_type(struct)
+      type_size = type_size(builtin_type)
 
-      position = struct.internal.offset_of(internal_name)
-      struct.internal.pointer.put_pointer(position, pointer)
+      pointer = ::FFI::MemoryPointer.new(type_size, values.length)
+      pointer.write_array_of(builtin_type, type_size, values)
+
+      position = struct.offset_of(internal_name)
+      struct.pointer.put_pointer(position, pointer)
       struct.remember_pointer(pointer, external_name)
     end
 
     def from_native(struct, _external_name, internal_name)
-      # pointer = ::FFI::MemoryPointer.new(type, values.size)
-      # pointer.write_array_of(type, array)
-      # position = struct.internal.offset_of(internal_name)
-      # struct.internal.pointer.put_pointer(position, pointer)
-      # struct.remember_pointer(pointer, external_name)
-      # type_size = 0
+      return [] if struct[internal_name].null?
 
-
-      # return [] if struct.internal[internal_name].null?
-
-      val_array = ::FFI::Pointer.new(type, struct.internal[internal_name])
-      val_array.read_array_of(type, struct.send(length_attribute))
+      builtin_type = find_type(struct)
+      type_size = type_size(builtin_type)
+      pointer = ::FFI::Pointer.new(type_size, struct[internal_name])
+      pointer.read_array_of(builtin_type, type_size, struct.send(length_attribute))
     end
 
     private
 
-    def find_type(type)
-      type = if type.is_a?(Class) && type < ::FFI::ExtendedStruct
-               ::FFI::Type::POINTER
-             else
-               type
-             end
-
-      FFI.find_type(type)
+    def find_type(struct)
+      struct.class.send(:find_type, type, struct.class.send(:enclosing_module))
     end
 
-    def cast_values(values)
-      if type < ::FFI::ExtendedStruct
-        values.map { |value| value.internal.pointer }
-      else
-        values
-      end
+    def type_size(builtin_type)
+      builtin_type.size
     end
-
-    def cast_type(type)
-      if type < ::FFI::ExtendedStruct
-      else
-        type
-      end
-    end
-
-    # def to_native(value, struct, external_name, internal_name)
-    #   array_pointer = ::FFI::MemoryPointer.new(:pointer, value.length)
-
-    #   value.each_with_index do |nested_items, index|
-    #     nested_array_pointer = type.to_array_pointer(nested_items)
-
-    #     array_pointer[index].put_pointer(0, nested_array_pointer)
-    #   end
-
-    #   position = struct.internal.offset_of(internal_name)
-    #   struct.internal.pointer.put_pointer(position, array_pointer)
-    #   struct.remember_pointer(array_pointer, external_name)
-    # end
-
-    # def from_native(struct, _external_name, internal_name)
-    #   return [] if struct.internal[internal_name].null?
-
-    #   pointer_array = ::FFI::Pointer.new(:pointer, struct.internal[internal_name])
-
-    #   0.upto(struct.send(length_attribute) - 1).map do |index|
-    #     pointer = pointer_array[index].read_pointer
-
-    #     nested_pointer_array = ::FFI::Pointer.new(type, pointer)
-
-    #     0.upto(struct.send(nested_length_attribute) - 1).map do |nested_index|
-    #       type.from_pointer(nested_pointer_array[nested_index])
-    #     end
-    #   end
-    # end
   end
 end

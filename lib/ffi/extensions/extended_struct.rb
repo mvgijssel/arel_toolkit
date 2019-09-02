@@ -55,22 +55,6 @@ module FFI
       @attributes
     end
 
-    # def self.internal_class
-    #   ref = self
-
-    #   @internal_class ||= Class.new(FFI::Struct) do
-    #     ref_layout = ref.attributes.map do |_name, value|
-    #       [value.fetch(:internal_name), value.fetch(:type)]
-    #     end.flatten
-
-    #     layout(*ref_layout)
-    #   end
-    # end
-
-    # def self.size
-    #   internal_class.size
-    # end
-
     def self.ensure_layout
       return if @layout
 

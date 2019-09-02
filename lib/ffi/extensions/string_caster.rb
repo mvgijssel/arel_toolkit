@@ -14,18 +14,18 @@ module FFI
                     raise "`#{value}` (#{value.class}) should be a String"
                   end
 
-        position = struct.internal.offset_of(internal_name)
+        position = struct.offset_of(internal_name)
         struct.remember_pointer(pointer, external_name)
-        struct.internal.pointer.put_pointer(position, pointer)
+        struct.pointer.put_pointer(position, pointer)
       end
 
       #   # https://github.com/ffi/ffi/wiki/Pointers#fresh-strings
       #   # TODO: no clue if UTF-8 is the correct here
       #   self[:name].read_string.force_encoding('UTF-8')
       def from_native(struct, _external_name, internal_name)
-        return if struct.internal[internal_name].null?
+        return if struct[internal_name].null?
 
-        struct.internal[internal_name].read_string
+        struct[internal_name].read_string
       end
     end
   end
