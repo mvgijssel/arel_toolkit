@@ -80,9 +80,5 @@ module FFI
     def remember_pointer(pointer, attribute_name)
       @remembered_pointers[attribute_name] = pointer
     end
-
-    def size
-      self.class.size
-    end
   end
 end

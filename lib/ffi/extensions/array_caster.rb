@@ -1,5 +1,5 @@
 module FFI
-  # # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
+  # https://zegoggl.es/2009/05/ruby-ffi-recipes.html
   class ArrayCaster
     include FFI::DataConverter
     def native_type

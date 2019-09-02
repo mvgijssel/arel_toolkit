@@ -79,7 +79,16 @@ module Arel
           end
 
           def result_set_columns(pg_result, pg_columns)
-            pg_columns_pointer = Postgresql::FFI::Column.to_array_pointer(pg_columns)
+            pg_columns_pointer = ::FFI::MemoryPointer.new(
+              Postgresql::FFI::Column,
+              pg_columns.length,
+            )
+
+            pg_columns_pointer.write_array_of(
+              Postgresql::FFI::Column.by_value,
+              Postgresql::FFI::Column.size,
+              pg_columns,
+            )
 
             pq_set_result_attrs pg_result_pointer(pg_result), pg_columns.length, pg_columns_pointer
           end
