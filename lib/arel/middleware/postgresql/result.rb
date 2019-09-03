@@ -5,16 +5,7 @@ module Arel
         class << self
           def columns(pg_result)
             pg_result.fields.each_with_index.map do |field, index|
-              Arel::Middleware::Column.new(
-                field,
-                name: Postgresql::FFI.result_column_name(pg_result, index),
-                tableid: Postgresql::FFI.result_column_table_id(pg_result, index),
-                columnid: Postgresql::FFI.result_column_id(pg_result, index),
-                format: Postgresql::FFI.result_column_format(pg_result, index),
-                typid: Postgresql::FFI.result_column_type_id(pg_result, index),
-                typlen: Postgresql::FFI.result_column_type_length(pg_result, index),
-                atttypmod: Postgresql::FFI.result_column_type_modifier(pg_result, index),
-              )
+              Postgresql::FFI.result_get_column(pg_result, field, index)
             end
           end
 
@@ -49,8 +40,6 @@ module Arel
                 Postgresql::FFI.result_set_value(pg_result, row_index, column_index, value)
               end
             end
-
-            binding.pry
 
             pg_result
           end

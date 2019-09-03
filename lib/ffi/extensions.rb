@@ -1,8 +1,6 @@
 require_relative './extensions/pointer'
-require_relative './extensions/library'
 require_relative './extensions/native_caster'
 require_relative './extensions/string_caster'
-require_relative './extensions/array_caster'
 require_relative './extensions/extended_struct'
 
 module FFI

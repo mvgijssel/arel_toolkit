@@ -46,36 +46,23 @@ module Arel
             Postgresql::FFI::Column.from_data kwargs
           end
 
+          def result_get_column(pg_result, column_name, index)
+            pointer = pg_result_pointer(pg_result)
+
+            Arel::Middleware::Column.new(
+              column_name,
+              name: pq_f_name(pointer, index),
+              tableid: pq_f_table(pointer, index),
+              columnid: pq_f_table_col(pointer, index),
+              format: pq_f_format(pointer, index),
+              typid: pq_f_type(pointer, index),
+              typlen: pq_f_size(pointer, index),
+              atttypmod: pq_f_mod(pointer, index),
+            )
+          end
+
           def result_struct(pg_result)
             Postgresql::FFI::Result.from_pointer pg_result_pointer(pg_result)
-          end
-
-          def result_column_name(pg_result, column_index)
-            pq_f_name pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_table_id(pg_result, column_index)
-            pq_f_table pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_id(pg_result, column_index)
-            pq_f_table_col pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_format(pg_result, column_index)
-            pq_f_format pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_type_id(pg_result, column_index)
-            pq_f_type pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_type_length(pg_result, column_index)
-            pq_f_size pg_result_pointer(pg_result), column_index
-          end
-
-          def result_column_type_modifier(pg_result, column_index)
-            pq_f_mod pg_result_pointer(pg_result), column_index
           end
 
           def result_set_columns(pg_result, pg_columns)
