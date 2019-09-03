@@ -25,17 +25,20 @@ module Arel
         attach_function :pgresult_get, [:self], :pg_result
 
         # https://www.postgresql.org/docs/10/libpq-exec.html
-        attach_function :pq_f_name, :PQfname, [:pg_result, :column_number], :pointer
-        attach_function :pq_f_table, :PQftable, [:pg_result, :column_number], :oid
-        attach_function :pq_f_table_col, :PQftablecol, [:pg_result, :column_number], :int
-        attach_function :pq_f_format, :PQfformat, [:pg_result, :column_number], :int
-        attach_function :pq_f_type, :PQftype, [:pg_result, :column_number], :oid
-        attach_function :pq_f_size, :PQfsize, [:pg_result, :column_number], :int
-        attach_function :pq_f_mod, :PQfmod, [:pg_result, :column_number], :int
+        attach_function :pq_f_name, :PQfname, %i[pg_result column_number], :pointer
+        attach_function :pq_f_table, :PQftable, %i[pg_result column_number], :oid
+        attach_function :pq_f_table_col, :PQftablecol, %i[pg_result column_number], :int
+        attach_function :pq_f_format, :PQfformat, %i[pg_result column_number], :int
+        attach_function :pq_f_type, :PQftype, %i[pg_result column_number], :oid
+        attach_function :pq_f_size, :PQfsize, %i[pg_result column_number], :int
+        attach_function :pq_f_mod, :PQfmod, %i[pg_result column_number], :int
 
         # https://www.postgresql.org/docs/10/libpq-misc.html
-        attach_function :pq_set_result_attrs, :PQsetResultAttrs, [:pg_result, :numAttributes, :att_descs], :int
-        attach_function :pq_set_value, :PQsetvalue, [:pg_result, :tup_num, :field_num, :value, :len], :int
+        attach_function :pq_set_result_attrs,
+                        :PQsetResultAttrs,
+                        %i[pg_result numAttributes att_descs],
+                        :int
+        attach_function :pq_set_value, :PQsetvalue, %i[pg_result tup_num field_num value len], :int
 
         class << self
           def new_result

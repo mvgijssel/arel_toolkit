@@ -21,15 +21,7 @@ module Arel
 
             # Create and add the columns to the result object
             pg_columns = result.columns.map do |column|
-              Postgresql::FFI.new_column(
-                name: column.name,
-                tableid: column.metadata.fetch(:tableid),
-                columnid: column.metadata.fetch(:columnid),
-                format: column.metadata.fetch(:format),
-                typid: column.metadata.fetch(:typid),
-                typlen: column.metadata.fetch(:typlen),
-                atttypmod: column.metadata.fetch(:atttypmod),
-              )
+              new_column(column)
             end
 
             Postgresql::FFI.result_set_columns(pg_result, pg_columns)
@@ -42,6 +34,20 @@ module Arel
             end
 
             pg_result
+          end
+
+          private
+
+          def new_column(column)
+            Postgresql::FFI.new_column(
+              name: column.name,
+              tableid: column.metadata.fetch(:tableid),
+              columnid: column.metadata.fetch(:columnid),
+              format: column.metadata.fetch(:format),
+              typid: column.metadata.fetch(:typid),
+              typlen: column.metadata.fetch(:typlen),
+              atttypmod: column.metadata.fetch(:atttypmod),
+            )
           end
         end
       end
