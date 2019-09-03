@@ -31,6 +31,12 @@ module FFI
           type_name: type,
           caster: caster,
         }
+
+        ref_layout = attributes.map do |_name, value|
+          [value.fetch(:internal_name), value.fetch(:type)]
+        end.flatten
+
+        layout(*ref_layout)
       end
 
       def from_pointer(pointer)
@@ -40,22 +46,10 @@ module FFI
       def from_data(**kwargs)
         new(nil, kwargs)
       end
-
-      def ensure_layout
-        return if @layout
-
-        ref_layout = attributes.map do |_name, value|
-          [value.fetch(:internal_name), value.fetch(:type)]
-        end.flatten
-
-        layout(*ref_layout)
-      end
     end
 
     def initialize(pointer = nil, **kwargs)
       @remembered_pointers = {}
-
-      self.class.ensure_layout
 
       super(pointer)
 
