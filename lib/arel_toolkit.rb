@@ -4,8 +4,8 @@ require 'active_record_upsert' if Gem.loaded_specs.key?('active_record_upsert')
 require 'pg_search' if Gem.loaded_specs.key?('pg_search')
 require 'rails/railtie' if Gem.loaded_specs.key?('railties')
 require 'arel'
+require 'active_record'
 require 'ffi'
-require 'ffi/extensions'
 
 require 'arel_toolkit/version'
 require 'arel/extensions'
