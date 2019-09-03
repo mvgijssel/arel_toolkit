@@ -4,7 +4,7 @@ module Arel
       module FFI
         extend ::FFI::Library
         dir = Gem.loaded_specs.fetch('pg').stub.extension_dir
-        file = 'pg_ext.bundle'
+        file = ::FFI::Platform.mac? ? "pg_ext.bundle" : "pg_ext.so"
         path = File.join(dir, file)
         ffi_lib path
 
