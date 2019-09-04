@@ -1,3 +1,5 @@
+GC.disable
+
 require 'simplecov'
 require 'simplecov-console'
 SimpleCov.start do
@@ -40,6 +42,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
+    GC.disable
   end
 
   config.around(:each) do |example|
