@@ -14,8 +14,12 @@ describe ArelToolkit do
 
     conn = ActiveRecord::Base.connection.raw_connection
 
-    binding.pry
 
     PgResultInit.create(conn, [Column.new('kerk')])
+
+    binding.pry
+
+    raise 'broken'
+
   end
 end

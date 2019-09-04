@@ -25,7 +25,34 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE columns) {
   PGresult *result = PQmakeEmptyPGresult(conn, status);
   VALUE rb_pgresult = pg_new_result(result, rb_pgconn);
 
-  column = rb_ary_entry(columns, 0);
+  /* VALUE column = rb_ary_entry(columns, 0); */
+
+  // convert column to
+
+  int numAttributes = 2;
+  /* PGresAttDesc attDescs; */
+  /* PGresAttDesc attDesc; */
+
+
+  printf("%zu", sizeof(PGresAttDesc));
+
+  PGresAttDesc *attDescs = malloc (numAttributes * sizeof(PGresAttDesc));
+
+  attDescs[0].name = "shine";
+  attDescs[1].name = "papi";
+
+  // Allocate a PGresAttDesc
+  /* PGresAttDesc *attDesc = malloc (sizeof(PGresAttDesc)); */
+  /* size_t nameLen = 1; */
+  /* attDesc->name = malloc(nameLen * sizeof (char)); */
+
+  // assigning a string to a pointer allocates the pointer
+  /* attDesc->name = "papi"; */
+
+  PQsetResultAttrs(result, numAttributes, attDescs);
+
+  /* rb_p(column); */
+
 
   return rb_pgresult;
 }
