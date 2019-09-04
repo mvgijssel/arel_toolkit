@@ -47,3 +47,7 @@ group :red_green_refactor, halt_on_fail: true do
     watch(%r{(?:.+/)?\.rubocop(?:_todo)?\.yml$}) { |m| File.dirname(m[0]) }
   end
 end
+
+guard 'rake', task: 'compile' do
+  watch(/^ext/)
+end

@@ -6,6 +6,8 @@ require 'rails/railtie' if Gem.loaded_specs.key?('railties')
 require 'arel'
 
 require 'arel_toolkit/version'
+require 'arel_toolkit/pg_result_init'
+
 require 'arel/extensions'
 require 'arel/sql_to_arel'
 require 'arel/middleware'
