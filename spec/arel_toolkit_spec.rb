@@ -14,14 +14,11 @@ describe ArelToolkit do
 
     conn = ActiveRecord::Base.connection.raw_connection
 
-
     # PgResultInit.create(conn, [Column.new('kerk')])
-    PgResultInit.create(conn, [{ name: 'henk' }], [['chulo'], ['shine']])
+    puts PgResultInit.create(conn, [{ name: 'henk' }], [['chulo'], ['shine']]).to_a
 
     binding.pry
 
-
     raise 'broken'
-
   end
 end
