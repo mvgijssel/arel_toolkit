@@ -5,33 +5,15 @@
 VALUE rb_mPgResultInit;
 
 static VALUE
-pg_result_init_hello() {
-  printf("kerk");
-
-  return Qnil;
-}
-
-// TODO: always check the return value of malloc
-// TODO: maybe check return value pg_new_result?
-// TODO: do type checking on the VALUE variables
-static VALUE
-pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_columns, VALUE rb_rows) {
-	t_pg_connection *p_conn = pg_get_connection(rb_pgconn);
-  PGconn *conn = p_conn->pgconn;
-
-  /*
-   * status 2 is for regular success
-   * https://www.postgresql.org/docs/10/libpq-misc.html
-   */
-  int status = 2;
-
-  PGresult *result = PQmakeEmptyPGresult(conn, status);
-  VALUE rb_pgresult = pg_new_result(result, rb_pgconn);
-
-  /* printf("%zu", sizeof(PGresAttDesc)); */
+pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_columns, VALUE rb_rows) {
+  PGresult *result = pgresult_get(rb_result);
+  PGresult *result_copy = PQcopyResult(result, PG_COPYRES_EVENTS | PG_COPYRES_NOTICEHOOKS);
 
   int num_columns = RARRAY_LEN(rb_columns);
   PGresAttDesc *attDescs = malloc(num_columns * sizeof(PGresAttDesc));
+
+  if (attDescs == NULL)
+    rb_raise(rb_eRuntimeError, "Cannot allocate memory");
 
   int index;
   VALUE rb_column;
@@ -51,8 +33,8 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_columns, VALUE rb_ro
     rb_table_id = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("tableid")), INT2NUM(0));
     rb_column_id = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("columnid")), INT2NUM(0));
     rb_format = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("format")), INT2NUM(0));
-    rb_typ_id = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("typid")), INT2NUM(0));
-    rb_typ_len = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("typlen")), INT2NUM(0));
+    rb_typ_id = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("typid")));
+    rb_typ_len = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("typlen")));
     rb_att_typemod = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("atttypmod")), INT2NUM(-1));
 
     // Using StringValueCStr, if column contains null bytes it should raise Argument error
@@ -69,35 +51,54 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_columns, VALUE rb_ro
     attDescs[index].atttypmod = NUM2INT(rb_att_typemod); // -1 no type modifier
   }
 
-  PQsetResultAttrs(result, num_columns, attDescs);
+  int success;
+
+  success = PQsetResultAttrs(result_copy, num_columns, attDescs);
+
+  if (success == 0)
+    rb_raise(rb_eRuntimeError, "PQsetResultAttrs failed: %d", success);
 
   free(attDescs);
 
-  /* int num_rows = RARRAY_LEN(rb_rows); */
-  /* int row_index; */
-  /* int column_index; */
-  /* VALUE rb_row; */
-  /* VALUE rb_value; */
-  /* char *value; */
-  /* int value_len; */
+  int num_rows = RARRAY_LEN(rb_rows);
+  int row_index;
+  int column_index;
+  VALUE rb_row;
+  VALUE rb_value;
+  char *value;
+  int value_len;
 
-  /* for(row_index = 0; row_index < num_rows; row_index++) { */
-  /*   for(column_index = 0; column_index < num_columns; column_index++) { */
-  /*     rb_row = rb_ary_entry(rb_rows, row_index); */
-  /*     rb_value = rb_ary_entry(rb_row, column_index); */
 
-  /*     // TODO: maybe casting to string can be better? */
-  /*     rb_value = rb_funcall(rb_value, rb_intern("to_s"), 0); */
+  for(row_index = 0; row_index < num_rows; row_index++) {
+    for(column_index = 0; column_index < num_columns; column_index++) {
+      rb_row = rb_ary_entry(rb_rows, row_index);
+      rb_value = rb_ary_entry(rb_row, column_index);
 
-  /*     // Using StringValueCStr, if column contains null bytes it should raise Argument error */
-  /*     // postgres does not handle null bytes. */
-  /*     value = StringValueCStr(rb_value); */
-  /*     value_len = RSTRING_LEN(rb_value); */
+      if (NIL_P(rb_value)) {
+        success = PQsetvalue(result_copy, row_index, column_index, NULL, -1);
 
-  /*     PQsetvalue(result, row_index, column_index, value, value_len); */
-  /*   } */
-  /* } */
+        if (success == 0)
+          rb_raise(rb_eRuntimeError, "PQsetvalue failed: %d", success);
+      }
+      else {
+        // TODO: casting needs to be better
+        rb_value = rb_funcall(rb_value, rb_intern("to_s"), 0);
 
+        // Using StringValueCStr, if column contains null bytes it should raise Argument error
+        // postgres does not handle null bytes.
+        value = StringValueCStr(rb_value);
+        value_len = RSTRING_LEN(rb_value);
+
+        success = PQsetvalue(result_copy, row_index, column_index, value, value_len);
+
+        if (success == 0)
+          rb_raise(rb_eRuntimeError, "PQsetvalue failed: %d", success);
+      }
+
+    }
+  }
+
+  VALUE rb_pgresult = pg_new_result(result_copy, rb_pgconn);
   return rb_pgresult;
 }
 
@@ -106,8 +107,6 @@ Init_pg_result_init(void)
 {
   rb_mPgResultInit = rb_define_module("PgResultInit");
 
-  rb_define_module_function(rb_mPgResultInit, "hello", pg_result_init_hello, 0);
-
   /* `2` means that the method accepts 2 arguments */
-  rb_define_module_function(rb_mPgResultInit, "create", pg_result_init_create, 3);
+  rb_define_module_function(rb_mPgResultInit, "create", pg_result_init_create, 4);
 }

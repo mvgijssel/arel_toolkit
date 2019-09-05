@@ -95,8 +95,12 @@ module Arel
           pg_result.fields.each_with_index.map do |field, index|
             Column.new(
               field,
-              fmod: pg_result.fmod(index),
-              ftype: pg_result.ftype(index),
+              tableid: pg_result.ftable(index),
+              columnid: pg_result.ftablecol(index),
+              format: pg_result.fformat(index),
+              typid: pg_result.ftype(index),
+              typlen: pg_result.fsize(index),
+              atttypmod: pg_result.fmod(index),
             )
           end
         end
@@ -106,6 +110,7 @@ module Arel
         end
 
         def cast_to(result)
+          return result.original_data unless result.modified?
           return result.original_data if result.columns.length.zero?
 
           conn = ActiveRecord::Base.connection.raw_connection
@@ -113,21 +118,20 @@ module Arel
           pg_columns = result.column_objects.map do |column|
             {
               name: column.name,
-              typid: column.metadata.fetch(:ftype),
-              fmod: column.metadata.fetch(:fmod),
+              tableid: column.metadata.fetch(:tableid, 0),
+              columnid: column.metadata.fetch(:columnid, 0),
+              format: column.metadata.fetch(:format, 0),
+              typid: column.metadata.fetch(:typid),
+              typlen: column.metadata.fetch(:typlen),
+              atttypmod: column.metadata.fetch(:atttypmod, -1),
             }
           end
 
-          PgResultInit.create(conn, pg_columns, result.rows)
-          # if result.modified?
-          #   original_data = result.original_data
-          #   instance = new(result)
-          #   instance.cmd_tuples = original_data.cmd_tuples
-          #   original_data.clear
-          #   instance
-          # else
-          #   result.original_data
-          # end
+          new_result = PgResultInit.create(conn, result.original_data, pg_columns, result.rows)
+
+          result.original_data.clear
+
+          new_result
         end
       end
     end
@@ -135,7 +139,7 @@ module Arel
     class EmptyPGResult < PGResult
       class << self
         def cast_to(result)
-          new(result)
+          ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
         end
       end
     end
