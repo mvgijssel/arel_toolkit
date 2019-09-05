@@ -73,30 +73,30 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_columns, VALUE rb_ro
 
   free(attDescs);
 
-  int num_rows = RARRAY_LEN(rb_rows);
-  int row_index;
-  int column_index;
-  VALUE rb_row;
-  VALUE rb_value;
-  char *value;
-  int value_len;
+  /* int num_rows = RARRAY_LEN(rb_rows); */
+  /* int row_index; */
+  /* int column_index; */
+  /* VALUE rb_row; */
+  /* VALUE rb_value; */
+  /* char *value; */
+  /* int value_len; */
 
-  for(row_index = 0; row_index < num_rows; row_index++) {
-    for(column_index = 0; column_index < num_columns; column_index++) {
-      rb_row = rb_ary_entry(rb_rows, row_index);
-      rb_value = rb_ary_entry(rb_row, column_index);
+  /* for(row_index = 0; row_index < num_rows; row_index++) { */
+  /*   for(column_index = 0; column_index < num_columns; column_index++) { */
+  /*     rb_row = rb_ary_entry(rb_rows, row_index); */
+  /*     rb_value = rb_ary_entry(rb_row, column_index); */
 
-      // TODO: maybe casting to string can be better?
-      rb_value = rb_funcall(rb_value, rb_intern("to_s"), 0);
+  /*     // TODO: maybe casting to string can be better? */
+  /*     rb_value = rb_funcall(rb_value, rb_intern("to_s"), 0); */
 
-      // Using StringValueCStr, if column contains null bytes it should raise Argument error
-      // postgres does not handle null bytes.
-      value = StringValueCStr(rb_value);
-      value_len = RSTRING_LEN(rb_value);
+  /*     // Using StringValueCStr, if column contains null bytes it should raise Argument error */
+  /*     // postgres does not handle null bytes. */
+  /*     value = StringValueCStr(rb_value); */
+  /*     value_len = RSTRING_LEN(rb_value); */
 
-      PQsetvalue(result, row_index, column_index, value, value_len);
-    }
-  }
+  /*     PQsetvalue(result, row_index, column_index, value, value_len); */
+  /*   } */
+  /* } */
 
   return rb_pgresult;
 }
