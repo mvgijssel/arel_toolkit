@@ -138,7 +138,7 @@ module Arel
 
     class EmptyPGResult < PGResult
       class << self
-        def cast_to(result)
+        def cast_to(_result)
           ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
         end
       end
