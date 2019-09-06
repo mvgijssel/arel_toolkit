@@ -9,6 +9,12 @@ class Dir
       puts "WHO DIT THIS", args
       puts Kernel.caller
 
+      print "WHO DIT THIS\n"
+      print args
+      print "\n"
+      print Kernel.caller
+      print "\n"
+
       old_chdir(*args)
     end
   end
@@ -38,9 +44,18 @@ dir_config(
   pg_lib_dir,
 )
 
-pg_ext = Gem.loaded_specs.fetch('pg')
-pg_ext_inlude_dir = File.join(pg_ext.full_gem_path, 'ext')
-pg_ext_lib_dir = pg_ext.extension_dir
+# pg_ext = Gem.loaded_specs.fetch('pg')
+# pg_ext_inlude_dir = File.join(pg_ext.full_gem_path, 'ext')
+# pg_ext_lib_dir = pg_ext.extension_dir
+
+# dir_config(
+#   'pg_ext',
+#   pg_ext_inlude_dir,
+#   pg_ext_lib_dir,
+# )
+
+pg_ext_inlude_dir = '/bundle/gems/pg-1.1.4/ext'
+pg_ext_lib_dir = '/bundle/extensions/x86_64-linux/2.4.0/pg-1.1.4'
 
 dir_config(
   'pg_ext',
