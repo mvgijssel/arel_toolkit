@@ -49,5 +49,5 @@ if (
 
   create_makefile('arel_toolkit/pg_result_init')
 else
-  puts 'Could not find PostgreSQL build environment (libraries & headers): Makefile not created'
+  abort 'Could not find PostgreSQL build environment (libraries & headers): Makefile not created'
 end
