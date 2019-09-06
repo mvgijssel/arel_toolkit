@@ -44,8 +44,7 @@ if (
    have_header('pg.h') &&
    have_func('PQcopyResult') &&
    have_func('PQsetResultAttrs') &&
-   have_func('PQsetvalue') &&
-
+   have_func('PQsetvalue')
 
   create_makefile('arel_toolkit/pg_result_init')
 else
