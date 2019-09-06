@@ -1,6 +1,19 @@
 require 'mkmf'
 require 'pg'
 
+class Dir
+  class << self
+    alias_method :old_chdir, :chdir
+
+    def chdir(*args)
+      puts "WHO DIT THIS", args
+      puts Kernel.caller
+
+      old_chdir(*args)
+    end
+  end
+end
+
 CONFIG['debugflags'] = '-ggdb3'
 CONFIG['optflags'] = '-O0'
 
