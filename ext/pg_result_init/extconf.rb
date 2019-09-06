@@ -41,11 +41,11 @@ if (
     have_library('ms/libpq')
   ) &&
    have_header('libpq-fe.h') &&
-   have_header('pg.h')
+   have_header('pg.h') &&
+   have_func('PQcopyResult') &&
+   have_func('PQsetResultAttrs') &&
+   have_func('PQsetvalue') &&
 
-  # have_func 'PQsetSingleRowMode'
-  # have_func 'timegm'
-  # TODO: check pg_result_init.c for required enums / functions
 
   create_makefile('arel_toolkit/pg_result_init')
 else
