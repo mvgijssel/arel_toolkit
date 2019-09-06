@@ -37,44 +37,44 @@ module Arel
       end
 
       def apply(middleware, &block)
-        continue_chain(middleware, internal_context, &block)
+        new_middleware = Array.wrap(middleware)
+        continue_chain(new_middleware, internal_context, &block)
       end
-
-      def only(middleware, &block)
-        continue_chain(middleware, internal_context, &block)
-      end
+      alias only apply
 
       def none(&block)
         continue_chain([], internal_context, &block)
       end
 
       def except(without_middleware, &block)
-        new_middleware = internal_middleware.reject do |middleware|
-          middleware == without_middleware
-        end
-
+        without_middleware = Array.wrap(without_middleware)
+        new_middleware = internal_middleware - without_middleware
         continue_chain(new_middleware, internal_context, &block)
       end
 
       def insert_before(new_middleware, existing_middleware, &block)
+        new_middleware = Array.wrap(new_middleware)
         index = internal_middleware.index(existing_middleware)
-        updated_middleware = internal_middleware.insert(index, new_middleware)
+        updated_middleware = internal_middleware.insert(index, *new_middleware)
         continue_chain(updated_middleware, internal_context, &block)
       end
 
       def prepend(new_middleware, &block)
-        updated_middleware = [new_middleware] + internal_middleware
+        new_middleware = Array.wrap(new_middleware)
+        updated_middleware = new_middleware + internal_middleware
         continue_chain(updated_middleware, internal_context, &block)
       end
 
       def insert_after(new_middleware, existing_middleware, &block)
+        new_middleware = Array.wrap(new_middleware)
         index = internal_middleware.index(existing_middleware)
-        updated_middleware = internal_middleware.insert(index + 1, new_middleware)
+        updated_middleware = internal_middleware.insert(index + 1, *new_middleware)
         continue_chain(updated_middleware, internal_context, &block)
       end
 
       def append(new_middleware, &block)
-        updated_middleware = internal_middleware + [new_middleware]
+        new_middleware = Array.wrap(new_middleware)
+        updated_middleware = internal_middleware + new_middleware
         continue_chain(updated_middleware, internal_context, &block)
       end
 

@@ -19,6 +19,12 @@ describe 'Arel.middleware' do
     end
   end
 
+  class OtherMiddleware
+    def self.call(arel, next_middleware)
+      next_middleware.call(arel)
+    end
+  end
+
   before do
     # This makes sure ActiveRecord preloads index, columns, etc
     # So these requests don't show up as middleware calls
@@ -159,30 +165,6 @@ describe 'Arel.middleware' do
     end.to raise_error('You cannot do a block statement while calling context without arguments')
   end
 
-  it 'only applies middleware given for a block' do
-    current = nil
-
-    Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.apply([ReorderMiddleware]) do
-        current = Arel.middleware.current
-      end
-    end
-
-    expect(current).to eq [ReorderMiddleware]
-  end
-
-  it 'does not call middleware which is excluded' do
-    expect(NoopMiddleware).to_not receive(:call)
-
-    Arel.middleware.apply([NoopMiddleware, ReorderMiddleware]) do
-      Arel.middleware.except(NoopMiddleware) do
-        expect(Arel.middleware.current).to eq [ReorderMiddleware]
-
-        Post.select(:id).load
-      end
-    end
-  end
-
   it 'resets middleware when exiting a middleware block' do
     middleware = nil
 
@@ -208,64 +190,89 @@ describe 'Arel.middleware' do
     expect(Arel.middleware.current).to eq []
   end
 
+  it 'only applies middleware given for a block' do
+    current = nil
+
+    Arel.middleware.apply(NoopMiddleware) do
+      Arel.middleware.apply([ReorderMiddleware]) do
+        current = Arel.middleware.current
+      end
+    end
+
+    expect(current).to eq [ReorderMiddleware]
+  end
+
+  it 'does not call middleware which is excluded' do
+    expect(NoopMiddleware).to_not receive(:call)
+    expect(OtherMiddleware).to_not receive(:call)
+
+    Arel.middleware.apply([NoopMiddleware, ReorderMiddleware, OtherMiddleware]) do
+      Arel.middleware.except([NoopMiddleware, OtherMiddleware]) do
+        expect(Arel.middleware.current).to eq [ReorderMiddleware]
+
+        Post.select(:id).load
+      end
+    end
+  end
+
   it 'allows middleware to be inserted before other middleware' do
     middleware = nil
 
     Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.insert_before(ReorderMiddleware, NoopMiddleware) do
+      Arel.middleware.insert_before([ReorderMiddleware, OtherMiddleware], NoopMiddleware) do
         middleware = Arel.middleware.current
       end
     end
 
-    expect(middleware).to eq([ReorderMiddleware, NoopMiddleware])
+    expect(middleware).to eq([ReorderMiddleware, OtherMiddleware, NoopMiddleware])
   end
 
   it 'allows middleware to be inserted before all other middleware' do
     middleware = nil
 
     Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.prepend(ReorderMiddleware) do
+      Arel.middleware.prepend([ReorderMiddleware, OtherMiddleware]) do
         middleware = Arel.middleware.current
       end
     end
 
-    expect(middleware).to eq([ReorderMiddleware, NoopMiddleware])
+    expect(middleware).to eq([ReorderMiddleware, OtherMiddleware, NoopMiddleware])
   end
 
   it 'allows middleware to be appended after other middleware' do
     middleware = nil
 
     Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.insert_after(ReorderMiddleware, NoopMiddleware) do
+      Arel.middleware.insert_after([ReorderMiddleware, OtherMiddleware], NoopMiddleware) do
         middleware = Arel.middleware.current
       end
     end
 
-    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware])
+    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware, OtherMiddleware])
   end
 
   it 'allows middleware to be appended after all middleware' do
     middleware = nil
 
     Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.append(ReorderMiddleware) do
+      Arel.middleware.append([ReorderMiddleware, OtherMiddleware]) do
         middleware = Arel.middleware.current
       end
     end
 
-    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware])
+    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware, OtherMiddleware])
   end
 
   it 'allows only running specified middleware' do
     middleware = nil
 
-    Arel.middleware.apply([NoopMiddleware]) do
-      Arel.middleware.only([ReorderMiddleware]) do
+    Arel.middleware.apply([NoopMiddleware, ReorderMiddleware, OtherMiddleware]) do
+      Arel.middleware.only([NoopMiddleware, ReorderMiddleware]) do
         middleware = Arel.middleware.current
       end
     end
 
-    expect(middleware).to eq([ReorderMiddleware])
+    expect(middleware).to eq([NoopMiddleware, ReorderMiddleware])
   end
 
   it 'allows execution without any middleware' do
