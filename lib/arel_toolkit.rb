@@ -7,6 +7,8 @@ require 'arel'
 require 'active_record'
 
 require 'arel_toolkit/version'
+
+require 'pg'
 require 'arel_toolkit/pg_result_init'
 
 require 'arel/extensions'

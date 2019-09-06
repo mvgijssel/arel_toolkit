@@ -6,6 +6,25 @@ VALUE rb_mPgResultInit;
 
 static VALUE
 pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_columns, VALUE rb_rows) {
+  Check_Type(rb_columns, T_ARRAY);
+  Check_Type(rb_rows, T_ARRAY);
+
+	if (!rb_obj_is_kind_of(rb_result, rb_cPGresult)) {
+	  rb_raise(
+      rb_eTypeError,
+      "wrong argument type %s (expected kind of PG::Result)",
+      rb_obj_classname(rb_result)
+    );
+  }
+
+  if (!rb_obj_is_kind_of(rb_pgconn, rb_cPGconn)) {
+    rb_raise(
+      rb_eTypeError,
+      "wrong argument type %s (expected kind of PG::Connection)",
+      rb_obj_classname(rb_pgconn)
+    );
+  }
+
   PGresult *result = pgresult_get(rb_result);
   PGresult *result_copy = PQcopyResult(result, PG_COPYRES_EVENTS | PG_COPYRES_NOTICEHOOKS);
 
@@ -29,6 +48,8 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
 
   for(index = 0; index < num_columns; index++) {
     rb_column = rb_ary_entry(rb_columns, index);
+    Check_Type(rb_column, T_HASH);
+
     rb_column_name = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("name")));
 
     // 0 means unknown tableid
