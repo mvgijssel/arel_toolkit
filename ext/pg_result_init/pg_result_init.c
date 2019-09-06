@@ -4,6 +4,7 @@
 
 VALUE rb_mPgResultInit;
 
+// TESTING
 static VALUE
 pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_columns, VALUE rb_rows) {
   PGresult *result = pgresult_get(rb_result);
