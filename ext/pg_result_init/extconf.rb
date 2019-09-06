@@ -68,7 +68,7 @@ if (
 
   # TODO: check pg_result_init.c for required enums / functions
 
-  create_makefile('pg_result_init/pg_result_init')
+  create_makefile('arel_toolkit/pg_result_init')
 else
-  raise 'Could not find PostgreSQL build environment (libraries & headers): Makefile not created'
+  abort 'Could not find PostgreSQL build environment (libraries & headers): Makefile not created'
 end
