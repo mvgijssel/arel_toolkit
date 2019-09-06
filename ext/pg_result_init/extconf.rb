@@ -1,24 +1,20 @@
-require 'mkmf'
-require 'pg'
+read, write = IO.pipe
 
-class Dir
-  class << self
-    alias_method :old_chdir, :chdir
-
-    def chdir(*args)
-      puts "WHO DIT THIS", args
-      puts Kernel.caller
-
-      print "WHO DIT THIS\n"
-      print args
-      print "\n"
-      print Kernel.caller
-      print "\n"
-
-      old_chdir(*args)
-    end
-  end
+pid = Process.fork do
+  require 'pg'
+  pg_ext = Gem.loaded_specs.fetch('pg')
+  pg_ext_inlude_dir = File.join(pg_ext.full_gem_path, 'ext')
+  pg_ext_lib_dir = pg_ext.extension_dir
+  write.puts("#{pg_ext_inlude_dir},#{pg_ext_lib_dir}")
+  puts "DONE PROCESS"
 end
+
+Process.wait(pid)
+write.close
+pg_ext_include_dir, pg_ext_lib_dir = read.read.chomp.split(",")
+read.close
+
+require 'mkmf'
 
 CONFIG['debugflags'] = '-ggdb3'
 CONFIG['optflags'] = '-O0'
@@ -44,22 +40,12 @@ dir_config(
   pg_lib_dir,
 )
 
-# pg_ext = Gem.loaded_specs.fetch('pg')
-# pg_ext_inlude_dir = File.join(pg_ext.full_gem_path, 'ext')
-# pg_ext_lib_dir = pg_ext.extension_dir
-
-# dir_config(
-#   'pg_ext',
-#   pg_ext_inlude_dir,
-#   pg_ext_lib_dir,
-# )
-
-pg_ext_inlude_dir = '/bundle/gems/pg-1.1.4/ext'
-pg_ext_lib_dir = '/bundle/extensions/x86_64-linux/2.4.0/pg-1.1.4'
+# require 'pry'
+# binding.pry
 
 dir_config(
   'pg_ext',
-  pg_ext_inlude_dir,
+  pg_ext_include_dir,
   pg_ext_lib_dir,
 )
 
