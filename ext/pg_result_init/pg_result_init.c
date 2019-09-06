@@ -4,7 +4,6 @@
 
 VALUE rb_mPgResultInit;
 
-// TESTING
 static VALUE
 pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_columns, VALUE rb_rows) {
   PGresult *result = pgresult_get(rb_result);
@@ -31,11 +30,20 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
   for(index = 0; index < num_columns; index++) {
     rb_column = rb_ary_entry(rb_columns, index);
     rb_column_name = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("name")));
+
+    // 0 means unknown tableid
     rb_table_id = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("tableid")), INT2NUM(0));
+
+    // 0 means unknown columnid
     rb_column_id = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("columnid")), INT2NUM(0));
+
+    // 0 is text, 1 is binary https://www.postgresql.org/docs/10/libpq-exec.html
     rb_format = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("format")), INT2NUM(0));
+
     rb_typ_id = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("typid")));
     rb_typ_len = rb_funcall(rb_column, rb_intern("fetch"), 1, ID2SYM(rb_intern("typlen")));
+
+    // -1 means that there is no type modifier
     rb_att_typemod = rb_funcall(rb_column, rb_intern("fetch"), 2, ID2SYM(rb_intern("atttypmod")), INT2NUM(-1));
 
     // Using StringValueCStr, if column contains null bytes it should raise Argument error
@@ -43,13 +51,13 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
     column_name = StringValueCStr(rb_column_name);
 
     // postgres/src/interfaces/libpq/libpq-fe.h:235
-    attDescs[index].name = column_name; // TODO: do we need to copy the contents or can we use a reference?
-    attDescs[index].tableid = NUM2INT(rb_table_id); // TODO: tableid is Oid type, not integer
+    attDescs[index].name = column_name;
+    attDescs[index].tableid = NUM2INT(rb_table_id);
     attDescs[index].columnid = NUM2INT(rb_column_id);
-    attDescs[index].format = NUM2INT(rb_format); // 0 is text, 1 is binary https://www.postgresql.org/docs/10/libpq-exec.html
-    attDescs[index].typid = NUM2INT(rb_typ_id); // TODO: typid is Oid type, not integer
+    attDescs[index].format = NUM2INT(rb_format);
+    attDescs[index].typid = NUM2INT(rb_typ_id);
     attDescs[index].typlen = NUM2INT(rb_typ_len);
-    attDescs[index].atttypmod = NUM2INT(rb_att_typemod); // -1 no type modifier
+    attDescs[index].atttypmod = NUM2INT(rb_att_typemod);
   }
 
   int success;
@@ -82,7 +90,6 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
           rb_raise(rb_eRuntimeError, "PQsetvalue failed: %d", success);
       }
       else {
-        // TODO: casting needs to be better
         rb_value = rb_funcall(rb_value, rb_intern("to_s"), 0);
 
         // Using StringValueCStr, if column contains null bytes it should raise Argument error
@@ -95,7 +102,6 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
         if (success == 0)
           rb_raise(rb_eRuntimeError, "PQsetvalue failed: %d", success);
       }
-
     }
   }
 
@@ -108,6 +114,5 @@ Init_pg_result_init(void)
 {
   rb_mPgResultInit = rb_define_module("PgResultInit");
 
-  /* `2` means that the method accepts 2 arguments */
   rb_define_module_function(rb_mPgResultInit, "create", pg_result_init_create, 4);
 }
