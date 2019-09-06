@@ -77,7 +77,6 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
   char *value;
   int value_len;
 
-
   for(row_index = 0; row_index < num_rows; row_index++) {
     for(column_index = 0; column_index < num_columns; column_index++) {
       rb_row = rb_ary_entry(rb_rows, row_index);
