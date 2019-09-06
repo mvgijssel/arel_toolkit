@@ -24,6 +24,8 @@ dir_config(
   pg_lib_dir,
 )
 
+puts Gem.loaded_specs
+
 pg_ext = Gem.loaded_specs.fetch('pg').stub
 pg_ext_inlude_dir = File.join(pg_ext.full_gem_path, 'ext')
 pg_ext_lib_dir = pg_ext.extension_dir
