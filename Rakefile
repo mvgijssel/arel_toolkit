@@ -12,3 +12,11 @@ GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.future_release = "v#{ArelToolkit::VERSION}"
   config.pulls = false
 end
+
+require 'rake/extensiontask'
+
+task build: :compile
+
+Rake::ExtensionTask.new('pg_result_init') do |ext|
+  ext.lib_dir = 'lib/arel_toolkit'
+end

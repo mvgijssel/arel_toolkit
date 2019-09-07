@@ -95,8 +95,12 @@ module Arel
           pg_result.fields.each_with_index.map do |field, index|
             Column.new(
               field,
-              fmod: pg_result.fmod(index),
-              ftype: pg_result.ftype(index),
+              tableid: pg_result.ftable(index),
+              columnid: pg_result.ftablecol(index),
+              format: pg_result.fformat(index),
+              typid: pg_result.ftype(index),
+              typlen: pg_result.fsize(index),
+              atttypmod: pg_result.fmod(index),
             )
           end
         end
@@ -106,61 +110,37 @@ module Arel
         end
 
         def cast_to(result)
-          if result.modified?
-            original_data = result.original_data
-            instance = new(result)
-            instance.cmd_tuples = original_data.cmd_tuples
-            original_data.clear
-            instance
-          else
-            result.original_data
+          return result.original_data unless result.modified?
+
+          pg_columns = result_to_columns(result)
+          conn = ActiveRecord::Base.connection.raw_connection
+          new_result = PgResultInit.create(conn, result.original_data, pg_columns, result.rows)
+          result.original_data.clear
+          new_result
+        end
+
+        private
+
+        def result_to_columns(result)
+          result.column_objects.map do |column|
+            {
+              name: column.name,
+              tableid: column.metadata.fetch(:tableid, 0),
+              columnid: column.metadata.fetch(:columnid, 0),
+              format: column.metadata.fetch(:format, 0),
+              typid: column.metadata.fetch(:typid),
+              typlen: column.metadata.fetch(:typlen),
+              atttypmod: column.metadata.fetch(:atttypmod, -1),
+            }
           end
-        end
-      end
-
-      attr_reader :fields, :values, :original
-      attr_accessor :cmd_tuples
-
-      # Object based on https://github.com/ged/ruby-pg/blob/v1.1.4/lib/pg/result.rb
-      # The object is instantiated in C, so we cannot simply make a new PG::Result
-      # Therefore we're ducktyping, with similar methods as the original object.
-      def initialize(result)
-        @fields = result.columns
-        @fmods = []
-        @ftypes = []
-
-        result.column_objects.each do |column_object|
-          @fmods << column_object.metadata.fetch(:fmod)
-          @ftypes << column_object.metadata.fetch(:ftype)
-        end
-
-        @values = result.rows
-        @cmd_tuples = 0
-        @original = result.original_data
-        @hash_rows = result.hash_rows
-      end
-
-      def ftype(index)
-        @ftypes[index]
-      end
-
-      def fmod(index)
-        @fmods[index]
-      end
-
-      def clear; end
-
-      def map(&block)
-        @hash_rows.each do
-          yield block
         end
       end
     end
 
     class EmptyPGResult < PGResult
       class << self
-        def cast_to(result)
-          new(result)
+        def cast_to(_result)
+          ActiveRecord::Base.connection.raw_connection.make_empty_pgresult(2)
         end
       end
     end
