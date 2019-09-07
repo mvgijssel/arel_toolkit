@@ -111,11 +111,18 @@ module Arel
 
         def cast_to(result)
           return result.original_data unless result.modified?
-          return result.original_data if result.columns.length.zero?
 
+          pg_columns = result_to_columns(result)
           conn = ActiveRecord::Base.connection.raw_connection
+          new_result = PgResultInit.create(conn, result.original_data, pg_columns, result.rows)
+          result.original_data.clear
+          new_result
+        end
 
-          pg_columns = result.column_objects.map do |column|
+        private
+
+        def result_to_columns(result)
+          result.column_objects.map do |column|
             {
               name: column.name,
               tableid: column.metadata.fetch(:tableid, 0),
@@ -126,12 +133,6 @@ module Arel
               atttypmod: column.metadata.fetch(:atttypmod, -1),
             }
           end
-
-          new_result = PgResultInit.create(conn, result.original_data, pg_columns, result.rows)
-
-          result.original_data.clear
-
-          new_result
         end
       end
     end
