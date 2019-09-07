@@ -204,14 +204,58 @@ describe PgResultInit do
   end
 
   it 'sets tableid to 0 when not given' do
+    columns = [{
+      name: 'hello',
+      typid: 0,
+      typlen: 0,
+    }]
+
+    rows = []
+
+    new_result = PgResultInit.create(conn, original_result, columns, rows)
+
+    expect(new_result.ftable(0)).to eq 0
   end
 
   it 'sets columnid to 0 when not given' do
+    columns = [{
+      name: 'hello',
+      typid: 0,
+      typlen: 0,
+    }]
+
+    rows = []
+
+    new_result = PgResultInit.create(conn, original_result, columns, rows)
+
+    expect(new_result.ftablecol(0)).to eq 0
   end
 
   it 'sets format to 0 when not given' do
+    columns = [{
+      name: 'hello',
+      typid: 0,
+      typlen: 0,
+    }]
+
+    rows = []
+
+    new_result = PgResultInit.create(conn, original_result, columns, rows)
+
+    expect(new_result.fformat(0)).to eq 0
   end
 
   it 'sets atttypmod to -1 when not given' do
+    columns = [{
+      name: 'hello',
+      typid: 0,
+      typlen: 0,
+    }]
+
+    rows = []
+
+    new_result = PgResultInit.create(conn, original_result, columns, rows)
+
+    expect(new_result.fmod(0)).to eq -1
   end
 end
