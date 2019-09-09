@@ -7,12 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      checkout: [0, 1]
-      include:
-        - checkout: 0
-          name: branch
-        - checkout: 1
-          name: master
+      matrix:
+        checkout: [branch, master]
+        include:
+          - checkout: branch
+            name: branch
+          - checkout: master
+            name: master
     steps:
     - run: |
         env
