@@ -6,9 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: lebreak
-        id: the-breaker
+        id: 1
         run: exit 1
       - name: doit
+        id: 2
         env:
           STEPS_CONTEXT: ${{ toJson(steps) }}
           HELLO_FRIEND: ${{ failure() }}
