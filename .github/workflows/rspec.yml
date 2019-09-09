@@ -2,6 +2,19 @@ name: RSpec
 on: [push]
 
 jobs:
+  brokenstep:
+  runs-on: ubuntu-latest
+  steps:
+    - name: lebreak
+      run: exit 1
+    - name: doit
+      env:
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+      if: always()
+      run: |
+        echo "did it anyway"
+        echo "$STEPS_CONTEXT"
+
   one:
     runs-on: ubuntu-latest
     steps:
@@ -30,53 +43,53 @@ jobs:
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
         run: echo "$MATRIX_CONTEXT"
 
-  postgres:
-    name: Test postgres
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        image: postgres:10.10
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: arel_toolkit_test
-          POSTGRES_USER: postgres
-    steps:
-    - run: sudo apt-get install -y postgresql-client-10
-    - run: pg_isready -h postgres -p 5432 -U postgres -d arel_toolkit_test || true
-    - run: pg_isready -h localhost -p 5432 -U postgres -d arel_toolkit_test || true
-    - run: pg_isready -h 127.0.0.1 -p 5432 -U postgres -d arel_toolkit_test || true
+  # postgres:
+  #   name: Test postgres
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     postgres:
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #       image: postgres:10.10
+  #       ports:
+  #         - 5432:5432
+  #       env:
+  #         POSTGRES_DB: arel_toolkit_test
+  #         POSTGRES_USER: postgres
+  #   steps:
+  #   - run: sudo apt-get install -y postgresql-client-10
+  #   - run: pg_isready -h postgres -p 5432 -U postgres -d arel_toolkit_test || true
+  #   - run: pg_isready -h localhost -p 5432 -U postgres -d arel_toolkit_test || true
+  #   - run: pg_isready -h 127.0.0.1 -p 5432 -U postgres -d arel_toolkit_test || true
 
-  services:
-    name: Test services
-    runs-on: ubuntu-latest
-    services:
-      nginx:
-        image: nginx
-        ports:
-          - 8080:80
-        env:
-          NGINX_PORT: 80
-    steps:
-    - run: curl -v localhost:8080 || true
-    - run: curl -v nginx:8080 || true
-    - run: curl -v 127.0.0.1:8080 || true
+  # services:
+  #   name: Test services
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     nginx:
+  #       image: nginx
+  #       ports:
+  #         - 8080:80
+  #       env:
+  #         NGINX_PORT: 80
+  #   steps:
+  #   - run: curl -v localhost:8080 || true
+  #   - run: curl -v nginx:8080 || true
+  #   - run: curl -v 127.0.0.1:8080 || true
 
-  artifact:
-    name: Artifact upload?
-    runs-on: ubuntu-latest
-    steps:
-    - run: mkdir -p path/to/artifact
-    - run: echo hello > path/to/artifact/world.txt
-    - uses: actions/upload-artifact@master
-      with:
-        name: my-artifact
-        path: path/to/artifact
+  # artifact:
+  #   name: Artifact upload?
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - run: mkdir -p path/to/artifact
+  #   - run: echo hello > path/to/artifact/world.txt
+  #   - uses: actions/upload-artifact@master
+  #     with:
+  #       name: my-artifact
+  #       path: path/to/artifact
 
   rspec:
     name: Greeting
