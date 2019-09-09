@@ -19,7 +19,7 @@ jobs:
           POSTGRES_DB: arel_toolkit_test
           POSTGRES_USER: postgres
     steps:
-    - run: apt-get install -y postgresql-client-10
+    - run: sudo apt-get install -y postgresql-client-10
     - run: pg_isready -h postgres -p 5432 -U postgres -d arel_toolkit_test || true
     - run: pg_isready -h localhost -p 5432 -U postgres -d arel_toolkit_test || true
     - run: pg_isready -h 127.0.0.1 -p 5432 -U postgres -d arel_toolkit_test || true
