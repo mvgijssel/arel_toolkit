@@ -11,7 +11,7 @@ jobs:
         checkout: [branch, master]
         include:
           - checkout: branch
-            ref: master
+            ref: ${{ github.sha }}
             title: branch
           - checkout: master
             ref: master
