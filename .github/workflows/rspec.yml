@@ -4,6 +4,7 @@ on: [push]
 jobs:
   artifact:
     name: Artifact upload?
+    runs-on: ubuntu-latest
     steps:
     - run: mkdir -p path/to/artifact
     - run: echo hello > path/to/artifact/world.txt
@@ -15,6 +16,14 @@ jobs:
   rspec:
     name: Greeting
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:10.10
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: arel_toolkit_test
+          POSTGRES_USER: postgres
     steps:
     - uses: actions/checkout@v1
     - name: Set up Ruby 2.5.x
