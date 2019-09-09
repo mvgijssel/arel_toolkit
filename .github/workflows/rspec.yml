@@ -42,7 +42,7 @@ jobs:
 
     - name: RSpec
       run: |
-        bundle exec appraisal rspec
+        bundle exec appraisal rspec --force-color
 
     - name: Report to codeclimate
       if: always()
