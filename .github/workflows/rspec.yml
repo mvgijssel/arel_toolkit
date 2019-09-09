@@ -2,7 +2,17 @@ name: RSpec
 on: [push]
 
 jobs:
-  build:
+  artifact:
+    name: Artifact upload?
+    steps:
+    - run: mkdir -p path/to/artifact
+    - run: echo hello > path/to/artifact/world.txt
+    - uses: actions/upload-artifact@master
+      with:
+        name: my-artifact
+        path: path/to/artifact
+
+  rspec:
     name: Greeting
     runs-on: ubuntu-latest
     steps:
