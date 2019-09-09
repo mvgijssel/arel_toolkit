@@ -6,14 +6,13 @@ jobs:
   runs-on: ubuntu-latest
   steps:
     - name: lebreak
-      id: someid
+      id: 1
       run: exit 1
     - name: doit
       env:
         STEPS_CONTEXT: ${{ toJson(steps) }}
       if: always()
       run: |
-        echo "did it anyway"
         echo "$STEPS_CONTEXT"
 
   one:
