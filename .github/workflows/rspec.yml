@@ -2,7 +2,7 @@ name: RSpec
 on: [push]
 
 jobs:
-  brokenstep:
+  brokenjob:
     runs-on: ubuntu-latest
     steps:
       - name: lebreak
@@ -10,6 +10,25 @@ jobs:
         run: exit 1
       - name: doit
         id: step2
+        env:
+          Z_GITHUB_CONTEXT: ${{ toJson(github) }}
+          Z_JOB_CONTEXT: ${{ toJson(job) }}
+          Z_STEPS_CONTEXT: ${{ toJson(steps) }}
+          Z_RUNNER_CONTEXT: ${{ toJson(runner) }}
+          Z_SECRETS_CONTEXT: ${{ toJson(secrets) }}
+          Z_STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+          Z_MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          Z_FAILURE: ${{ job.status == 'Failure' }}
+        if: always()
+        run: |
+          env
+
+  workingjob:
+    runs-on: ubuntu-latest
+    steps:
+      - name: work
+        run: exit 0
+      - name: doit
         env:
           Z_GITHUB_CONTEXT: ${{ toJson(github) }}
           Z_JOB_CONTEXT: ${{ toJson(job) }}
@@ -138,10 +157,12 @@ jobs:
         bundle exec rake compile
 
     - name: RSpec
-      continue-on-error: true
       run: |
         bundle exec appraisal rspec
 
     - name: Report to codeclimate
+      if: always()
+        env:
+          JOB_STATUS: ${{ job.status == 'Success' }}
       run: |
         ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
