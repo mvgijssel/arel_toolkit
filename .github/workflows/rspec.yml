@@ -2,28 +2,6 @@ name: Continuous Integration
 on: [push]
 
 jobs:
-  secrets:
-    name: Testing secrets
-    runs-on: ubuntu-latest
-    steps:
-    - name: Test the secret
-      env:
-        HELLO: ${{ toJson(secrets) }}
-        FRIEND: ${{ secrets.CC_TEST_REPORTER_ID }}
-      run: |
-        env
-
-  # artifact:
-  #   name: Artifact upload?
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - run: mkdir -p path/to/artifact
-  #   - run: echo hello > path/to/artifact/world.txt
-  #   - uses: actions/upload-artifact@master
-  #     with:
-  #       name: my-artifact
-  #       path: path/to/artifact
-
   rspec:
     name: RSpec
     runs-on: ubuntu-latest
@@ -71,6 +49,7 @@ jobs:
       shell: bash
       env:
         JOB_STATUS: ${{ job.status == 'Success' }}
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       run: |
         EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
         ./cc-test-reporter after-build --exit-code $EXIT_CODE
