@@ -9,6 +9,7 @@ jobs:
     - name: Test the secret
       env:
         HELLO: ${{ toJson(secrets) }}
+        FRIEND: ${{ secrets.CC_TEST_REPORTER_ID }}
       run: |
         env
 
