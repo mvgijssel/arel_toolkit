@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      checkout: [branch, master]
+      checkout: [0, 1]
       include:
-        - checkout: branch
+        - checkout: 0
           name: branch
-        - checkout: master
+        - checkout: 1
           name: master
     steps:
     - run: |
