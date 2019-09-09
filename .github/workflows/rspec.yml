@@ -13,9 +13,9 @@ jobs:
         env:
           NGINX_PORT: 80
     steps:
-    - curl -v localhost:80 || true
-    - curl -v nginx:80 || true
-    - curl -v 127.0.0.1 || true
+    - run: curl -v localhost:80 || true
+    - run: curl -v nginx:80 || true
+    - run: curl -v 127.0.0.1 || true
 
   artifact:
     name: Artifact upload?
