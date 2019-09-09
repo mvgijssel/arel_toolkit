@@ -2,6 +2,16 @@ name: Continuous Integration
 on: [push]
 
 jobs:
+  secrets:
+    name: Testing secrets
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test the secret
+      env:
+        HELLO: ${{ toJson(secrets) }}
+      run: |
+        env
+
   # artifact:
   #   name: Artifact upload?
   #   runs-on: ubuntu-latest
