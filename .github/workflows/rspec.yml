@@ -2,6 +2,14 @@ name: Continuous Integration
 on: [push]
 
 jobs:
+  testenv:
+    name: Test ENV
+    runs-on: ubuntu-latest
+    steps:
+    - run: env
+      env:
+        GITHUB: ${{ toJson(github) }}
+
   rspec:
     name: RSpec
     runs-on: ubuntu-latest
