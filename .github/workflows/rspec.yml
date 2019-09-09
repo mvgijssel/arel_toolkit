@@ -2,13 +2,20 @@ name: Continuous Integration
 on: [push]
 
 jobs:
-  testenv:
-    name: Test ENV
+  rspec:
+    name: RSpec ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      checkout: [branch, master]
+      include:
+        - checkout: branch
+          name: branch
+        - checkout: master
+          name: master
     steps:
-    - run: env
-      env:
-        GITHUB: ${{ toJson(github) }}
+    - run: |
+        env
 
   rspec_master:
     name: RSpec - merge with master
@@ -31,6 +38,8 @@ jobs:
       with:
         ref: master
     - name: Merge with master
+      # Based on
+      # https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165
       run: |
         git fetch origin $GITHUB_REF
         git rebase $GITHUB_SHA
