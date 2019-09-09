@@ -6,10 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: lebreak
-        id: 1
+        id: step1
         run: exit 1
       - name: doit
-        id: 2
+        id: step2
         env:
           STEPS_CONTEXT: ${{ toJson(steps) }}
         if: always()
