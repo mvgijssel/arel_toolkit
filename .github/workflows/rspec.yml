@@ -11,17 +11,12 @@ jobs:
       - name: doit
         id: step2
         env:
-          Z_GITHUB_CONTEXT: ${{ toJson(github) }}
-          Z_JOB_CONTEXT: ${{ toJson(job) }}
-          Z_STEPS_CONTEXT: ${{ toJson(steps) }}
-          Z_RUNNER_CONTEXT: ${{ toJson(runner) }}
-          Z_SECRETS_CONTEXT: ${{ toJson(secrets) }}
-          Z_STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-          Z_MATRIX_CONTEXT: ${{ toJson(matrix) }}
-          Z_FAILURE: ${{ job.status == 'Failure' }}
+          JOB_STATUS: ${{ job.status == 'Success' }}
         if: always()
+        shell: bash
         run: |
-          env
+          EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo "0" || echo "1")
+          echo $EXIT_CODE
 
   workingjob:
     runs-on: ubuntu-latest
@@ -30,17 +25,12 @@ jobs:
         run: exit 0
       - name: doit
         env:
-          Z_GITHUB_CONTEXT: ${{ toJson(github) }}
-          Z_JOB_CONTEXT: ${{ toJson(job) }}
-          Z_STEPS_CONTEXT: ${{ toJson(steps) }}
-          Z_RUNNER_CONTEXT: ${{ toJson(runner) }}
-          Z_SECRETS_CONTEXT: ${{ toJson(secrets) }}
-          Z_STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-          Z_MATRIX_CONTEXT: ${{ toJson(matrix) }}
-          Z_FAILURE: ${{ job.status == 'Failure' }}
+          JOB_STATUS: ${{ job.status == 'Success' }}
         if: always()
+        shell: bash
         run: |
-          env
+          EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
+          echo $EXIT_CODE
 
   # one:
   #   runs-on: ubuntu-latest
@@ -119,7 +109,7 @@ jobs:
   #       path: path/to/artifact
 
   rspec:
-    name: Greeting
+    name: RSpec
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -162,7 +152,9 @@ jobs:
 
     - name: Report to codeclimate
       if: always()
+      shell: bash
       env:
         JOB_STATUS: ${{ job.status == 'Success' }}
       run: |
-        ./cc-test-reporter after-build --exit-code $JOB_STATUS
+        EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
+        ./cc-test-reporter after-build --exit-code $EXIT_CODE
