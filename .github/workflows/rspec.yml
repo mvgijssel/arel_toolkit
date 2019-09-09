@@ -15,8 +15,10 @@ jobs:
           - checkout: master
             name: master
     steps:
-    - run: |
-        echo ${{ toJson(matrix) }}
+    - env:
+        KERK: ${{ toJson(matrix) }}
+      run: |
+        env
 
   rspec_master:
     name: RSpec - merge with master
