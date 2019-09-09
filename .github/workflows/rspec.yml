@@ -18,6 +18,7 @@ jobs:
           Z_SECRETS_CONTEXT: ${{ toJson(secrets) }}
           Z_STRATEGY_CONTEXT: ${{ toJson(strategy) }}
           Z_MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          Z_FAILURE: ${{ job.status == 'Failure' }}
         if: always()
         run: |
           env
