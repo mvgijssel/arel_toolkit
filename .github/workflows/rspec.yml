@@ -13,6 +13,7 @@ jobs:
         ruby-version: 2.5.x
     - name: Test with RSpec
       run: |
+        apt-get install -y libpq-dev
         gem install bundler
         bundle install --jobs 4 --retry 3
         bundle exec appraisal install
