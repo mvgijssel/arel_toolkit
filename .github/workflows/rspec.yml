@@ -2,6 +2,21 @@ name: RSpec
 on: [push]
 
 jobs:
+  services:
+    name: Test services
+    runs-on: ubuntu-latest
+    services:
+      nginx:
+        image: nginx
+        ports:
+          - 8080:80
+        env:
+          NGINX_PORT: 80
+    steps:
+    - curl -v localhost:80 || true
+    - curl -v nginx:80 || true
+    - curl -v 127.0.0.1 || true
+
   artifact:
     name: Artifact upload?
     runs-on: ubuntu-latest
