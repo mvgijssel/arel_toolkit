@@ -3,17 +3,17 @@ on: [push]
 
 jobs:
   brokenstep:
-  runs-on: ubuntu-latest
-  steps:
-    - name: lebreak
-      id: 1
-      run: exit 1
-    - name: doit
-      env:
-        STEPS_CONTEXT: ${{ toJson(steps) }}
-      if: always()
-      run: |
-        echo "$STEPS_CONTEXT"
+    runs-on: ubuntu-latest
+    steps:
+      - name: lebreak
+        id: the-breaker
+        run: exit 1
+      - name: doit
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        if: always()
+        run: |
+          echo "$STEPS_CONTEXT"
 
   one:
     runs-on: ubuntu-latest
