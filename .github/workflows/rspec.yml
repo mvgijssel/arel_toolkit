@@ -72,12 +72,27 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.5.x
-    - name: Test with RSpec
+    - name: Setup
       run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+
         sudo apt-get install -y libpq-dev
+
         gem install bundler
+
         bundle install --jobs 4 --retry 3
         bundle exec appraisal install
+
         bundle exec rake clean
         bundle exec rake compile
+
+    - name: RSpec
+      continue-on-error: true
+      run: |
         bundle exec appraisal rspec
+
+    - name: Report to codeclimate
+      run: |
+        ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
