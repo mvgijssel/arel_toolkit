@@ -162,7 +162,7 @@ jobs:
 
     - name: Report to codeclimate
       if: always()
-        env:
-          JOB_STATUS: ${{ job.status == 'Success' }}
+      env:
+        JOB_STATUS: ${{ job.status == 'Success' }}
       run: |
-        ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+        ./cc-test-reporter after-build --exit-code $JOB_STATUS
