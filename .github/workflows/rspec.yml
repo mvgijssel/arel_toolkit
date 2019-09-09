@@ -12,7 +12,6 @@ jobs:
         id: 2
         env:
           STEPS_CONTEXT: ${{ toJson(steps) }}
-          HELLO_FRIEND: ${{ failure() }}
         if: always()
         run: |
           env
