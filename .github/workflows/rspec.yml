@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   rspec:
-    name: RSpec ${{ matrix.name }}
+    name: RSpec - ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -16,7 +16,7 @@ jobs:
             name: master
     steps:
     - run: |
-        env
+        echo ${{ toJson(matrix) }}
 
   rspec_master:
     name: RSpec - merge with master
