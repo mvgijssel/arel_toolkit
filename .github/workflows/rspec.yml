@@ -11,7 +11,7 @@ jobs:
       - name: doit
         env:
           STEPS_CONTEXT: ${{ toJson(steps) }}
-          HELLO_FRIEND: ${{ failure }}
+          HELLO_FRIEND: ${{ failure() }}
         if: always()
         run: |
           env
