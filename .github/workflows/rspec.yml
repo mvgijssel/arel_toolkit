@@ -6,6 +6,7 @@ jobs:
   runs-on: ubuntu-latest
   steps:
     - name: lebreak
+      id: someid
       run: exit 1
     - name: doit
       env:
