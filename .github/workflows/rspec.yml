@@ -19,14 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
+
     - uses: actions/download-artifact@master
       with:
         name: test-artifact
         path: ./coverage
+
+    - run: ls -la ./coverage
+
     - uses: maxheld83/ghpages@v0.2.1
       env:
         BUILD_DIR: ./coverage
-        GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+        GH_PAT: ${{ secrets.GH_PAT }}
 
   rspec:
     name: RSpec - ${{ matrix.title }}
