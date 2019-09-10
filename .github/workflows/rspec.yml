@@ -11,11 +11,14 @@ jobs:
         checkout: [branch, master]
         include:
           - checkout: branch
-            ref:
+            ref: null
             title: branch
+            rebase: false
           - checkout: master
             ref: master
             title: master
+            rebase: true
+
     # services:
     #   postgres:
     #     options: >-
@@ -40,12 +43,13 @@ jobs:
       with:
         ref: ${{ matrix.ref }}
 
-    # - name: Merge with master
-    #   # Based on
-    #   # https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165
-    #   run: |
-    #     git fetch origin $GITHUB_REF
-    #     git rebase $GITHUB_SHA
+    # Based on
+    # https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165
+    - name: Rebase
+      if: ${{ matrix.rebase }}
+      run: |
+        git fetch origin $GITHUB_REF
+        git rebase $GITHUB_SHA
 
     # - name: Set up Ruby 2.5.x
     #   uses: actions/setup-ruby@v1
