@@ -2,6 +2,15 @@ name: CI
 on: [push]
 
 jobs:
+  pages:
+    name: Test pages
+    runs-on: ubuntu-latest
+    steps:
+    - uses: maxheld83/ghpages@v0.2.1
+      env:
+        BUILD_DIR: ./coverage
+        GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+
   rspec:
     name: RSpec - ${{ matrix.title }}
     runs-on: ubuntu-latest
