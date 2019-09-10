@@ -2,10 +2,27 @@ name: CI
 on: [push]
 
 jobs:
-  pages:
-    name: Test pages
+  test:
+    name: Test generate artifact
     runs-on: ubuntu-latest
     steps:
+    - run: mkdir -p coverage
+    - run: echo "hello" > coverage/hello
+    - run: echo "friend" > coverage/friend
+    - uses: actions/upload-artifact@master
+      with:
+        name: test-artifact
+        path: ./coverage
+
+  pages:
+    name: Test upload pages
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - uses: actions/download-artifact@master
+      with:
+        name: test-artifact
+        path: ./coverage
     - uses: maxheld83/ghpages@v0.2.1
       env:
         BUILD_DIR: ./coverage
