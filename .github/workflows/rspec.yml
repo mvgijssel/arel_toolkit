@@ -46,7 +46,7 @@ jobs:
     # Based on
     # https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165
     - name: Rebase
-      if: ${{ matrix.rebase }}
+      if: matrix.rebase
       run: |
         git fetch origin $GITHUB_REF
         git rebase $GITHUB_SHA
