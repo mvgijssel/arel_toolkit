@@ -39,6 +39,9 @@ jobs:
       fail-fast: false
       matrix:
         checkout: [branch, master]
+        exclude:
+          checkout: ${{ github.ref }}
+
         include:
           - checkout: branch
             ref: null
