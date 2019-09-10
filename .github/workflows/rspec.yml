@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI
 on: [push]
 
 jobs:
@@ -12,33 +12,27 @@ jobs:
         include:
           - checkout: branch
             ref: null
-            title: branch
+            title: current branch
             rebase: false
           - checkout: master
             ref: master
-            title: master
+            title: merge with master
             rebase: true
 
-    # services:
-    #   postgres:
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-    #     image: postgres:10.10
-    #     ports:
-    #       - 5432:5432
-    #     env:
-    #       POSTGRES_DB: arel_toolkit_test
-    #       POSTGRES_USER: postgres
+    services:
+      postgres:
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        image: postgres:10.10
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: arel_toolkit_test
+          POSTGRES_USER: postgres
     steps:
-    - env:
-        KERK: ${{ toJson(matrix) }}
-        SHINE: ${{ toJson(github) }}
-      run: |
-        env
-
     - uses: actions/checkout@v1
       with:
         ref: ${{ matrix.ref }}
@@ -51,123 +45,11 @@ jobs:
         git fetch origin $GITHUB_REF
         git rebase $GITHUB_SHA
 
-    # - name: Set up Ruby 2.5.x
-    #   uses: actions/setup-ruby@v1
-    #   with:
-    #     ruby-version: 2.5.x
-    # - name: Setup
-    #   run: |
-    #     curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    #     chmod +x ./cc-test-reporter
-    #     ./cc-test-reporter before-build
-
-    #     sudo apt-get install -y libpq-dev
-
-    #     gem install bundler
-
-    #     bundle install --jobs 4 --retry 3
-    #     bundle exec appraisal install
-
-    #     bundle exec rake clean
-    #     bundle exec rake compile
-
-    # - name: RSpec
-    #   run: |
-    #     bundle exec appraisal rspec --force-color
-
-    # - name: Report to codeclimate
-    #   if: always()
-    #   shell: bash
-    #   env:
-    #     JOB_STATUS: ${{ job.status == 'Success' }}
-    #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-    #   run: |
-    #     EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
-    #     ./cc-test-reporter after-build --exit-code $EXIT_CODE
-
-  rspec_master:
-    name: RSpec - merge with master
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        image: postgres:10.10
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: arel_toolkit_test
-          POSTGRES_USER: postgres
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        ref: master
-    - name: Merge with master
-      # Based on
-      # https://discourse.drone.io/t/planned-change-to-git-clone-logic/1165
-      run: |
-        git fetch origin $GITHUB_REF
-        git rebase $GITHUB_SHA
-
     - name: Set up Ruby 2.5.x
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.5.x
-    - name: Setup
-      run: |
-        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        chmod +x ./cc-test-reporter
-        ./cc-test-reporter before-build
 
-        sudo apt-get install -y libpq-dev
-
-        gem install bundler
-
-        bundle install --jobs 4 --retry 3
-        bundle exec appraisal install
-
-        bundle exec rake clean
-        bundle exec rake compile
-
-    - name: RSpec
-      run: |
-        bundle exec appraisal rspec --force-color
-
-    - name: Report to codeclimate
-      if: always()
-      shell: bash
-      env:
-        JOB_STATUS: ${{ job.status == 'Success' }}
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      run: |
-        EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
-        ./cc-test-reporter after-build --exit-code $EXIT_CODE
-
-  rspec_branch:
-    name: RSpec - current branch
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        image: postgres:10.10
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: arel_toolkit_test
-          POSTGRES_USER: postgres
-    steps:
-    - uses: actions/checkout@v1
-    - name: Set up Ruby 2.5.x
-      uses: actions/setup-ruby@v1
-      with:
-        ruby-version: 2.5.x
     - name: Setup
       run: |
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
