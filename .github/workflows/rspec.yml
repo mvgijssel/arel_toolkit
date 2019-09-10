@@ -40,7 +40,7 @@ jobs:
       matrix:
         checkout: [branch, master]
         exclude:
-          checkout: ${{ github.ref }}
+          - checkout: ${{ github.ref }}
 
         include:
           - checkout: branch
