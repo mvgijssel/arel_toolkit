@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - 137/github-actions
 
 jobs:
   rspec:
