@@ -2,7 +2,7 @@
 
 ## Overview
 
-- [![Build Status](https://travis-ci.com/mvgijssel/arel_toolkit.svg?branch=master)](https://travis-ci.com/mvgijssel/arel_toolkit)
+- [![](https://github.com/mvgijssel/arel_toolkit/workflows/CI%20-%20master/badge.svg)](https://github.com/mvgijssel/arel_toolkit/actions)
 - [![Maintainability](https://api.codeclimate.com/v1/badges/3ef13d1649a00a98562d/maintainability)](https://codeclimate.com/github/mvgijssel/arel_toolkit/maintainability)
 - [![Test Coverage](https://api.codeclimate.com/v1/badges/3ef13d1649a00a98562d/test_coverage)](https://codeclimate.com/github/mvgijssel/arel_toolkit/test_coverage)
 - [![Gem Version](https://badge.fury.io/rb/arel_toolkit.svg)](https://badge.fury.io/rb/arel_toolkit)
