@@ -39,9 +39,6 @@ jobs:
       fail-fast: false
       matrix:
         checkout: [branch, master]
-        exclude:
-          - checkout: ${{ job.status }}
-
         include:
           - checkout: branch
             ref: null
