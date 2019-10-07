@@ -7,7 +7,7 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
     Post.where(id: 0).load
 
     transformer = Arel::Transformer::ReplaceTableWithSubquery.new({
-      'posts' => Post.where('id > 1').arel
+      'posts' => Post.where('public = TRUE').arel
     })
 
     query = Post.all
@@ -30,6 +30,7 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
     end
 
     expect(query_sql).to eq 'SELECT "posts".* FROM "posts"'
-    expect(middleware_sql).to eq 'SELECT "posts".* FROM (SELECT "posts".* FROM "posts" WHERE (id > 1)) posts'
+    binding.pry
+    expect(middleware_sql).to eq 'SELECT "posts".* FROM (SELECT "posts".* FROM "posts" WHERE (public = TRUE)) posts'
   end
 end
