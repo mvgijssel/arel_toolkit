@@ -32,4 +32,15 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
     expect(middleware_sql).to eq \
       'SELECT "posts".* FROM (SELECT "posts".* FROM "posts" WHERE (public = TRUE)) posts'
   end
+
+  context 'table' do
+    it 'does not replace when no mapping is present' do
+      transformer = Arel::Transformer::ReplaceTableWithSubquery.new({})
+      sql = 'SELECT "posts"."id" FROM "posts"'
+      arel = Arel.sql_to_arel(sql)
+      transformed_sql = transformer.call(arel.first, next_middleware).to_sql
+
+      expect(transformed_sql).to eq 'SELECT "posts"."id" FROM "posts"'
+    end
+  end
 end
