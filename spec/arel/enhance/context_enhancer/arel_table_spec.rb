@@ -132,6 +132,16 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
       .to eq(range_variable: false, column_reference: false, alias: true)
   end
 
+  it 'works for a table alias' do
+    sql = 'SELECT all_posts.id FROM posts AS all_posts '
+    tree = Arel.enhance(Arel.sql_to_arel(sql).first)
+
+    alias_node = '???' # HALP!
+
+    expect(alias_node.context)
+      .to eq(range_variable: false, column_reference: false, alias: true)
+  end
+
   it 'raises an error for an arel table in an unknown location' do
     sql = 'SELECT 1'
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
