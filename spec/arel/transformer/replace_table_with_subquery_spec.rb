@@ -30,7 +30,6 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
     end
 
     expect(query_sql).to eq 'SELECT "posts".* FROM "posts"'
-    binding.pry
     expect(middleware_sql).to eq 'SELECT "posts".* FROM (SELECT "posts".* FROM "posts" WHERE (public = TRUE)) posts'
   end
 end
