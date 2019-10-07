@@ -6,7 +6,9 @@ module Arel
         # rubocop:disable Metrics/CyclomaticComplexity
         # rubocop:disable Metrics/AbcSize
         def self.call(node)
-          context = node.context.merge!(range_variable: false, column_reference: false)
+          context = node.context.merge!(
+            range_variable: false, column_reference: false, alias: false,
+          )
           parent_object = node.parent.object
 
           # Using Arel::Table as SELECT ... FROM <table>
@@ -61,6 +63,9 @@ module Arel
           # Using Arel::Table as an "alias" for SELECT INTO <table> ...
           elsif parent_object.is_a?(Arel::Nodes::Into)
             context[:alias] = true
+
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias)
+            context[:range_variable] = true
 
           else
             raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"
