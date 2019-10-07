@@ -7,8 +7,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     from_table_node = tree.child_at_path(['ast', 'cores', 0, 'source', 'left'])
     projection_table_node = tree.child_at_path(['ast', 'cores', 0, 'projections', 0, 'relation'])
 
-    expect(from_table_node.context).to eq(range_variable: true, column_reference: false)
-    expect(projection_table_node.context).to eq(range_variable: false, column_reference: true)
+    expect(from_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
+    expect(projection_table_node.context).to eq \
+      range_variable: false, column_reference: true, alias: false
   end
 
   it 'works for a single table inside FROM' do
@@ -16,7 +18,7 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     table_node = tree.child_at_path(['ast', 'cores', 0, 'source', 'left'])
 
-    expect(table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(table_node.context).to eq(range_variable: true, column_reference: false, alias: false)
   end
 
   it 'works for multiple tables inside FROM' do
@@ -26,8 +28,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     posts_table_node = tree.child_at_path ['ast', 'cores', 0, 'source', 'left', 0]
     comments_table_node = tree.child_at_path ['ast', 'cores', 0, 'source', 'left', 1]
 
-    expect(posts_table_node.context).to eq(range_variable: true, column_reference: false)
-    expect(comments_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(posts_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
+    expect(comments_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for joining tables' do
@@ -37,8 +41,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     users_table_node = tree.child_at_path ['ast', 'cores', 0, 'source', 'right', 1, 'left']
     comments_table_node = tree.child_at_path ['ast', 'cores', 0, 'source', 'right', 0, 'left']
 
-    expect(users_table_node.context).to eq(range_variable: true, column_reference: false)
-    expect(comments_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(users_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
+    expect(comments_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for SELECT projections' do
@@ -46,7 +52,8 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     attribute_table_node = tree.child_at_path(['ast', 'cores', 0, 'projections', 0, 'relation'])
 
-    expect(attribute_table_node.context).to eq(range_variable: false, column_reference: true)
+    expect(attribute_table_node.context).to eq \
+      range_variable: false, column_reference: true, alias: false
   end
 
   it 'works for INSERT INTO table' do
@@ -54,7 +61,8 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     insert_table_node = tree.child_at_path(%w[ast relation])
 
-    expect(insert_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(insert_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for UPDATE table' do
@@ -62,7 +70,8 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     update_table_node = tree.child_at_path(%w[ast relation])
 
-    expect(update_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(update_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for the UPDATE FROM tables' do
@@ -71,8 +80,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     users_table_node = tree.child_at_path(['ast', 'froms', 0])
     comments_table_node = tree.child_at_path(['ast', 'froms', 1])
 
-    expect(users_table_node.context).to eq(range_variable: true, column_reference: false)
-    expect(comments_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(users_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
+    expect(comments_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for DELETE table' do
@@ -80,7 +91,8 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     delete_table_node = tree.child_at_path(%w[ast relation])
 
-    expect(delete_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(delete_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for DELETE USING tables' do
@@ -89,8 +101,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     users_table_node = tree.child_at_path(['ast', 'using', 0])
     comments_table_node = tree.child_at_path(['ast', 'using', 1])
 
-    expect(users_table_node.context).to eq(range_variable: true, column_reference: false)
-    expect(comments_table_node.context).to eq(range_variable: true, column_reference: false)
+    expect(users_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
+    expect(comments_table_node.context).to eq \
+      range_variable: true, column_reference: false, alias: false
   end
 
   it 'works for a CTE table' do
