@@ -196,5 +196,17 @@ describe Arel::Transformer::PrefixSchemaName do
         %(SELECT EXISTS (SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5)),
       )
     end
+
+    it 'kerk' do
+      arel = Post.limit(1).arel
+
+      prefix_transformer = Arel::Transformer::PrefixSchemaName.new
+      replace_transformer = Arel::Transformer::ReplaceTableWithSubquery.new({ 'posts' => arel })
+      shine_transformer = ->(tree, next_middleware, context) { binding.pry; next_middleware.call tree }
+
+      Arel.middleware.apply([replace_transformer, prefix_transformer, shine_transformer]) { Post.first }
+
+      raise '1'
+     end
   end
 end

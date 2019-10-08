@@ -19,6 +19,7 @@ module Arel
         tree.query(
           class: Arel::Table,
           context: { range_variable: true },
+          schema_name: nil,
         ).each do |node|
           if (subquery = table_to_subquery_mapping[node.name.value])
             node.replace subquery.as(node.name.value)
