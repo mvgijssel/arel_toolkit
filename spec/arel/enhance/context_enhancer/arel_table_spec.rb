@@ -133,10 +133,10 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
   end
 
   it 'works for a table alias' do
-    sql = 'SELECT all_posts.id FROM posts AS all_posts '
-    tree = Arel.enhance(Arel.sql_to_arel(sql).first)
+    arel = Post.where(id: 1).arel.as('alias')
+    tree = Arel.enhance(arel)
 
-    alias_node = '???' # HALP!
+    alias_node = tree.query(class: Arel::Nodes::TableAlias).first
 
     expect(alias_node.context)
       .to eq(range_variable: false, column_reference: false, alias: true)
