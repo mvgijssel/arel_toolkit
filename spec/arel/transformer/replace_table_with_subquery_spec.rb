@@ -7,7 +7,9 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
     Post.where(id: 0).load
 
     transformer =
-      Arel::Transformer::ReplaceTableWithSubquery.new 'posts' => Post.where('public = TRUE').arel
+      Arel::Transformer::ReplaceTableWithSubquery.new(
+        ->(_) { Post.where('public = TRUE').arel },
+      )
 
     query = Post.all
     middleware_sql = nil
@@ -35,7 +37,9 @@ describe Arel::Transformer::ReplaceTableWithSubquery do
 
   context 'table' do
     it 'does not replace when no mapping is present' do
-      transformer = Arel::Transformer::ReplaceTableWithSubquery.new({})
+      transformer = Arel::Transformer::ReplaceTableWithSubquery.new(
+        ->(_) {},
+      )
       sql = 'SELECT "posts"."id" FROM "posts"'
       arel = Arel.sql_to_arel(sql)
       transformed_sql = transformer.call(arel.first, next_middleware).to_sql

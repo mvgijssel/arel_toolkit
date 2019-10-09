@@ -1,10 +1,10 @@
 module Arel
   module Transformer
     class ReplaceTableWithSubquery
-      attr_reader :table_to_subquery_mapping
+      attr_reader :subquery_for_table
 
-      def initialize(table_to_subquery_mapping)
-        @table_to_subquery_mapping = table_to_subquery_mapping
+      def initialize(subquery_for_table)
+        @subquery_for_table = subquery_for_table
       end
 
       def call(arel, next_middleware)
@@ -21,7 +21,7 @@ module Arel
           context: { range_variable: true },
           schema_name: nil,
         ).each do |node|
-          if (subquery = table_to_subquery_mapping[node.name.value])
+          if (subquery = subquery_for_table.call(node.name.value))
             node.replace subquery.as(node.name.value)
           end
         end
