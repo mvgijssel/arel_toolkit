@@ -15,9 +15,24 @@ module Arel
           if parent_object.is_a?(Arel::Nodes::JoinSource)
             context[:range_variable] = true
 
+          # NOTE: only applies to ActiveRecord generated Arel
+          # which does not use Arel::Table#alias but Arel::TableAlias instead
+          # Using Arel::Table as SELECT ... FROM <table> AS alias
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias) &&
+                node.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
+            context[:range_variable] = true
+
           # Using Arel::Table as SELECT ... FROM [<table>]
           elsif parent_object.is_a?(Array) &&
                 node.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
+            context[:range_variable] = true
+
+          # NOTE: only applies to ActiveRecord generated Arel
+          # which does not use Arel::Table#alias but Arel::TableAlias instead
+          # Using Arel::Table as SELECT ... FROM [<table> AS alias]
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias) &&
+                node.parent.parent.object.is_a?(Array) &&
+                node.parent.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
             context[:range_variable] = true
 
           # Using Arel::Table as SELECT ... INNER JOIN <table> ON TRUE
@@ -63,9 +78,6 @@ module Arel
           # Using Arel::Table as an "alias" for SELECT INTO <table> ...
           elsif parent_object.is_a?(Arel::Nodes::Into)
             context[:alias] = true
-
-          elsif parent_object.is_a?(Arel::Nodes::TableAlias)
-            context[:range_variable] = true
 
           else
             raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"

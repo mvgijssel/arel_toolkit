@@ -21,6 +21,17 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     expect(table_node.context).to eq(range_variable: true, column_reference: false, alias: false)
   end
 
+  it 'works for an ActiveRecord aliased table inside FROM' do
+    table_alias = Post.arel_table.alias('public_posts')
+    arel = Post.where(public: true).arel
+    arel.from table_alias
+    tree = Arel.enhance(arel)
+    table_node = tree.child_at_path(['ast', 'cores', 0, 'source', 'left', 'relation'])
+
+    expect(table_node.context)
+      .to eq(range_variable: true, column_reference: false, alias: false)
+  end
+
   it 'works for multiple tables inside FROM' do
     sql = 'SELECT * FROM posts, comments'
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
@@ -32,6 +43,21 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
       range_variable: true, column_reference: false, alias: false
     expect(comments_table_node.context).to eq \
       range_variable: true, column_reference: false, alias: false
+  end
+
+  it 'works for multiple aliased tables inside FROM' do
+    public_posts_alias = Post.arel_table.alias('public_posts')
+    private_posts_alias = Post.arel_table.alias('private_posts')
+    arel = Post.select(1).arel
+    arel.from [public_posts_alias, private_posts_alias]
+    tree = Arel.enhance(arel)
+    public_posts_alias = tree.child_at_path(['ast', 'cores', 0, 'source', 'left', 0, 'relation'])
+    private_posts_alias = tree.child_at_path(['ast', 'cores', 0, 'source', 'left', 1, 'relation'])
+
+    expect(public_posts_alias.context)
+      .to eq(range_variable: true, column_reference: false, alias: false)
+    expect(private_posts_alias.context)
+      .to eq(range_variable: true, column_reference: false, alias: false)
   end
 
   it 'works for joining tables' do
@@ -129,16 +155,6 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
     into_table_node = tree.child_at_path(['ast', 'cores', 0, 'into', 'expr'])
 
     expect(into_table_node.context)
-      .to eq(range_variable: false, column_reference: false, alias: true)
-  end
-
-  it 'works for a table alias' do
-    arel = Post.where(id: 1).arel.as('alias')
-    tree = Arel.enhance(arel)
-
-    alias_node = tree.query(class: Arel::Nodes::TableAlias).first
-
-    expect(alias_node.context)
       .to eq(range_variable: false, column_reference: false, alias: true)
   end
 

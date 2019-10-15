@@ -214,7 +214,8 @@ describe 'Arel.sql_to_arel' do
         sql_to_arel: false
   visit 'select', '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
         pg_node: 'PgQuery::RANGE_FUNCTION'
-  visit 'select', '* FROM (SELECT \'b\') AS "a" INNER JOIN LATERAL (SELECT 1) AS "b" ON \'t\'::bool',
+  visit 'select',
+        '* FROM (SELECT \'b\') AS "a" INNER JOIN LATERAL (SELECT 1) AS "b" ON \'t\'::bool',
         pg_node: 'PgQuery::RANGE_SUBSELECT'
   visit 'select', '1 FROM "public"."table_is_range_var" "alias", ONLY "b"',
         pg_node: 'PgQuery::RANGE_VAR'
