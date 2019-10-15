@@ -6,16 +6,33 @@ module Arel
         # rubocop:disable Metrics/CyclomaticComplexity
         # rubocop:disable Metrics/AbcSize
         def self.call(node)
-          context = node.context.merge!(range_variable: false, column_reference: false)
+          context = node.context.merge!(
+            range_variable: false, column_reference: false, alias: false,
+          )
           parent_object = node.parent.object
 
           # Using Arel::Table as SELECT ... FROM <table>
           if parent_object.is_a?(Arel::Nodes::JoinSource)
             context[:range_variable] = true
 
+          # NOTE: only applies to ActiveRecord generated Arel
+          # which does not use Arel::Table#alias but Arel::TableAlias instead
+          # Using Arel::Table as SELECT ... FROM <table> AS alias
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias) &&
+                node.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
+            context[:range_variable] = true
+
           # Using Arel::Table as SELECT ... FROM [<table>]
           elsif parent_object.is_a?(Array) &&
                 node.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
+            context[:range_variable] = true
+
+          # NOTE: only applies to ActiveRecord generated Arel
+          # which does not use Arel::Table#alias but Arel::TableAlias instead
+          # Using Arel::Table as SELECT ... FROM [<table> AS alias]
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias) &&
+                node.parent.parent.object.is_a?(Array) &&
+                node.parent.parent.parent.object.is_a?(Arel::Nodes::JoinSource)
             context[:range_variable] = true
 
           # Using Arel::Table as SELECT ... INNER JOIN <table> ON TRUE

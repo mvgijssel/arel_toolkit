@@ -195,7 +195,7 @@ module Arel
       end
 
       def visit_Alias(aliasname:)
-        aliasname
+        Arel.sql visit_String(nil, str: aliasname)
       end
 
       def visit_BitString(str:)
@@ -619,7 +619,7 @@ module Arel
       def visit_RangeSubselect(aliaz:, subquery:, lateral: false)
         aliaz = visit(aliaz)
         subquery = visit(subquery)
-        node = Arel::Nodes::TableAlias.new(Arel::Nodes::Grouping.new(subquery), aliaz)
+        node = Arel::Nodes::As.new(Arel::Nodes::Grouping.new(subquery), aliaz)
         lateral ? Arel::Nodes::Lateral.new(node) : node
       end
 
@@ -643,7 +643,8 @@ module Arel
           val = visit(val)
 
           if name
-            Arel::Nodes::As.new(val, Arel.sql(name))
+            aliaz = visit_Alias(aliasname: name)
+            Arel::Nodes::As.new(val, aliaz)
           else
             val
           end
