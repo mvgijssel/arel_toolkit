@@ -256,6 +256,6 @@ describe PgResultInit do
 
     new_result = PgResultInit.create(conn, original_result, columns, rows)
 
-    expect(new_result.fmod(0)).to eq -1
+    expect(new_result.fmod(0)).to eq(-1)
   end
 end
