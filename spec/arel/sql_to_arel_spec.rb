@@ -54,7 +54,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', '"id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'sql',
         'WITH "a" AS (SELECT 1) '\
-        'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") "d"',
+        'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") AS "d"',
         pg_node: 'PgQuery::COMMON_TABLE_EXPR'
   visit 'sql', 'CREATE TABLE a (b integer NOT NULL)',
         pg_node: 'PgQuery::CONSTRAINT',
@@ -79,7 +79,7 @@ describe 'Arel.sql_to_arel' do
         sql_to_arel: false
   visit 'sql', 'DO $$ a $$', pg_node: 'PgQuery::DEF_ELEM', sql_to_arel: false
   visit 'sql',
-        'WITH "some_delete_query" AS (SELECT 1 AS some_column) ' \
+        'WITH "some_delete_query" AS (SELECT 1 AS "some_column") ' \
         'DELETE FROM ONLY "a" "some_table" ' \
         'USING "other_table", "another_table" ' \
         'WHERE "other_table"."other_column" = 1.0 ' \
@@ -107,7 +107,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'DEALLOCATE ALL',
         pg_node: 'PgQuery::DEALLOCATE_STMT'
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
-  visit 'select', 'SUM("a") AS some_a_sum', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', 'SUM("a") AS "some_a_sum"', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'rank("b")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'public.rank("c")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'pg_catalog.obj_description("c", \'pg_class\')', pg_node: 'PgQuery::FUNC_CALL'
@@ -159,7 +159,7 @@ describe 'Arel.sql_to_arel' do
         'INSERT INTO "t" ("a", "b", "c", "d") ' \
         'OVERRIDING SYSTEM VALUE ' \
         'VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1) ' \
-        'RETURNING *, "some_column" AS some_column_alias',
+        'RETURNING *, "some_column" AS "some_column_alias"',
         pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql',
         'WITH RECURSIVE "a" AS (SELECT "some_table"."a" FROM "some_table") ' \
@@ -214,7 +214,7 @@ describe 'Arel.sql_to_arel' do
         sql_to_arel: false
   visit 'select', '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
         pg_node: 'PgQuery::RANGE_FUNCTION'
-  visit 'select', '* FROM (SELECT \'b\') "a" INNER JOIN LATERAL (SELECT 1) "b" ON \'t\'::bool',
+  visit 'select', '* FROM (SELECT \'b\') AS "a" INNER JOIN LATERAL (SELECT 1) AS "b" ON \'t\'::bool',
         pg_node: 'PgQuery::RANGE_SUBSELECT'
   visit 'select', '1 FROM "public"."table_is_range_var" "alias", ONLY "b"',
         pg_node: 'PgQuery::RANGE_VAR'
@@ -292,11 +292,11 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::TYPE_CAST'
   visit 'select', '"a"::varchar', pg_node: 'PgQuery::TYPE_NAME'
   visit 'sql',
-        'WITH "query" AS (SELECT 1 AS a) ' \
+        'WITH "query" AS (SELECT 1 AS "a") ' \
         'UPDATE ONLY "some_table" "table_alias" ' \
         'SET "b" = "query"."a", "d" = DEFAULT, "e" = (SELECT 1), "d" = ROW(DEFAULT) ' \
         'FROM "query", "other_query" WHERE 1 = 1 ' \
-        'RETURNING *, "c" AS some_column',
+        'RETURNING *, "c" AS "some_column"',
         pg_node: 'PgQuery::UPDATE_STMT'
   visit 'sql',
         'UPDATE ONLY "some_table" ' \
