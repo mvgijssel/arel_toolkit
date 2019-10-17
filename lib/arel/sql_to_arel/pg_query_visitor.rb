@@ -601,8 +601,8 @@ module Arel
         Arel::Nodes::BindParam.new(value)
       end
 
-      def visit_RangeFunction(is_rowsfrom:, functions:, lateral: false, ordinality: false)
-        boom 'https://github.com/mvgijssel/arel_toolkit/issues/36' unless is_rowsfrom == true
+      def visit_RangeFunction(is_rowsfrom: false, functions:, lateral: false, ordinality: false)
+        # binding.pry unless is_rowsfrom == true
 
         functions = functions.map do |function_array|
           function, empty_value = function_array
