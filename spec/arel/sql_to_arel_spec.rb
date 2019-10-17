@@ -212,6 +212,7 @@ describe 'Arel.sql_to_arel' do
         'PREPARE some_plan (integer) AS (SELECT $1)',
         pg_node: 'PgQuery::PREPARE_STMT',
         sql_to_arel: false
+  visit 'select', '* FROM generate_series(1, 2)'
   visit 'select', '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
         pg_node: 'PgQuery::RANGE_FUNCTION'
   visit 'select',
@@ -809,8 +810,6 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "ts_token_type('default')"
   visit 'select', 'ts_token_type(3722)'
   visit 'select', "ts_stat('SELECT vector from apod')"
-
-  visit 'select', '* FROM generate_series(1, 2)'
 
   it 'returns an Arel::SelectManager for only the top level SELECT' do
     sql = 'SELECT 1, (SELECT 2)'
