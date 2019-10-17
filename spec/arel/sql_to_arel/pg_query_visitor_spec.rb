@@ -44,14 +44,6 @@ describe Arel::SqlToArel::PgQueryVisitor do
   end
 
   describe 'visit_RangeFunction' do
-    it 'raises an exception when is_rowsfrom is not true' do
-      expect do
-        described_class.new.send(:visit_RangeFunction, is_rowsfrom: false, functions: [])
-      end.to raise_error do |error|
-        expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/36')
-      end
-    end
-
     it 'raises an exception when functions does not contain nil' do
       functions = [%w[some_function something_else]]
       expect do
