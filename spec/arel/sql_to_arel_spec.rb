@@ -811,7 +811,6 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'ts_token_type(3722)'
   visit 'select', "ts_stat('SELECT vector from apod')"
 
-  visit 'select', %{CAST('2019-10-01 00:00:00' AS TIMESTAMP)}
   visit 'select', %{* FROM GENERATE_SERIES(0, 1, CAST('1 week' AS INTERVAL)) AS time_series}
 
   it 'returns an Arel::SelectManager for only the top level SELECT' do
