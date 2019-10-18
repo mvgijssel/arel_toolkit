@@ -212,7 +212,7 @@ describe 'Arel.sql_to_arel' do
         'PREPARE some_plan (integer) AS (SELECT $1)',
         pg_node: 'PgQuery::PREPARE_STMT',
         sql_to_arel: false
-  visit 'select', '* FROM generate_series(0, 2) AS "time_series"'
+  visit 'select', '* FROM some_function(0, 2) AS "some_alias"'
   visit 'select', '* FROM generate_series(1, 2)'
   visit 'select', '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
         pg_node: 'PgQuery::RANGE_FUNCTION'
