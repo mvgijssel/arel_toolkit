@@ -281,22 +281,20 @@ module Arel
       end
 
       def visit_ColumnRef(fields:)
-        case fields.length
-        when 1
-          visited_field = visit(fields[0], :operator)
-          Arel::Nodes::UnqualifiedColumn.new Arel::Attribute.new(nil, visited_field)
+        fields = fields.reverse
+        column = visit(fields[0], :operator)
+        table = visit(fields[1], :operator) if fields[1]
+        schema_name = visit(fields[2], :operator) if fields[2]
+        database = visit(fields[3], :operator) if fields[3]
 
-        when 2
-          table_reference, column_reference = fields
-          table_reference = visit(table_reference, :operator)
-          table = Arel::Table.new(table_reference)
+        table = Arel::Table.new(table) if table
+        attribute = Arel::Attribute.new(table, column)
+        attribute.schema_name = schema_name
+        attribute.database = database
 
-          column_reference = visit(column_reference, :operator)
-          table[column_reference]
+        return attribute if table
 
-        else
-          raise 'Can\'t deal with column refs that have more than 2 fields'
-        end
+        Arel::Nodes::UnqualifiedColumn.new Arel::Attribute.new(nil, column)
       end
 
       def visit_CommonTableExpr(ctename:, ctequery:)
