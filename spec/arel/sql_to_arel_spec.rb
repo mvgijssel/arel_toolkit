@@ -52,6 +52,9 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::COLUMN_DEF',
         sql_to_arel: false
   visit 'select', '"id"', pg_node: 'PgQuery::COLUMN_REF'
+  visit 'select', '"posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
+  visit 'select', '"public"."posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
+  visit 'select', '"database"."public"."posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'sql',
         'WITH "a" AS (SELECT 1) '\
         'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") AS "d"',
