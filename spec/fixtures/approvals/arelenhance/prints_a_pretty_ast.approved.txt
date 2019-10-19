@@ -96,6 +96,14 @@
                                             <Node(String) [0, 'ast', 'cores', 0, 'wheres', 0, 'children', 0, 'left', 'expr', 'name']
                                               parent = Node(Arel::Attributes::Attribute)
                                               value = "id">
+                                          schema_name =
+                                            <Node(NilClass) [0, 'ast', 'cores', 0, 'wheres', 0, 'children', 0, 'left', 'expr', 'schema_name']
+                                              parent = Node(Arel::Attributes::Attribute)
+                                              value = nil>
+                                          database =
+                                            <Node(NilClass) [0, 'ast', 'cores', 0, 'wheres', 0, 'children', 0, 'left', 'expr', 'database']
+                                              parent = Node(Arel::Attributes::Attribute)
+                                              value = nil>
                                         >
                                     >
                                   right =
