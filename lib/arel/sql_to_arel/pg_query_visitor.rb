@@ -948,8 +948,11 @@ module Arel
         start_offset: nil,
         end_offset: nil
       )
-        instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
+        if name.present? && partition_clause.empty? && order_clause.empty?
+          return Arel::Nodes::SqlLiteral.new(name)
+        end
 
+        instance = name.nil? ? Arel::Nodes::Window.new : Arel::Nodes::NamedWindow.new(name)
         instance.tap do |window|
           window.orders = visit order_clause
           window.partitions = visit partition_clause
