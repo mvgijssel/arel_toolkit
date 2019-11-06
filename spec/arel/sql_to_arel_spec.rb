@@ -354,6 +354,12 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::WINDOW_DEF'
   visit 'sql', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"',
         pg_node: 'PgQuery::WITH_CLAUSE'
+  visit 'select', 'SUM("a") OVER (ORDER BY "a")'
+  visit 'select', 'CAST((AVG("a") OVER running_average) AS FLOAT)',
+        expected_sql: 'SELECT (AVG("a") OVER running_average)::double precision'
+  visit 'select',
+        'SUM("a") OVER w, AVG("a") OVER w FROM "t" ' \
+        'WINDOW "w" AS (PARTITION BY "b" ORDER BY "a" DESC)'
   visit 'select', '11 + (11 + 5)'
   visit 'select', '(12 - 12) - 13'
   visit 'select', '3 + (10 * 10)'
