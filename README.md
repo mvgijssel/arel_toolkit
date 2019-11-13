@@ -89,28 +89,31 @@ Arel::Middleware::Railtie.insert
 
 ### Example
 
-Create some middleware (this can be any Ruby object as long as it responds to `call`). In this example, we're creating a middleware that will reorder any query. Next to reordering, we're adding an additional middleware that prints out the result of the reorder middleware.
+Create middleware which can be any Ruby object as long as it responds to `call`. Middleware accepts 2 or 3 arguments, context is optional. Calling `.call` on `next_middleware` invokes the next middleware in the chain, returning the response from the database.
+
+In this example, we're creating a middleware that will reorder any query. Next to reordering, we're adding an additional middleware that prints out the result of the reorder middleware.
 
 ```ruby
 class ReorderMiddleware
-  def self.call(arel, _context)
+  def self.call(arel, next_middleware)
     enhanced_arel = Arel.enhance(arel)
     enhanced_arel.query(class: Arel::Nodes::SelectStatement).each do |node|
       arel_table = node.child_at_path(['cores', 0, 'source', 'left']).object
       node['orders'].replace([arel_table[:id].asc])
     end
 
-    arel.order(Post.arel_table[:id].asc)
+    new_arel = arel.order(Post.arel_table[:id].asc)
+    next_middleware.call(new_arel)
   end
 end
 
 class LoggingMiddleware
-  def self.call(arel, context)
+  def self.call(arel, next_middleware, context)
     puts "User executing query: `#{context[:current_user_id]}`"
     puts "Original SQL: `#{context[:original_sql]}`"
     puts "Modified SQL: `#{arel.to_sql}`"
-    
-    arel
+
+    next_middleware.call(arel)
   end
 end
 ```
