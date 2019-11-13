@@ -1,4 +1,16 @@
+puts "STARTING COMPILE"
+
+class Dir
+  def self.chdir(*args)
+    puts "CHDIR PATCH: #{args}"
+    raise 'boom'
+  end
+end
+
+puts "REQUIRE MKMF"
 require 'mkmf'
+
+puts "AFTER REQUIRE MKMF"
 
 CONFIG['debugflags'] = '-ggdb3'
 CONFIG['optflags'] = '-O0'
