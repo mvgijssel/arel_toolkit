@@ -1,8 +1,14 @@
 #include <libpq-fe.h>
-#include <pg.h>
 #include "pg_result_init.h"
 
 VALUE rb_mPgResultInit;
+
+/* defined by ruby-pg */
+PGresult* pgresult_get(VALUE);
+VALUE pg_new_result _(( PGresult *, VALUE ));
+VALUE rb_mPG;
+VALUE rb_cPGresult;
+VALUE rb_cPGconn;
 
 static VALUE
 pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_columns, VALUE rb_rows) {
@@ -132,7 +138,10 @@ pg_result_init_create(VALUE self, VALUE rb_pgconn, VALUE rb_result, VALUE rb_col
 void
 Init_pg_result_init(void)
 {
-  rb_mPgResultInit = rb_define_module("PgResultInit");
+  rb_mPG = rb_define_module( "PG" );
+  rb_cPGresult = rb_define_class_under( rb_mPG, "Result", rb_cObject );
+  rb_cPGconn = rb_define_class_under( rb_mPG, "Connection", rb_cObject );
 
+  rb_mPgResultInit = rb_define_module("PgResultInit");
   rb_define_module_function(rb_mPgResultInit, "create", pg_result_init_create, 4);
 }
