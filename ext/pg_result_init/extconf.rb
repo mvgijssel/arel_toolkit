@@ -5,23 +5,10 @@ CONFIG['optflags'] = '-O0'
 
 # https://github.com/jeremyevans/sequel_pg/blob/master/ext/sequel_pg/extconf.rb
 
-pg_include_dir = ENV['POSTGRES_INCLUDE'] ||
-                 (begin
-                    IO.popen('pg_config --includedir').readline.chomp
-                  rescue StandardError
-                    nil
-                  end)
-pg_lib_dir = ENV['POSTGRES_LIB'] ||
-             (begin
-                IO.popen('pg_config --libdir').readline.chomp
-              rescue StandardError
-                nil
-              end)
-
 dir_config(
   'pg',
-  pg_include_dir,
-  pg_lib_dir,
+  '/Applications/Postgres.app/Contents/Versions/11/include',
+  '/Applications/Postgres.app/Contents/Versions/11/lib',
 )
 
 if (
