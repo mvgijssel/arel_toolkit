@@ -7,27 +7,21 @@ module Arel
             frame_option_names = calculate_frame_option_names(frame_options)
             return unless frame_option_names.include?('FRAMEOPTION_NONDEFAULT')
 
-            range_klass = if frame_option_names.include?('FRAMEOPTION_RANGE')
-                            Arel::Nodes::Range
-                          else
-                            Arel::Nodes::Rows
-                          end
+            range_klass =
+              if frame_option_names.include?('FRAMEOPTION_RANGE')
+                Arel::Nodes::Range
+              else
+                Arel::Nodes::Rows
+              end
 
-            start_node = calculate_frame_node(
-              'FRAMEOPTION_START_',
-              frame_option_names,
-              start_offset,
-            )
-            end_node = calculate_frame_node(
-              'FRAMEOPTION_END_',
-              frame_option_names,
-              end_offset,
-            )
+            start_node =
+              calculate_frame_node('FRAMEOPTION_START_', frame_option_names, start_offset)
+            end_node = calculate_frame_node('FRAMEOPTION_END_', frame_option_names, end_offset)
 
             if frame_option_names.include?('FRAMEOPTION_BETWEEN')
               Arel::Nodes::Between.new(
                 range_klass.new,
-                Arel::Nodes::And.new([start_node, end_node]),
+                Arel::Nodes::And.new([start_node, end_node])
               )
             else
               range_klass.new start_node
@@ -56,14 +50,12 @@ module Arel
             'FRAMEOPTION_START_VALUE_PRECEDING' => 0x00400,
             'FRAMEOPTION_END_VALUE_PRECEDING' => 0x00800,
             'FRAMEOPTION_START_VALUE_FOLLOWING' => 0x01000,
-            'FRAMEOPTION_END_VALUE_FOLLOWING' => 0x02000,
+            'FRAMEOPTION_END_VALUE_FOLLOWING' => 0x02000
           }.freeze
 
           def biggest_detractable_number(number, candidates)
             high_to_low_candidates = candidates.sort { |a, b| b <=> a }
-            high_to_low_candidates.find do |candidate|
-              number - candidate >= 0
-            end
+            high_to_low_candidates.find { |candidate| number - candidate >= 0 }
           end
 
           def calculate_frame_option_names(frame_options, names = [])
@@ -71,9 +63,7 @@ module Arel
 
             number = biggest_detractable_number(frame_options, FRAMEOPTIONS.values)
             name = FRAMEOPTIONS.key(number)
-            calculate_frame_option_names(
-              frame_options - number, names + [name]
-            )
+            calculate_frame_option_names(frame_options - number, names + [name])
           end
 
           def calculate_frame_node(pattern, frame_option_names, offset)
@@ -88,19 +78,14 @@ module Arel
             case node_name
             when 'UNBOUNDED_PRECEDING'
               Arel::Nodes::Preceding.new
-
             when 'UNBOUNDED_FOLLOWING'
               Arel::Nodes::Following.new
-
             when 'CURRENT_ROW'
               Arel::Nodes::CurrentRow.new
-
             when 'VALUE_PRECEDING'
               Arel::Nodes::Preceding.new offset
-
             when 'VALUE_FOLLOWING'
               Arel::Nodes::Following.new offset
-
             else
               raise "Unknown start / end frame node `#{node_name}`"
             end

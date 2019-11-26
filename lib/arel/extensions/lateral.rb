@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # https://github.com/mvgijssel/arel_toolkit/issues/46
-    class Lateral < Arel::Nodes::Unary
-    end
+    class Lateral < Arel::Nodes::Unary; end
   end
 
   module Visitors

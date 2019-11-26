@@ -22,8 +22,8 @@ module Arel
 
       def initialize(expr, aliaz = nil)
         @expressions = expr
-        @alias       = aliaz && SqlLiteral.new(aliaz)
-        @distinct    = false
+        @alias = aliaz && SqlLiteral.new(aliaz)
+        @distinct = false
       end
 
       def as(aliaz)
@@ -36,8 +36,7 @@ module Arel
       end
 
       def eql?(other)
-        self.class == other.class &&
-          expressions == other.expressions &&
+        self.class == other.class && expressions == other.expressions &&
           self.alias == other.alias &&
           distinct == other.distinct
       end

@@ -16,10 +16,7 @@ module Arel
           binds_collection.concat(binds)
         end
 
-        [
-          sql_collection.join('; '),
-          binds_collection,
-        ]
+        [sql_collection.join('; '), binds_collection]
       end
 
       def map(&block)

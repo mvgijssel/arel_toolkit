@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class NotBetween < Arel::Nodes::Between
-    end
+    class NotBetween < Arel::Nodes::Between; end
   end
 
   module Visitors

@@ -2,9 +2,7 @@ module Arel
   module Middleware
     module PostgreSQLAdapter
       def initialize(*args)
-        Arel.middleware.none do
-          super(*args)
-        end
+        Arel.middleware.none { super(*args) }
       end
 
       def execute(sql, name = nil)
@@ -19,7 +17,7 @@ module Arel
           Arel::Middleware::Result.create(
             data: parent_execute(processed_sql, name),
             from: Arel::Middleware::PGResult,
-            to: Arel::Middleware::PGResult,
+            to: Arel::Middleware::PGResult
           )
         end
       end
@@ -30,10 +28,11 @@ module Arel
           # NOTE: we're not calling `super` here, but execute.
           # The `query` super does not return the columns, like the other methods.
           # As we want the result objects to be the same, we call execute instead.
-          Arel::Middleware::Result.create(
+          Arel::Middleware::Result
+            .create(
             data: parent_execute(processed_sql, name),
             from: Arel::Middleware::PGResult,
-            to: Arel::Middleware::ArrayResult,
+            to: Arel::Middleware::ArrayResult
           )
         end
       end
@@ -43,7 +42,7 @@ module Arel
           Arel::Middleware::Result.create(
             data: super(processed_sql, name, processed_binds),
             from: Arel::Middleware::PGResult,
-            to: Arel::Middleware::PGResult,
+            to: Arel::Middleware::PGResult
           )
         end
       end
@@ -53,7 +52,7 @@ module Arel
           Arel::Middleware::Result.create(
             data: super(processed_sql, name, processed_binds),
             from: Arel::Middleware::PGResult,
-            to: Arel::Middleware::PGResult,
+            to: Arel::Middleware::PGResult
           )
         end
       end

@@ -15,9 +15,7 @@ if Gem.loaded_specs.key?('rspec-rails')
       end
 
       def test_arel_toolkit(&block)
-        Arel.middleware.apply([IgnoreFirstEntry]) do
-          yield block
-        end
+        Arel.middleware.apply([IgnoreFirstEntry]) { yield block }
       end
 
       def index
@@ -32,15 +30,14 @@ if Gem.loaded_specs.key?('rspec-rails')
 
         get :index
 
-        expect(response.body).to eq ['Willian'].to_json
+        expect(response.body).to eq %w[Willian].to_json
       end
 
       it 'has loaded the Railtie' do
-        initializer_names = Rails.application.railties.map do |railtie|
-          railtie.initializers.map do |initializer|
-            initializer.name.to_s
-          end
-        end.flatten
+        initializer_names =
+          Rails.application.railties.map do |railtie|
+            railtie.initializers.map { |initializer| initializer.name.to_s }
+          end.flatten
 
         expect(initializer_names).to include('arel.middleware.insert')
       end

@@ -5,14 +5,10 @@ module Arel
         def call(arel, next_middleware)
           tree = Arel.enhance(arel)
 
-          tree.query(class: Arel::Table).each do |node|
-            node['type_caster'].remove
-          end
+          tree.query(class: Arel::Table).each { |node| node['type_caster'].remove }
 
           tree.query(class: Arel::Nodes::BindParam).each do |node|
-            node.replace(
-              cast_for_database(node.object.value.value_for_database),
-            )
+            node.replace(cast_for_database(node.object.value.value_for_database))
           end
 
           next_middleware.call tree.object

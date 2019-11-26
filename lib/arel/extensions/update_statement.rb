@@ -33,11 +33,12 @@ module Arel
           collector << SPACE
         end
 
-        wheres = if o.orders.empty? && o.limit.nil?
-                   o.wheres
-                 else
-                   [Nodes::In.new(o.key, [build_subselect(o.key, o)])]
-                 end
+        wheres =
+          if o.orders.empty? && o.limit.nil?
+            o.wheres
+          else
+            [Nodes::In.new(o.key, [build_subselect(o.key, o)])]
+          end
 
         collector << 'UPDATE '
         collector = visit o.relation, collector

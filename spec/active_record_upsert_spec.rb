@@ -10,9 +10,10 @@ if Gem.loaded_specs.key?('active_record_upsert')
       Arel.middleware.apply([UpsertMiddleware]) do
         post = Post.create!(title: 'some title', content: 'some content')
 
-        expect do
-          Post.upsert(id: post.id, title: 'some other title')
-        end.to change { post.reload.title }.from('some title').to('some other title')
+        expect { Post.upsert(id: post.id, title: 'some other title') }.to change {
+          post.reload.title
+        }.from('some title')
+          .to('some other title')
       end
     end
 
@@ -21,8 +22,9 @@ if Gem.loaded_specs.key?('active_record_upsert')
         post = Post.new(id: 1)
         post.title = 'some title'
         post.public = true
-        post
-          .upsert(attributes: [:title], arel_condition: Post.arel_table[:updated_at].lt(1.day.ago))
+        post.upsert(
+          attributes: %i[title], arel_condition: Post.arel_table[:updated_at].lt(1.day.ago)
+        )
       end
     end
   end

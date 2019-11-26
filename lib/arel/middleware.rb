@@ -11,8 +11,7 @@ module Arel
   module Middleware
     class << self
       def current_chain
-        Thread.current[:arel_toolkit_middleware_current_chain] ||=
-          Arel::Middleware::Chain.new
+        Thread.current[:arel_toolkit_middleware_current_chain] ||= Arel::Middleware::Chain.new
       end
 
       def current_chain=(new_chain)

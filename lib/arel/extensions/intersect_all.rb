@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class IntersectAll < Binary
-    end
+    class IntersectAll < Binary; end
   end
 
   module Visitors

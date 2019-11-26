@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class Indirection < Arel::Nodes::Binary
-    end
+    class Indirection < Arel::Nodes::Binary; end
   end
 
   module Visitors

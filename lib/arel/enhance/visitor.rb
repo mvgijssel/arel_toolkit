@@ -5,7 +5,7 @@ module Arel
     # rubocop:disable Naming/MethodName
     class Visitor < Arel::Visitors::Dot
       DEFAULT_CONTEXT_ENHANCERS = {
-        Arel::Table => Arel::Enhance::ContextEnhancer::ArelTable,
+        Arel::Table => Arel::Enhance::ContextEnhancer::ArelTable
       }.freeze
 
       attr_reader :context_enhancers
@@ -20,9 +20,7 @@ module Arel
       def accept_with_root(object, root_node, context_enhancers = DEFAULT_CONTEXT_ENHANCERS)
         @context_enhancers = context_enhancers
 
-        with_node(root_node) do
-          visit object
-        end
+        with_node(root_node) { visit object }
 
         root_node
       end

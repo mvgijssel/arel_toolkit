@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class BitString < Arel::Nodes::Unary
-    end
+    class BitString < Arel::Nodes::Unary; end
   end
 
   module Visitors

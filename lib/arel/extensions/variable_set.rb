@@ -32,11 +32,7 @@ module Arel
           collector << ' TO '
         end
 
-        if o.args.empty?
-          collector << 'DEFAULT'
-        else
-          inject_join(o.args, collector, ', ')
-        end
+        o.args.empty? ? collector << 'DEFAULT' : inject_join(o.args, collector, ', ')
       end
     end
 

@@ -17,9 +17,7 @@ describe Arel::SqlToArel::PgQueryVisitor do
         raise 'uh oh'
       end
 
-      expect do
-        parser.accept(sql)
-      end.to raise_error do |error|
+      expect { parser.accept(sql) }.to raise_error do |error|
         expect(error.message).to eq message
       end
     end
@@ -27,17 +25,17 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
   describe 'visit_A_Expr' do
     it 'raises an exception with a PgQuery::AEXPR_OF statement' do
-      expect do
+      expect {
         described_class.new.send(:visit_A_Expr, kind: PgQuery::AEXPR_OF, name: 'name')
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/34')
       end
     end
 
     it 'raises an exception with a PgQuery::AEXPR_PAREN statement' do
-      expect do
+      expect {
         described_class.new.send(:visit_A_Expr, kind: PgQuery::AEXPR_PAREN, name: 'name')
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/35')
       end
     end
@@ -46,9 +44,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
   describe 'visit_RangeFunction' do
     it 'raises an exception when functions does not contain nil' do
       functions = [%w[some_function something_else]]
-      expect do
+      expect {
         described_class.new.send(:visit_RangeFunction, is_rowsfrom: true, functions: functions)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/37')
       end
     end
@@ -56,18 +54,13 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
   describe 'visit_SubLink' do
     it 'raises an exception when typemod is not -1' do
-      oper_name = [
-        { 'String' => { 'str' => '=' } },
-        { 'String' => { 'str' => '>' } },
-      ]
-      expect do
+      oper_name = [{ 'String' => { 'str' => '=' } }, { 'String' => { 'str' => '>' } }]
+      expect {
         described_class.new.send(
           :visit_SubLink,
-          subselect: [],
-          sub_link_type: 1,
-          oper_name: oper_name,
+          subselect: [], sub_link_type: 1, oper_name: oper_name
         )
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/39')
       end
     end
@@ -78,12 +71,12 @@ describe Arel::SqlToArel::PgQueryVisitor do
       funcname = [
         { 'String' => { 'str' => 'some_schema' } },
         { 'String' => { 'str' => 'some_function' } },
-        { 'String' => { 'str' => 'something_unknown' } },
+        { 'String' => { 'str' => 'something_unknown' } }
       ]
 
-      expect do
+      expect {
         described_class.new.send(:visit_FuncCall, funcname: funcname)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include("Don't know how to handle function names length `3`")
       end
     end
@@ -91,9 +84,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
   describe 'visit_TypeName' do
     it 'raises an exception when typemod is not -1' do
-      expect do
+      expect {
         described_class.new.send(:visit_TypeName, names: [], typemod: 1)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/40')
       end
     end
@@ -102,12 +95,12 @@ describe Arel::SqlToArel::PgQueryVisitor do
       names = [
         { 'String' => { 'str' => Arel::SqlToArel::PgQueryVisitor::PG_CATALOG } },
         { 'String' => { 'str' => 'bool' } },
-        { 'String' => { 'str' => 'bpchar' } },
+        { 'String' => { 'str' => 'bpchar' } }
       ]
 
-      expect do
+      expect {
         described_class.new.send(:visit_TypeName, names: names, typemod: -1)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/41')
       end
     end
@@ -115,16 +108,14 @@ describe Arel::SqlToArel::PgQueryVisitor do
     it 'raises an exception when array_bounds is not [] or [-1]' do
       names = [
         { 'String' => { 'str' => Arel::SqlToArel::PgQueryVisitor::PG_CATALOG } },
-        { 'String' => { 'str' => 'bool' } },
+        { 'String' => { 'str' => 'bool' } }
       ]
-      expect do
+      expect {
         described_class.new.send(
           :visit_TypeName,
-          names: names,
-          typemod: -1,
-          array_bounds: [{ 'Integer' => { 'ival' => 1 } }],
+          names: names, typemod: -1, array_bounds: [{ 'Integer' => { 'ival' => 1 } }]
         )
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/86')
       end
     end
@@ -132,25 +123,25 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
   describe 'generate_sublink' do
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_ROWCOMPARE' do
-      expect do
+      expect {
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_ROWCOMPARE, nil, nil, nil)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/42')
       end
     end
 
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_MULTIEXPR' do
-      expect do
+      expect {
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_MULTIEXPR, nil, nil, nil)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/43')
       end
     end
 
     it 'raises an exception when sub_link_type is PgQuery::SUBLINK_TYPE_ROWCOMPARE' do
-      expect do
+      expect {
         described_class.new.send(:generate_sublink, PgQuery::SUBLINK_TYPE_CTE, nil, nil, nil)
-      end.to raise_error do |error|
+      }.to raise_error do |error|
         expect(error.message).to include('https://github.com/mvgijssel/arel_toolkit/issues/44')
       end
     end

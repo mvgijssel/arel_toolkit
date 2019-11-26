@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class LocalTimestamp < TimeWithPrecision
-    end
+    class LocalTimestamp < TimeWithPrecision; end
   end
 
   module Visitors

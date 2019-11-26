@@ -10,9 +10,7 @@ describe 'Arel.enhance' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result.first)
 
-    expect do
-      tree['unknown']
-    end.to raise_error(/key not found/)
+    expect { tree['unknown'] }.to raise_error(/key not found/)
   end
 
   it 'uses regular method accessors to access children' do
@@ -26,9 +24,7 @@ describe 'Arel.enhance' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result.first)
 
-    expect do
-      tree.unknown
-    end.to raise_error(/undefined method `unknown'/)
+    expect { tree.unknown }.to raise_error(/undefined method `unknown'/)
   end
 
   it 'correctly handles respond_to and method for method missing' do
@@ -75,9 +71,9 @@ describe 'Arel.enhance' do
 
     expect(parsed_sql).to_not eq(sql)
 
-    expect do
-      ActiveRecord::Base.connection.exec_cache(parsed_sql, 'TEST', binds)
-    end.to raise_error(/cannot insert multiple commands into a prepared statement/)
+    expect { ActiveRecord::Base.connection.exec_cache(parsed_sql, 'TEST', binds) }.to raise_error(
+      /cannot insert multiple commands into a prepared statement/
+    )
   end
 
   it 'replaces a node using a setter' do
@@ -86,11 +82,9 @@ describe 'Arel.enhance' do
     old_projections = tree[0]['ast']['cores'][0]['projections']
     new_projections = [3, 4]
 
-    expect do
-      old_projections.replace(new_projections)
-    end
-      .to change { tree.to_sql }
-      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1')
+    expect { old_projections.replace(new_projections) }.to change { tree.to_sql }.from(
+      'SELECT 1, 2 FROM "posts" WHERE "id" = 1'
+    )
       .to('SELECT 3, 4 FROM "posts" WHERE "id" = 1')
   end
 
@@ -100,11 +94,9 @@ describe 'Arel.enhance' do
     old_type_name = tree[0]['ast']['cores'][0]['projections'][0]['type_name']
     new_type_name = 'real'
 
-    expect do
-      old_type_name.replace(new_type_name)
-    end
-      .to change { tree.to_sql }
-      .from('SELECT 1::integer')
+    expect { old_type_name.replace(new_type_name) }.to change { tree.to_sql }.from(
+      'SELECT 1::integer'
+    )
       .to('SELECT 1::real')
   end
 
@@ -114,11 +106,9 @@ describe 'Arel.enhance' do
     old_projection = tree[0]['ast']['cores'][0]['projections'][0]
     new_projection = Arel::Nodes::UnqualifiedColumn.new Arel::Attribute.new(nil, 'c')
 
-    expect do
-      old_projection.replace(new_projection)
-    end
-      .to change { tree.to_sql }
-      .from('SELECT "a", "b"')
+    expect { old_projection.replace(new_projection) }.to change { tree.to_sql }.from(
+      'SELECT "a", "b"'
+    )
       .to('SELECT "c", "b"')
   end
 
@@ -126,13 +116,12 @@ describe 'Arel.enhance' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result)
 
-    expect do
+    expect {
       tree[0]['ast']['cores'][0]['wheres'].remove
       tree[0]['ast']['cores'][0]['projections'][1].remove
-    end
-      .to change { tree.to_sql }
-      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1')
-      .to('SELECT 1 FROM "posts"')
+    }.to change { tree.to_sql }.from('SELECT 1, 2 FROM "posts" WHERE "id" = 1').to(
+      'SELECT 1 FROM "posts"'
+    )
   end
 
   it 'can enhance a Hash like object' do
@@ -140,28 +129,24 @@ describe 'Arel.enhance' do
     binds = nil
 
     middleware = lambda do |next_arel, next_middleware, _context|
-      next_arel.query(class: Arel::InsertManager).each do
-        sql, binds = next_arel.to_sql_and_binds
-      end
+      next_arel.query(class: Arel::InsertManager).each { sql, binds = next_arel.to_sql_and_binds }
 
       next_middleware.call(next_arel)
     end
 
-    Arel.middleware.append(middleware) do
-      Post.create additional_data: { foo: :bar }
-    end
+    Arel.middleware.append(middleware) { Post.create additional_data: { foo: :bar } }
 
     expect(sql).to eq 'INSERT INTO "posts" ("additional_data", "created_at", "updated_at") ' \
-                      'VALUES ($1, $2, $3) RETURNING "id"'
+         'VALUES ($1, $2, $3) RETURNING "id"'
   end
 
   it 'marks a tree as dirty when modified', focus: true do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result)
 
-    expect do
-      tree[0]['ast']['cores'][0]['wheres'].remove
-    end.to change { tree.dirty? }.from(false).to(true)
+    expect { tree[0]['ast']['cores'][0]['wheres'].remove }.to change { tree.dirty? }.from(false).to(
+      true
+    )
   end
 
   it 'updates the enhanced tree when mutating' do
@@ -194,9 +179,7 @@ describe 'Arel.enhance' do
     old_projections = tree[0]['ast']['cores'][0]['projections']
     new_projections = [3, 4]
 
-    expect do
-      old_projections.replace(new_projections)
-    end.to_not(change { result.to_sql })
+    expect { old_projections.replace(new_projections) }.to_not(change { result.to_sql })
   end
 
   it 'makes a deep copy of the arel when modified' do

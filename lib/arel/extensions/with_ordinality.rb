@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://paquier.xyz/postgresql-2/postgres-9-4-feature-highlight-with-ordinality/
-    class WithOrdinality < Arel::Nodes::Unary
-    end
+    class WithOrdinality < Arel::Nodes::Unary; end
   end
 
   module Visitors

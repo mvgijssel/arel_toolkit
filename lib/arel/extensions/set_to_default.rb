@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
-    class SetToDefault < Arel::Nodes::Node
-    end
+    class SetToDefault < Arel::Nodes::Node; end
   end
 
   module Visitors

@@ -7,10 +7,7 @@ module Arel
       attr_reader :object_mapping
       attr_reader :schema_priority
 
-      def initialize(
-        schema_priority = DEFAULT_SCHEMA_PRIORITY,
-        override_object_mapping = {}
-      )
+      def initialize(schema_priority = DEFAULT_SCHEMA_PRIORITY, override_object_mapping = {})
         @schema_priority = schema_priority
         @object_mapping = database_object_mapping.merge(override_object_mapping)
       end
@@ -27,21 +24,15 @@ module Arel
       private
 
       def update_arel_tables(tree)
-        tree.query(
-          class: Arel::Table,
-          schema_name: nil,
-          context: { range_variable: true },
-        ).each do |node|
+        tree.query(class: Arel::Table, schema_name: nil, context: { range_variable: true })
+          .each do |node|
           schema_name = schema_name_from_object_name(node['name'].object.to_s)
           node['schema_name'].replace(schema_name)
         end
       end
 
       def update_typecasts(tree)
-        tree.query(
-          class: Arel::Nodes::TypeCast,
-          type_name: 'regclass',
-        ).each do |node|
+        tree.query(class: Arel::Nodes::TypeCast, type_name: 'regclass').each do |node|
           update_typecast_node(node)
         end
       end
@@ -59,25 +50,24 @@ module Arel
           node # Do nothing
         else
           raise "Don't know how to handle `#{reference_parts.length}` parts in " \
-                "`#{reference_parts}` for sql `#{node.to_sql}`"
+                  "`#{reference_parts}` for sql `#{node.to_sql}`"
         end
       end
 
       def update_functions(tree)
         tree.query(
-          class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function),
-          schema_name: nil,
-        ).each do |node|
-          update_function_node(node)
-        end
+          class: Arel::Enhance::QueryMethods.in_ancestors?(Arel::Nodes::Function), schema_name: nil
+        )
+          .each { |node| update_function_node(node) }
       end
 
       def update_function_node(node)
-        object_name = if node.object.is_a?(Arel::Nodes::NamedFunction)
-                        node['name'].object.downcase
-                      else
-                        node.object.class.to_s.demodulize.underscore
-                      end
+        object_name =
+          if node.object.is_a?(Arel::Nodes::NamedFunction)
+            node['name'].object.downcase
+          else
+            node.object.class.to_s.demodulize.underscore
+          end
 
         schema_name = schema_name_from_object_name(object_name)
         node['schema_name'].replace(schema_name)
@@ -100,14 +90,15 @@ module Arel
           raise "Object `#{table_name}` does not exist in the object_mapping and cannot be prefixed"
         end
 
-        schema_name = schema_priority.find do |possible_schema_name|
-          possible_schemas.include?(possible_schema_name)
-        end
+        schema_name =
+          schema_priority.find do |possible_schema_name|
+            possible_schemas.include?(possible_schema_name)
+          end
 
         if schema_name.nil?
           raise "Could not find a schema name for table `#{table_name}`.\n" \
-                "Current schema priority is `#{schema_priority}`.\n" \
-                "Possible schemas are `#{possible_schemas}`."
+                  "Current schema priority is `#{schema_priority}`.\n" \
+                  "Possible schemas are `#{possible_schemas}`."
         end
 
         # We don't need to prefix nodes with `pg_catalog`, because that's the default
@@ -152,26 +143,26 @@ module Arel
 
       def database_tables
         connection.execute(
-          'SELECT tablename AS object_name, schemaname AS schema_name FROM pg_tables',
+          'SELECT tablename AS object_name, schemaname AS schema_name FROM pg_tables'
         )
       end
 
       def database_views
         connection.execute(
-          'SELECT viewname AS object_name, schemaname AS schema_name FROM pg_views',
+          'SELECT viewname AS object_name, schemaname AS schema_name FROM pg_views'
         )
       end
 
       def database_materialized_views
         connection.execute(
-          'SELECT matviewname AS object_name, schemaname AS schema_name FROM pg_matviews',
+          'SELECT matviewname AS object_name, schemaname AS schema_name FROM pg_matviews'
         )
       end
 
       def database_functions
         connection.execute(
           'SELECT pg_proc.proname AS object_name, pg_namespace.nspname AS schema_name ' \
-          'FROM pg_proc INNER JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid',
+            'FROM pg_proc INNER JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid'
         )
       end
 

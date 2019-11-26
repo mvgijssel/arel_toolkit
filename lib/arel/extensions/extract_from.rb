@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT
-    class ExtractFrom < Arel::Nodes::Binary
-    end
+    class ExtractFrom < Arel::Nodes::Binary; end
   end
 
   module Visitors

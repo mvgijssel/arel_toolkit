@@ -1,12 +1,12 @@
 RSpec::Matchers.define :pg_ast_contains do |expected|
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/AbcSize
-  def ast_contains_constant(tree, constant)
+  def ast_contains_constant(
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/AbcSize
+    tree, constant
+  )
     case tree
     when Array
-      tree.any? do |child|
-        ast_contains_constant(child, constant)
-      end
+      tree.any? { |child| ast_contains_constant(child, constant) }
     when Hash
       tree.any? do |key, value|
         next true if key.to_s == constant.to_s
@@ -30,11 +30,7 @@ RSpec::Matchers.define :pg_ast_contains do |expected|
 
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/AbcSize
-  match do |pg_query_tree|
-    ast_contains_constant(pg_query_tree, expected)
-  end
+  match { |pg_query_tree| ast_contains_constant(pg_query_tree, expected) }
 
-  failure_message do |pg_query_tree|
-    "expected that #{pg_query_tree} would contain `#{expected}`"
-  end
+  failure_message { |pg_query_tree| "expected that #{pg_query_tree} would contain `#{expected}`" }
 end

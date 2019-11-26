@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class SessionUser < Arel::Nodes::Node
-    end
+    class SessionUser < Arel::Nodes::Node; end
   end
 
   module Visitors

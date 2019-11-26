@@ -100,7 +100,7 @@ module Arel
               format: pg_result.fformat(index),
               typid: pg_result.ftype(index),
               typlen: pg_result.fsize(index),
-              atttypmod: pg_result.fmod(index),
+              atttypmod: pg_result.fmod(index)
             )
           end
         end
@@ -130,7 +130,7 @@ module Arel
               format: column.metadata.fetch(:format, 0),
               typid: column.metadata.fetch(:typid),
               typlen: column.metadata.fetch(:typlen),
-              atttypmod: column.metadata.fetch(:atttypmod, -1),
+              atttypmod: column.metadata.fetch(:atttypmod, -1)
             }
           end
         end

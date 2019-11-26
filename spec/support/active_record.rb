@@ -4,10 +4,7 @@ def remove_active_record_info(arel)
 end
 
 ActiveRecord::Base.establish_connection(
-  adapter: 'postgresql',
-  host: 'localhost',
-  databse: 'arel_toolkit_test',
-  username: 'postgres',
+  adapter: 'postgresql', host: 'localhost', databse: 'arel_toolkit_test', username: 'postgres'
 )
 
 ActiveRecord::Schema.define do
@@ -31,21 +28,20 @@ ActiveRecord::Schema.define do
 end
 
 ActiveRecord::Base.connection.execute(
-  'CREATE OR REPLACE VIEW public_posts AS SELECT * FROM posts WHERE public = true',
+  'CREATE OR REPLACE VIEW public_posts AS SELECT * FROM posts WHERE public = true'
 )
 
 ActiveRecord::Base.connection.execute(
   'DROP MATERIALIZED VIEW IF EXISTS posts_count; ' \
-  'CREATE MATERIALIZED VIEW posts_count AS SELECT COUNT(*) FROM posts',
+    'CREATE MATERIALIZED VIEW posts_count AS SELECT COUNT(*) FROM posts'
 )
 
 ActiveRecord::Base.connection.execute(
   'CREATE OR REPLACE FUNCTION view_count(integer, integer)' \
-  "RETURNS integer LANGUAGE SQL AS 'SELECT 4'",
+    "RETURNS integer LANGUAGE SQL AS 'SELECT 4'"
 )
 
-ActiveRecord::Base.connection.execute(
-  <<~SQL,
+ActiveRecord::Base.connection.execute(<<~SQL)
     DROP AGGREGATE IF EXISTS sum_view_count(integer);
     CREATE AGGREGATE sum_view_count(integer) (
       SFUNC = public.view_count,
@@ -53,7 +49,6 @@ ActiveRecord::Base.connection.execute(
       INITCOND = '0'
     )
   SQL
-)
 
 class Post < ActiveRecord::Base
   belongs_to :owner, class_name: 'User'

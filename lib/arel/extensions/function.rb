@@ -17,9 +17,9 @@ module Arel
           super
 
           @expressions = expr
-          @alias       = aliaz && SqlLiteral.new(aliaz)
-          @distinct    = false
-          @orders      = []
+          @alias = aliaz && SqlLiteral.new(aliaz)
+          @distinct = false
+          @orders = []
         end
       end
 
@@ -83,11 +83,11 @@ module Arel
           visit_edge o, 'schema_name'
         end
 
-        alias visit_Arel_Nodes_Min    function
-        alias visit_Arel_Nodes_Max    function
-        alias visit_Arel_Nodes_Avg    function
-        alias visit_Arel_Nodes_Sum    function
-        alias visit_Arel_Nodes_Count  function
+        alias visit_Arel_Nodes_Min function
+        alias visit_Arel_Nodes_Max function
+        alias visit_Arel_Nodes_Avg function
+        alias visit_Arel_Nodes_Sum function
+        alias visit_Arel_Nodes_Count function
       end
 
       prepend FunctionExtension

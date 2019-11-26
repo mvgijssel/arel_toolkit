@@ -1,6 +1,6 @@
 module Arel
   module Middleware
-    if defined? Rails::Railtie
+    if defined?(Rails::Railtie)
       class Railtie < Rails::Railtie
         initializer 'arel.middleware.insert' do
           ActiveSupport.on_load :active_record do
@@ -13,12 +13,10 @@ module Arel
     class Railtie
       def self.insert
         ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.prepend(
-          Arel::Middleware::PostgreSQLAdapter,
+          Arel::Middleware::PostgreSQLAdapter
         )
 
-        ActiveRecord::Base.singleton_class.prepend(
-          Arel::Middleware::ActiveRecordExtension,
-        )
+        ActiveRecord::Base.singleton_class.prepend(Arel::Middleware::ActiveRecordExtension)
       end
     end
   end

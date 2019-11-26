@@ -16,9 +16,7 @@ end
 shared_examples 'enhance' do |sql|
   it "expects the sql `#{sql}` to work with the enhanced AST" do
     parsed_sql = Arel.sql_to_arel(sql)
-    parsed_sql.each do |sql_part|
-      Arel.enhance(sql_part)
-    end
+    parsed_sql.each { |sql_part| Arel.enhance(sql_part) }
   end
 end
 

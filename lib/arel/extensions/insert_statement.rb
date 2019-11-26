@@ -36,9 +36,7 @@ module Arel
         collector << 'INSERT INTO '
         collector = visit o.relation, collector
         if o.columns.any?
-          collector << " (#{o.columns.map do |x|
-            quote_column_name x.name
-          end.join ', '})"
+          collector << " (#{o.columns.map { |x| quote_column_name x.name }.join ', '})"
         end
 
         case o.override
@@ -52,13 +50,14 @@ module Arel
           raise "Unknown override `#{o.override}`"
         end
 
-        collector = if o.values
-                      maybe_visit o.values, collector
-                    elsif o.select
-                      maybe_visit o.select, collector
-                    else
-                      collector
-                    end
+        collector =
+          if o.values
+            maybe_visit o.values, collector
+          elsif o.select
+            maybe_visit o.select, collector
+          else
+            collector
+          end
 
         visit(o.conflict, collector) if o.conflict
 

@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class NaturalJoin < Arel::Nodes::Join
-    end
+    class NaturalJoin < Arel::Nodes::Join; end
   end
 
   module Visitors

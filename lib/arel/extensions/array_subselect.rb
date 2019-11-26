@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.1/functions-comparisons.html
-    class ArraySubselect < Arel::Nodes::Unary
-    end
+    class ArraySubselect < Arel::Nodes::Unary; end
   end
 
   module Visitors

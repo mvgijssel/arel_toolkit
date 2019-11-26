@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class ExceptAll < Binary
-    end
+    class ExceptAll < Binary; end
   end
 
   module Visitors

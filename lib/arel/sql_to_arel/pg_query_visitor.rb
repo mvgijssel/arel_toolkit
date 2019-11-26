@@ -52,50 +52,38 @@ module Arel
           right = visit(rexpr) if rexpr
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
-
         when PgQuery::AEXPR_OP_ANY
           left = visit(lexpr)
           right = visit(rexpr)
           right = Arel::Nodes::Any.new right
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
-
         when PgQuery::AEXPR_OP_ALL
           left = visit(lexpr)
           right = visit(rexpr)
           right = Arel::Nodes::All.new right
           operator = visit(name[0], :operator)
           generate_operator(left, right, operator)
-
         when PgQuery::AEXPR_DISTINCT
           left = visit(lexpr)
           right = visit(rexpr)
           Arel::Nodes::DistinctFrom.new(left, right)
-
         when PgQuery::AEXPR_NOT_DISTINCT
           left = visit(lexpr)
           right = visit(rexpr)
           Arel::Nodes::NotDistinctFrom.new(left, right)
-
         when PgQuery::AEXPR_NULLIF
           left = visit(lexpr)
           right = visit(rexpr)
           Arel::Nodes::NullIf.new(left, right)
-
         when PgQuery::AEXPR_OF
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/34'
-
         when PgQuery::AEXPR_IN
           left = visit(lexpr)
           right = visit(rexpr)
           operator = visit(name[0], :operator)
 
-          if operator == '<>'
-            Arel::Nodes::NotIn.new(left, right)
-          else
-            Arel::Nodes::In.new(left, right)
-          end
-
+          operator == '<>' ? Arel::Nodes::NotIn.new(left, right) : Arel::Nodes::In.new(left, right)
         when PgQuery::AEXPR_LIKE
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
@@ -114,7 +102,6 @@ module Arel
           else
             Arel::Nodes::DoesNotMatch.new(left, right, escape, true)
           end
-
         when PgQuery::AEXPR_ILIKE
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
@@ -133,7 +120,6 @@ module Arel
           else
             Arel::Nodes::DoesNotMatch.new(left, right, escape, false)
           end
-
         when PgQuery::AEXPR_SIMILAR
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
@@ -153,30 +139,24 @@ module Arel
           else
             Arel::Nodes::NotSimilar.new(left, right, escape)
           end
-
         when PgQuery::AEXPR_BETWEEN
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::Between.new left, Arel::Nodes::And.new(right)
-
         when PgQuery::AEXPR_NOT_BETWEEN
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::NotBetween.new left, Arel::Nodes::And.new(right)
-
         when PgQuery::AEXPR_BETWEEN_SYM
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::BetweenSymmetric.new left, Arel::Nodes::And.new(right)
-
         when PgQuery::AEXPR_NOT_BETWEEN_SYM
           left = visit(lexpr) if lexpr
           right = visit(rexpr)
           Arel::Nodes::NotBetweenSymmetric.new left, Arel::Nodes::And.new(right)
-
         when PgQuery::AEXPR_PAREN
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/35'
-
         else
           boom "Unknown Expr type `#{kind}`"
         end
@@ -205,25 +185,19 @@ module Arel
       def visit_BoolExpr(context = false, args:, boolop:)
         args = visit(args, context || true)
 
-        result = case boolop
-                 when PgQuery::BOOL_EXPR_AND
-                   Arel::Nodes::And.new(args)
+        result =
+          case boolop
+          when PgQuery::BOOL_EXPR_AND
+            Arel::Nodes::And.new(args)
+          when PgQuery::BOOL_EXPR_OR
+            generate_boolean_expression(args, Arel::Nodes::Or)
+          when PgQuery::BOOL_EXPR_NOT
+            Arel::Nodes::Not.new(args)
+          else
+            boom "? Boolop -> #{boolop}"
+          end
 
-                 when PgQuery::BOOL_EXPR_OR
-                   generate_boolean_expression(args, Arel::Nodes::Or)
-
-                 when PgQuery::BOOL_EXPR_NOT
-                   Arel::Nodes::Not.new(args)
-
-                 else
-                   boom "? Boolop -> #{boolop}"
-                 end
-
-        if context
-          Arel::Nodes::Grouping.new(result)
-        else
-          result
-        end
+        context ? Arel::Nodes::Grouping.new(result) : result
       end
 
       def visit_BooleanTest(arg:, booltesttype:)
@@ -232,22 +206,16 @@ module Arel
         case booltesttype
         when PgQuery::BOOLEAN_TEST_TRUE
           Arel::Nodes::Equality.new(arg, Arel::Nodes::True.new)
-
         when PgQuery::BOOLEAN_TEST_NOT_TRUE
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::True.new)
-
         when PgQuery::BOOLEAN_TEST_FALSE
           Arel::Nodes::Equality.new(arg, Arel::Nodes::False.new)
-
         when PgQuery::BOOLEAN_TEST_NOT_FALSE
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::False.new)
-
         when PgQuery::BOOLEAN_TEST_UNKNOWN
           Arel::Nodes::Equality.new(arg, Arel::Nodes::Unknown.new)
-
         when PgQuery::BOOLEAN_TEST_NOT_UNKNOWN
           Arel::Nodes::NotEqual.new(arg, Arel::Nodes::Unknown.new)
-
         else
           boom '?'
         end
@@ -317,11 +285,7 @@ module Arel
       end
 
       def visit_DeleteStmt(
-        relation:,
-        using_clause: nil,
-        where_clause: nil,
-        returning_list: [],
-        with_clause: nil
+        relation:, using_clause: nil, where_clause: nil, returning_list: [], with_clause: nil
       )
         relation = visit(relation)
 
@@ -351,88 +315,75 @@ module Arel
         func_variadic: nil,
         over: nil
       )
-        args = if args
-                 visit args
-               elsif agg_star
-                 [Arel.star]
-               else
-                 []
-               end
+        args =
+          if args
+            visit args
+          elsif agg_star
+            [Arel.star]
+          else
+            []
+          end
 
         function_names = visit(funcname, :operator)
 
-        func = case function_names
-               when ['sum']
-                 Arel::Nodes::Sum.new args
+        func =
+          case function_names
+          when %w[sum]
+            Arel::Nodes::Sum.new args
+          when %w[count]
+            Arel::Nodes::Count.new args
+          when %w[max]
+            Arel::Nodes::Max.new args
+          when %w[min]
+            Arel::Nodes::Min.new args
+          when %w[avg]
+            Arel::Nodes::Avg.new args
+          when [PG_CATALOG, 'like_escape']
+            args
+          when [PG_CATALOG, 'similar_escape']
+            args
+          when [PG_CATALOG, 'date_part']
+            field, expression = args
+            [Arel::Nodes::ExtractFrom.new(expression, field)]
+          when [PG_CATALOG, 'timezone']
+            timezone, expression = args
 
-               when ['count']
-                 Arel::Nodes::Count.new args
+            [Arel::Nodes::AtTimeZone.new(maybe_add_grouping(expression), timezone)]
 
-               when ['max']
-                 Arel::Nodes::Max.new args
-
-               when ['min']
-                 Arel::Nodes::Min.new args
-
-               when ['avg']
-                 Arel::Nodes::Avg.new args
-
-               when [PG_CATALOG, 'like_escape']
-                 args
-
-               when [PG_CATALOG, 'similar_escape']
-                 args
-
-               when [PG_CATALOG, 'date_part']
-                 field, expression = args
-                 [Arel::Nodes::ExtractFrom.new(expression, field)]
-
-               when [PG_CATALOG, 'timezone']
-                 timezone, expression = args
-
-                 [Arel::Nodes::AtTimeZone.new(maybe_add_grouping(expression), timezone)]
-
-               # https://www.postgresql.org/docs/10/functions-string.html
-               when [PG_CATALOG, 'position']
-                 string, substring = args
-                 [Arel::Nodes::Position.new(substring, string)]
-
-               when [PG_CATALOG, 'overlay']
-                 string, substring, start, length = args
-                 [Arel::Nodes::Overlay.new(string, substring, start, length)]
-
-               when [PG_CATALOG, 'ltrim']
-                 string, substring = args
-                 [Arel::Nodes::Trim.new('leading', substring, string)]
-
-               when [PG_CATALOG, 'rtrim']
-                 string, substring = args
-                 [Arel::Nodes::Trim.new('trailing', substring, string)]
-
-               when [PG_CATALOG, 'btrim']
-                 string, substring = args
-                 [Arel::Nodes::Trim.new('both', substring, string)]
-
-               when [PG_CATALOG, 'substring']
-                 string, pattern, escape = args
-                 [Arel::Nodes::Substring.new(string, pattern, escape)]
-
-               when [PG_CATALOG, 'overlaps']
-                 start1, end1, start2, end2 = args
-                 [Arel::Nodes::Overlaps.new(start1, end1, start2, end2)]
-
-               else
-                 case function_names.length
-                 when 2
-                   func = Arel::Nodes::NamedFunction.new(function_names.last, args)
-                   func.schema_name = function_names.first
-                   func
-                 when 1
-                   Arel::Nodes::NamedFunction.new(function_names.first, args)
-                 else
-                   boom "Don't know how to handle function names length `#{function_names.length}`"
-                 end
-               end
+            # https://www.postgresql.org/docs/10/functions-string.html
+          when [PG_CATALOG, 'position']
+            string, substring = args
+            [Arel::Nodes::Position.new(substring, string)]
+          when [PG_CATALOG, 'overlay']
+            string, substring, start, length = args
+            [Arel::Nodes::Overlay.new(string, substring, start, length)]
+          when [PG_CATALOG, 'ltrim']
+            string, substring = args
+            [Arel::Nodes::Trim.new('leading', substring, string)]
+          when [PG_CATALOG, 'rtrim']
+            string, substring = args
+            [Arel::Nodes::Trim.new('trailing', substring, string)]
+          when [PG_CATALOG, 'btrim']
+            string, substring = args
+            [Arel::Nodes::Trim.new('both', substring, string)]
+          when [PG_CATALOG, 'substring']
+            string, pattern, escape = args
+            [Arel::Nodes::Substring.new(string, pattern, escape)]
+          when [PG_CATALOG, 'overlaps']
+            start1, end1, start2, end2 = args
+            [Arel::Nodes::Overlaps.new(start1, end1, start2, end2)]
+          else
+            case function_names.length
+            when 2
+              func = Arel::Nodes::NamedFunction.new(function_names.last, args)
+              func.schema_name = function_names.first
+              func
+            when 1
+              Arel::Nodes::NamedFunction.new(function_names.first, args)
+            else
+              boom "Don't know how to handle function names length `#{function_names.length}`"
+            end
+          end
 
         func.distinct = (agg_distinct.nil? ? false : true) unless func.is_a?(::Array)
         func.orders = (agg_order ? visit(agg_order) : []) unless func.is_a?(::Array)
@@ -440,11 +391,7 @@ module Arel
         func.within_group = agg_within_group unless func.is_a?(::Array)
         func.variardic = func_variadic unless func.is_a?(::Array)
 
-        if over
-          Arel::Nodes::Over.new(func, visit(over))
-        else
-          func
-        end
+        over ? Arel::Nodes::Over.new(func, visit(over)) : func
       end
 
       def visit_InferClause(conname: nil, index_elems: nil)
@@ -470,9 +417,7 @@ module Arel
         override:
       )
         relation = visit(relation)
-        cols = visit(cols, :insert).map do |col|
-          Arel::Attribute.new(relation, col)
-        end
+        cols = visit(cols, :insert).map { |col| Arel::Attribute.new(relation, col) }
         select_stmt = visit(select_stmt) if select_stmt
 
         insert_manager = Arel::InsertManager.new
@@ -504,22 +449,23 @@ module Arel
       end
 
       def visit_JoinExpr(jointype:, is_natural: nil, larg:, rarg:, quals: nil)
-        join_class = case jointype
-                     when 0
-                       if is_natural
-                         Arel::Nodes::NaturalJoin
-                       elsif quals.nil?
-                         Arel::Nodes::CrossJoin
-                       else
-                         Arel::Nodes::InnerJoin
-                       end
-                     when 1
-                       Arel::Nodes::OuterJoin
-                     when 2
-                       Arel::Nodes::FullOuterJoin
-                     when 3
-                       Arel::Nodes::RightOuterJoin
-                     end
+        join_class =
+          case jointype
+          when 0
+            if is_natural
+              Arel::Nodes::NaturalJoin
+            elsif quals.nil?
+              Arel::Nodes::CrossJoin
+            else
+              Arel::Nodes::InnerJoin
+            end
+          when 1
+            Arel::Nodes::OuterJoin
+          when 2
+            Arel::Nodes::FullOuterJoin
+          when 3
+            Arel::Nodes::RightOuterJoin
+          end
 
         larg = visit(larg)
         rarg = visit(rarg)
@@ -528,25 +474,15 @@ module Arel
 
         join = join_class.new(rarg, quals)
 
-        if larg.is_a?(Array)
-          larg.concat([join])
-        else
-          [larg, join]
-        end
+        larg.is_a?(Array) ? larg.concat([join]) : [larg, join]
       end
 
       def visit_LockingClause(strength:, wait_policy:)
-        strength_clause = {
-          1 => 'FOR KEY SHARE',
-          2 => 'FOR SHARE',
-          3 => 'FOR NO KEY UPDATE',
-          4 => 'FOR UPDATE',
-        }.fetch(strength)
-        wait_policy_clause = {
-          0 => '',
-          1 => ' SKIP LOCKED',
-          2 => ' NOWAIT',
-        }.fetch(wait_policy)
+        strength_clause =
+          {
+            1 => 'FOR KEY SHARE', 2 => 'FOR SHARE', 3 => 'FOR NO KEY UPDATE', 4 => 'FOR UPDATE'
+          }.fetch(strength)
+        wait_policy_clause = { 0 => '', 1 => ' SKIP LOCKED', 2 => ' NOWAIT' }.fetch(wait_policy)
 
         Arel::Nodes::Lock.new Arel.sql("#{strength_clause}#{wait_policy_clause}")
       end
@@ -600,18 +536,15 @@ module Arel
       end
 
       def visit_RangeFunction(
-        is_rowsfrom: nil,
-        functions:,
-        lateral: false,
-        ordinality: false,
-        aliaz: nil
+        is_rowsfrom: nil, functions:, lateral: false, ordinality: false, aliaz: nil
       )
-        functions = functions.map do |function_array|
-          function, empty_value = function_array
-          boom 'https://github.com/mvgijssel/arel_toolkit/issues/37' unless empty_value.nil?
+        functions =
+          functions.map do |function_array|
+            function, empty_value = function_array
+            boom 'https://github.com/mvgijssel/arel_toolkit/issues/37' unless empty_value.nil?
 
-          visit(function)
-        end
+            visit(function)
+          end
 
         node = Arel::Nodes::RangeFunction.new functions, is_rowsfrom: is_rowsfrom
         node = lateral ? Arel::Nodes::Lateral.new(node) : node
@@ -632,7 +565,7 @@ module Arel
           as: (visit(aliaz) if aliaz),
           only: !inh,
           relpersistence: relpersistence,
-          schema_name: schemaname,
+          schema_name: schemaname
         )
       end
 
@@ -694,6 +627,7 @@ module Arel
         select_statement = select_manager.ast
 
         froms, join_sources = generate_sources(from_clause)
+
         if froms
           froms = froms.first if froms.length == 1
           select_core.froms = froms
@@ -706,11 +640,12 @@ module Arel
 
         if where_clause
           where_clause = visit(where_clause)
-          where_clause = if where_clause.is_a?(Arel::Nodes::And)
-                           where_clause
-                         else
-                           Arel::Nodes::And.new([where_clause])
-                         end
+          where_clause =
+            if where_clause.is_a?(Arel::Nodes::And)
+              where_clause
+            else
+              Arel::Nodes::And.new([where_clause])
+            end
 
           select_core.wheres = [where_clause]
         end
@@ -737,63 +672,61 @@ module Arel
         select_statement.with = visit(with_clause) if with_clause
         select_statement.lock = visit(locking_clause) if locking_clause
         if values_lists
-          values_lists = visit(values_lists).map do |values_list|
-            values_list.map do |value|
-              case value
-              when String
-                value
-              when Integer
-                Arel.sql(value.to_s)
-              when Arel::Nodes::TypeCast, Arel::Nodes::UnqualifiedColumn
-                Arel.sql(value.to_sql)
-              when Arel::Nodes::BindParam
-                value
-              when Arel::Nodes::Quoted
-                value.value
-              else
-                boom "Unknown value `#{value}`"
+          values_lists =
+            visit(values_lists).map do |values_list|
+              values_list.map do |value|
+                case value
+                when String
+                  value
+                when Integer
+                  Arel.sql(value.to_s)
+                when Arel::Nodes::TypeCast, Arel::Nodes::UnqualifiedColumn
+                  Arel.sql(value.to_sql)
+                when Arel::Nodes::BindParam
+                  value
+                when Arel::Nodes::Quoted
+                  value.value
+                else
+                  boom "Unknown value `#{value}`"
+                end
               end
             end
-          end
           select_statement.values_lists = Arel::Nodes::ValuesList.new(values_lists)
         end
 
-        union = case op
-                when 0
-                  nil
-                when 1
-                  if all
-                    Arel::Nodes::UnionAll.new(visit(larg), visit(rarg))
-                  else
-                    Arel::Nodes::Union.new(visit(larg), visit(rarg))
-                  end
-                when 2
-                  if all
-                    Arel::Nodes::IntersectAll.new(visit(larg), visit(rarg))
-                  else
-                    Arel::Nodes::Intersect.new(visit(larg), visit(rarg))
-                  end
-                when 3
-                  if all
-                    Arel::Nodes::ExceptAll.new(visit(larg), visit(rarg))
-                  else
-                    Arel::Nodes::Except.new(visit(larg), visit(rarg))
-                  end
-                else
-                  # https://www.postgresql.org/docs/10/queries-union.html
-                  boom "Unknown combining queries op `#{op}`"
-                end
+        union =
+          case op
+          when 0
+            nil
+          when 1
+            if all
+              Arel::Nodes::UnionAll.new(visit(larg), visit(rarg))
+            else
+              Arel::Nodes::Union.new(visit(larg), visit(rarg))
+            end
+          when 2
+            if all
+              Arel::Nodes::IntersectAll.new(visit(larg), visit(rarg))
+            else
+              Arel::Nodes::Intersect.new(visit(larg), visit(rarg))
+            end
+          when 3
+            if all
+              Arel::Nodes::ExceptAll.new(visit(larg), visit(rarg))
+            else
+              Arel::Nodes::Except.new(visit(larg), visit(rarg))
+            end
+          else
+            # https://www.postgresql.org/docs/10/queries-union.html
+            boom "Unknown combining queries op `#{op}`"
+          end
 
         unless union.nil?
           select_statement.cores = []
           select_statement.union = union
         end
 
-        if context == :top
-          select_manager
-        else
-          select_statement
-        end
+        context == :top ? select_manager : select_statement
       end
 
       def visit_SetToDefault(_args)
@@ -828,8 +761,11 @@ module Arel
           -> { Arel::Nodes::User.new },
           -> { Arel::Nodes::SessionUser.new },
           -> { Arel::Nodes::CurrentCatalog.new },
-          -> { Arel::Nodes::CurrentSchema.new },
-        ][op].call
+          -> { Arel::Nodes::CurrentSchema.new }
+        ][
+          op
+        ]
+          .call
       end
 
       def visit_String(context = nil, str:)
@@ -846,23 +782,19 @@ module Arel
       def visit_SubLink(subselect:, sub_link_type:, testexpr: nil, oper_name: nil)
         subselect = visit(subselect)
         testexpr = visit(testexpr) if testexpr
-        operator = if oper_name
-                     operator = visit(oper_name, :operator)
-                     if operator.length > 1
-                       boom 'https://github.com/mvgijssel/arel_toolkit/issues/39'
-                     end
+        operator =
+          if oper_name
+            operator = visit(oper_name, :operator)
+            boom 'https://github.com/mvgijssel/arel_toolkit/issues/39' if operator.length > 1
 
-                     operator.first
-                   end
+            operator.first
+          end
 
         generate_sublink(sub_link_type, subselect, testexpr, operator)
       end
 
       def visit_TransactionStmt(kind:, options: nil)
-        Arel::Nodes::Transaction.new(
-          kind,
-          (visit(options) if options),
-        )
+        Arel::Nodes::Transaction.new(kind, (visit(options) if options))
       end
 
       def visit_TypeCast(arg:, type_name:)
@@ -875,9 +807,7 @@ module Arel
       def visit_TypeName(names:, typemod:, array_bounds: [])
         array_bounds = visit(array_bounds)
 
-        names = names.map do |name|
-          visit(name, :operator)
-        end
+        names = names.map { |name| visit(name, :operator) }
 
         names = names.reject { |name| name == PG_CATALOG }
 
@@ -888,18 +818,19 @@ module Arel
         end
 
         type_name = names.first
-        type_name = case type_name
-                    when 'int4'
-                      'integer'
-                    when 'float4'
-                      'real'
-                    when 'float8'
-                      'double precision'
-                    when 'timestamptz'
-                      'timestamp with time zone'
-                    else
-                      type_name
-                    end
+        type_name =
+          case type_name
+          when 'int4'
+            'integer'
+          when 'float4'
+            'real'
+          when 'float8'
+            'double precision'
+          when 'timestamptz'
+            'timestamp with time zone'
+          else
+            type_name
+          end
 
         type_name << '[]' if array_bounds == [-1]
         type_name
@@ -928,12 +859,7 @@ module Arel
       end
 
       def visit_VariableSetStmt(kind:, name:, args: [], is_local: false)
-        Arel::Nodes::VariableSet.new(
-          kind,
-          visit(args),
-          name,
-          is_local,
-        )
+        Arel::Nodes::VariableSet.new(kind, visit(args), name, is_local)
       end
 
       def visit_VariableShowStmt(name:)
@@ -958,11 +884,12 @@ module Arel
           window.partitions = visit partition_clause
 
           if frame_options
-            window.framing = FrameOptions.arel(
-              frame_options,
-              (visit(start_offset) if start_offset),
-              (visit(end_offset) if end_offset),
-            )
+            window.framing =
+              FrameOptions.arel(
+                frame_options,
+                (visit(start_offset) if start_offset),
+                (visit(end_offset) if end_offset)
+              )
           end
         end
       end
@@ -980,8 +907,6 @@ module Arel
         right = maybe_add_grouping(right)
 
         case operator
-
-        # https://www.postgresql.org/docs/10/functions-math.html
         when '+'
           Arel::Nodes::Addition.new(left, right)
         when '-'
@@ -1029,7 +954,7 @@ module Arel
         when '>>'
           Arel::Nodes::BitwiseShiftRight.new(left, right)
 
-        # https://www.postgresql.org/docs/9.0/functions-comparison.html
+          # https://www.postgresql.org/docs/9.0/functions-comparison.html
         when '<'
           Arel::Nodes::LessThan.new(left, right)
         when '>'
@@ -1043,7 +968,7 @@ module Arel
         when '<>'
           Arel::Nodes::NotEqual.new(left, right)
 
-        # https://www.postgresql.org/docs/9.1/functions-array.html
+          # https://www.postgresql.org/docs/9.1/functions-array.html
         when '@>'
           Arel::Nodes::Contains.new(left, right)
         when '<@'
@@ -1053,13 +978,13 @@ module Arel
         when '||'
           Arel::Nodes::Concat.new(left, right)
 
-        # https://www.postgresql.org/docs/9.3/functions-net.html
+          # https://www.postgresql.org/docs/9.3/functions-net.html
         when '<<='
           Arel::Nodes::ContainedWithinEquals.new(left, right)
         when '>>='
           Arel::Nodes::ContainsEquals.new(left, right)
 
-        # https://www.postgresql.org/docs/9.4/functions-json.html
+          # https://www.postgresql.org/docs/9.4/functions-json.html
         when '->'
           Arel::Nodes::JsonGetObject.new(left, right)
         when '->>'
@@ -1069,7 +994,7 @@ module Arel
         when '#>>'
           Arel::Nodes::JsonPathGetField.new(left, right)
 
-        # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSONB-OP-TABLE
+          # https://www.postgresql.org/docs/9.4/functions-json.html#FUNCTIONS-JSONB-OP-TABLE
         when '?'
           Arel::Nodes::JsonbKeyExists.new(left, right)
         when '?|'
@@ -1081,14 +1006,13 @@ module Arel
         when '?&'
           Arel::Nodes::JsonbAllKeyExists.new(left, right)
 
-        # https://www.postgresql.org/docs/9.3/functions-matching.html#FUNCTIONS-POSIX-TABLE
+          # https://www.postgresql.org/docs/9.3/functions-matching.html#FUNCTIONS-POSIX-TABLE
         when '~*'
           Arel::Nodes::Regexp.new(left, right, false)
         when '!~'
           Arel::Nodes::NotRegexp.new(left, right, true)
         when '!~*'
           Arel::Nodes::NotRegexp.new(left, right, false)
-
         else
           if left.nil?
             Arel::Nodes::UnaryOperation.new(operator, right)
@@ -1096,6 +1020,7 @@ module Arel
             Arel::Nodes::InfixOperation.new(operator, left, right)
           end
         end
+        # https://www.postgresql.org/docs/10/functions-math.html
       end
 
       def visit_DeallocateStmt(name: nil)
@@ -1113,20 +1038,22 @@ module Arel
         dispatch_method = "visit_#{klass}"
         method = method(dispatch_method)
 
-        arg_has_context = (method.parameters.include?(%i[opt context]) ||
-          method.parameters.include?(%i[req context])) && context
+        arg_has_context =
+          (
+            method.parameters.include?(%i[opt context]) ||
+              method.parameters.include?(%i[req context])
+          ) &&
+            context
 
         args = arg_has_context ? [context] : nil
 
         if attributes.empty?
           send dispatch_method, *args
         else
-          kwargs = attributes.transform_keys do |key|
-            key
-              .gsub(/([a-z\d])([A-Z])/, '\1_\2')
-              .downcase
-              .to_sym
-          end
+          kwargs =
+            attributes.transform_keys do |key|
+              key.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase.to_sym
+            end
 
           kwargs.delete(:location)
 
@@ -1176,43 +1103,31 @@ module Arel
           end
         end
 
-        if froms.empty?
-          [nil, join_sources]
-        else
-          [froms, join_sources]
-        end
+        froms.empty? ? [nil, join_sources] : [froms, join_sources]
       end
 
       def generate_sublink(sub_link_type, subselect, testexpr, operator)
         case sub_link_type
         when PgQuery::SUBLINK_TYPE_EXISTS
           Arel::Nodes::Exists.new subselect
-
         when PgQuery::SUBLINK_TYPE_ALL
           generate_operator(testexpr, Arel::Nodes::All.new(subselect), operator)
-
         when PgQuery::SUBLINK_TYPE_ANY
           if operator.nil?
             Arel::Nodes::In.new(testexpr, subselect)
           else
             generate_operator(testexpr, Arel::Nodes::Any.new(subselect), operator)
           end
-
         when PgQuery::SUBLINK_TYPE_ROWCOMPARE
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/42'
-
         when PgQuery::SUBLINK_TYPE_EXPR
           Arel::Nodes::Grouping.new(subselect)
-
         when PgQuery::SUBLINK_TYPE_MULTIEXPR
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/43'
-
         when PgQuery::SUBLINK_TYPE_ARRAY
           Arel::Nodes::ArraySubselect.new(subselect)
-
         when PgQuery::SUBLINK_TYPE_CTE
           boom 'https://github.com/mvgijssel/arel_toolkit/issues/44'
-
         else
           boom "Unknown sublinktype: #{type}"
         end

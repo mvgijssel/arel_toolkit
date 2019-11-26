@@ -13,12 +13,7 @@ module Arel
       attr_accessor :relpersistence
 
       def initialize(
-        name,
-        as: nil,
-        type_caster: nil,
-        only: false,
-        schema_name: nil,
-        relpersistence: 'p'
+        name, as: nil, type_caster: nil, only: false, schema_name: nil, relpersistence: 'p'
       )
         @only = only
         @schema_name = schema_name
@@ -40,13 +35,10 @@ module Arel
           case o.relpersistence
           when 'p'
             collector << ''
-
           when 'u'
             collector << 'UNLOGGED '
-
           when 't'
             collector << 'TEMPORARY '
-
           else
             raise "Unknown relpersistence `#{o.relpersistence}`"
           end

@@ -17,8 +17,7 @@ if Gem.loaded_specs.key?('postgres_ext')
       belongs_to :user
     end
 
-    class Game < ActiveRecord::Base
-    end
+    class Game < ActiveRecord::Base; end
 
     class PostgresExtMiddleware
       def self.call(arel, next_middleware)
@@ -30,21 +29,19 @@ if Gem.loaded_specs.key?('postgres_ext')
       game = Game.create!
       score = Score.create! game: game
       _other_score = Score.create! game: Game.create!
-      query = Score
-        .with(my_games: Game.where(id: game))
-        .joins('INNER JOIN "my_games" ON "scores"."game_id" = "my_games"."id"')
+      query =
+        Score.with(my_games: Game.where(id: game)).joins(
+          'INNER JOIN "my_games" ON "scores"."game_id" = "my_games"."id"'
+        )
 
-      expect(PostgresExtMiddleware)
-        .to receive(:call)
+      expect(PostgresExtMiddleware).to receive(:call)
         .and_wrap_original do |m, arel, next_middleware, context|
         expect(arel.to_sql).to eq context[:original_sql]
 
         m.call(arel, next_middleware)
       end
 
-      Arel.middleware.apply([PostgresExtMiddleware]) do
-        expect(query.reload).to eq [score]
-      end
+      Arel.middleware.apply([PostgresExtMiddleware]) { expect(query.reload).to eq [score] }
     end
 
     # TODO: broken in the gem

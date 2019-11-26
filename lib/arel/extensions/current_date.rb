@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class CurrentDate < Arel::Nodes::Node
-    end
+    class CurrentDate < Arel::Nodes::Node; end
   end
 
   module Visitors

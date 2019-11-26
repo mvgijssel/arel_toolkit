@@ -34,9 +34,7 @@ module Arel
 
         yield self
 
-        children.each_value do |child|
-          child.each(&block)
-        end
+        children.each_value { |child| child.each(&block) }
       end
 
       def value?
@@ -129,11 +127,7 @@ module Arel
         string << "\n" if children.length.zero? && value?
         string << "#{spacing(indent)}value = #{value.inspect}" if value?
 
-        string << if children.length.zero?
-                    ">\n"
-                  else
-                    "#{spacing(indent - 1)}>\n"
-                  end
+        string << (children.length.zero? ? ">\n" : "#{spacing(indent - 1)}>\n")
       end
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/CyclomaticComplexity
@@ -181,14 +175,11 @@ module Arel
 
         if parent_object.respond_to?("#{path.current.value}=")
           parent_object.send("#{path.current.value}=", new_node)
-
         elsif parent_object.instance_values.key?(path.current.value)
           parent_object.instance_variable_set("@#{path.current.value}", new_node)
-
         elsif path.current.arguments? && parent_object.respond_to?(path.current.method[0])
           if remove
             parent_object.delete_at(path.current.value)
-
           else
             parent_object[path.current.value] = new_node
           end

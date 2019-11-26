@@ -20,8 +20,9 @@ describe Arel::Enhance::Query do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     table_node = tree.child_at_path(['ast', 'cores', 0, 'source', 'left'])
 
-    expect(tree.query(parent: { object: { class: Arel::Nodes::JoinSource } }).first)
-      . to eq table_node
+    expect(
+      tree.query(parent: { object: { class: Arel::Nodes::JoinSource } }).first
+    ).to eq table_node
   end
 
   it 'works node object attributes' do
@@ -29,7 +30,7 @@ describe Arel::Enhance::Query do
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
     table_node = tree.child_at_path(['ast', 'cores', 0, 'source', 'left'])
 
-    expect(tree.query(name: 'posts', relpersistence: 'p')). to eq [table_node]
+    expect(tree.query(name: 'posts', relpersistence: 'p')).to eq [table_node]
   end
 
   it 'searches from the current node, not from the root_node' do

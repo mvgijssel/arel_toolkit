@@ -4,33 +4,37 @@ describe 'Arel.sql_to_arel' do
   visit 'select', '1 = 2', pg_node: 'PgQuery::A_CONST'
   visit 'select', "3 = ANY('{4,5}'), 'a' = ANY($1)", pg_node: 'PgQuery::A_CONST'
   visit 'select', "6 = ALL('{7,8}'), 'b' = ALL($1)", pg_node: 'PgQuery::A_CONST'
-  visit 'select', '"c" IS DISTINCT FROM "d", 7 IS NOT DISTINCT FROM \'d\'',
+  visit 'select',
+        "\"c\" IS DISTINCT FROM \"d\", 7 IS NOT DISTINCT FROM 'd'",
         pg_node: 'PgQuery::A_CONST'
   visit 'select', "NULLIF(9, 10), NULLIF('e', 'f')", pg_node: 'PgQuery::A_CONST'
   visit 'select', "11 IN (12), 'a' NOT IN ('b')", pg_node: 'PgQuery::A_CONST'
   visit 'select', "'ghi' NOT LIKE 'gh%', 'ghi' LIKE '_h_' ESCAPE 'i'", pg_node: 'PgQuery::A_CONST'
   visit 'select', "'jkl' NOT ILIKE 'jk%', 'jkl' ILIKE '_k_' ESCAPE 'k'", pg_node: 'PgQuery::A_CONST'
-  visit 'select', "'mn' SIMILAR TO '(m|o)' ESCAPE '_', 'mn' NOT SIMILAR TO '_h{1}%' ESCAPE '_'",
+  visit 'select',
+        "'mn' SIMILAR TO '(m|o)' ESCAPE '_', 'mn' NOT SIMILAR TO '_h{1}%' ESCAPE '_'",
         pg_node: 'PgQuery::A_CONST'
-  visit 'select', "'mn' SIMILAR TO '(m|o)', 'mn' NOT SIMILAR TO '_h{1}%'",
+  visit 'select',
+        "'mn' SIMILAR TO '(m|o)', 'mn' NOT SIMILAR TO '_h{1}%'",
         pg_node: 'PgQuery::A_CONST'
   visit 'select', '14 BETWEEN 13 AND 15', pg_node: 'PgQuery::A_CONST'
   visit 'select', '16 NOT BETWEEN 17 AND 18', pg_node: 'PgQuery::A_CONST'
-  visit 'select', '20 BETWEEN SYMMETRIC 21 AND 19, 22 NOT BETWEEN SYMMETRIC 24 AND 23',
+  visit 'select',
+        '20 BETWEEN SYMMETRIC 21 AND 19, 22 NOT BETWEEN SYMMETRIC 24 AND 23',
         pg_node: 'PgQuery::A_EXPR'
   visit 'select', '"field"[1]', pg_node: 'PgQuery::A_INDICES'
   visit 'select', '"something"[1]', pg_node: 'PgQuery::A_INDIRECTION'
   visit 'select', '*', pg_node: 'PgQuery::A_STAR'
-  visit 'sql', 'GRANT INSERT, UPDATE ON mytable TO myuser',
-        pg_node: 'PgQuery::ACCESS_PRIV',
-        sql_to_arel: false
+  visit 'sql',
+        'GRANT INSERT, UPDATE ON mytable TO myuser',
+        pg_node: 'PgQuery::ACCESS_PRIV', sql_to_arel: false
   visit 'select', '1 FROM "a" "b"', pg_node: 'PgQuery::ALIAS'
-  visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
-        pg_node: 'PgQuery::ALTER_TABLE_CMD',
-        sql_to_arel: false
-  visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
-        pg_node: 'PgQuery::ALTER_TABLE_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'ALTER TABLE stuff ADD COLUMN address text',
+        pg_node: 'PgQuery::ALTER_TABLE_CMD', sql_to_arel: false
+  visit 'sql',
+        'ALTER TABLE stuff ADD COLUMN address text',
+        pg_node: 'PgQuery::ALTER_TABLE_STMT', sql_to_arel: false
   visit 'select', "B'0101'", pg_node: 'PgQuery::BIT_STRING'
   visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', pg_node: 'PgQuery::BOOL_EXPR'
   visit 'select', '1 IS TRUE', pg_node: 'PgQuery::BOOLEAN_TEST'
@@ -39,54 +43,56 @@ describe 'Arel.sql_to_arel' do
   visit 'select', '$1 IS NOT FALSE', pg_node: 'PgQuery::BOOLEAN_TEST'
   visit 'select', "'t'::bool IS UNKNOWN", pg_node: 'PgQuery::BOOLEAN_TEST'
   visit 'select', '9.0 IS NOT UNKNOWN', pg_node: 'PgQuery::BOOLEAN_TEST'
-  visit 'select', 'CASE WHEN "a" = "b" THEN 2 = 2 WHEN "a" THEN \'b\' ELSE 1 = 1 END',
+  visit 'select',
+        "CASE WHEN \"a\" = \"b\" THEN 2 = 2 WHEN \"a\" THEN 'b' ELSE 1 = 1 END",
         pg_node: 'PgQuery::CASE_EXPR'
-  visit 'select', "CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END",
+  visit 'select',
+        "CASE \"field\" WHEN \"a\" THEN 1 WHEN 'b' THEN 0 ELSE 2 END",
         pg_node: 'PgQuery::CASE_WHEN'
   visit 'sql', 'CHECKPOINT', pg_node: 'PgQuery::CHECK_POINT_STMT', sql_to_arel: false
   visit 'sql', 'CLOSE cursor;', pg_node: 'PgQuery::CLOSE_PORTAL_STMT', sql_to_arel: false
   visit 'select', "COALESCE(\"a\", NULL, 2, 'b')", pg_node: 'PgQuery::COALESCE_EXPR'
   # https://github.com/mvgijssel/arel_toolkit/issues/54
   # visit 'sql', 'SELECT a COLLATE "C"', pg_node: 'PgQuery::COLLATE_CLAUSE', sql_to_arel: false
-  visit 'sql', 'CREATE TABLE a (column_def_column text)',
-        pg_node: 'PgQuery::COLUMN_DEF',
-        sql_to_arel: false
+  visit 'sql',
+        'CREATE TABLE a (column_def_column text)',
+        pg_node: 'PgQuery::COLUMN_DEF', sql_to_arel: false
   visit 'select', '"id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'select', '"posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'select', '"public"."posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'select', '"database"."public"."posts"."id"', pg_node: 'PgQuery::COLUMN_REF'
   visit 'sql',
-        'WITH "a" AS (SELECT 1) '\
-        'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") AS "d"',
+        'WITH "a" AS (SELECT 1) ' \
+          'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") AS "d"',
         pg_node: 'PgQuery::COMMON_TABLE_EXPR'
-  visit 'sql', 'CREATE TABLE a (b integer NOT NULL)',
-        pg_node: 'PgQuery::CONSTRAINT',
-        sql_to_arel: false
+  visit 'sql',
+        'CREATE TABLE a (b integer NOT NULL)',
+        pg_node: 'PgQuery::CONSTRAINT', sql_to_arel: false
   visit 'sql', 'COPY reports TO STDOUT', pg_node: 'PgQuery::COPY_STMT', sql_to_arel: false
-  visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
-        pg_node: 'PgQuery::CREATE_FUNCTION_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
+        pg_node: 'PgQuery::CREATE_FUNCTION_STMT', sql_to_arel: false
   visit 'sql', 'CREATE SCHEMA secure', pg_node: 'PgQuery::CREATE_SCHEMA_STMT', sql_to_arel: false
   visit 'sql', 'CREATE TABLE a (b integer)', pg_node: 'PgQuery::CREATE_STMT', sql_to_arel: false
-  visit 'sql', 'CREATE TABLE a AS (SELECT * FROM reports)',
-        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT',
-        sql_to_arel: false
-  visit 'sql', 'CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)',
-        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT',
-        sql_to_arel: false
-  visit 'sql', 'CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)',
-        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT',
-        sql_to_arel: false
-  visit 'sql', 'CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()',
-        pg_node: 'PgQuery::CREATE_TRIG_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'CREATE TABLE a AS (SELECT * FROM reports)',
+        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT', sql_to_arel: false
+  visit 'sql',
+        'CREATE UNLOGGED TABLE a AS (SELECT * FROM reports)',
+        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT', sql_to_arel: false
+  visit 'sql',
+        'CREATE TEMPORARY TABLE a AS (SELECT * FROM reports)',
+        pg_node: 'PgQuery::CREATE_TABLE_AS_STMT', sql_to_arel: false
+  visit 'sql',
+        'CREATE TRIGGER a AFTER INSERT ON b FOR EACH ROW EXECUTE PROCEDURE b()',
+        pg_node: 'PgQuery::CREATE_TRIG_STMT', sql_to_arel: false
   visit 'sql', 'DO $$ a $$', pg_node: 'PgQuery::DEF_ELEM', sql_to_arel: false
   visit 'sql',
         'WITH "some_delete_query" AS (SELECT 1 AS "some_column") ' \
-        'DELETE FROM ONLY "a" "some_table" ' \
-        'USING "other_table", "another_table" ' \
-        'WHERE "other_table"."other_column" = 1.0 ' \
-        'RETURNING *, "some_delete_query"."some_column"',
+          'DELETE FROM ONLY "a" "some_table" ' \
+          'USING "other_table", "another_table" ' \
+          'WHERE "other_table"."other_column" = 1.0 ' \
+          'RETURNING *, "some_delete_query"."some_column"',
         pg_node: 'PgQuery::DELETE_STMT'
   visit 'sql', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', pg_node: 'PgQuery::DELETE_STMT'
   visit 'sql', 'DELETE FROM "a"', pg_node: 'PgQuery::DELETE_STMT'
@@ -94,26 +100,20 @@ describe 'Arel.sql_to_arel' do
   # visit 'sql', 'DISCARD ALL', pg_node: 'PgQuery::DISCARD_STMT', sql_to_arel: false
   visit 'sql', 'DO $$ a $$', pg_node: 'PgQuery::DO_STMT', sql_to_arel: false
   visit 'sql', 'DROP TABLE some_tablr', pg_node: 'PgQuery::DROP_STMT', sql_to_arel: false
-  visit 'sql', 'EXECUTE some_prepared_statement',
-        pg_node: 'PgQuery::EXECUTE_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'EXECUTE some_prepared_statement',
+        pg_node: 'PgQuery::EXECUTE_STMT', sql_to_arel: false
   visit 'sql', 'EXPLAIN SELECT 1', pg_node: 'PgQuery::EXPLAIN_STMT', sql_to_arel: false
   visit 'sql', 'FETCH some_cursor', pg_node: 'PgQuery::FETCH_STMT', sql_to_arel: false
-  visit 'sql',
-        'PREPARE some_plan (integer) AS (SELECT $1)',
-        pg_node: 'PgQuery::PREPARE_STMT'
-  visit 'sql',
-        'PREPARE some_plan AS (SELECT $1)',
-        pg_node: 'PgQuery::PREPARE_STMT'
-  visit 'sql', 'DEALLOCATE some_prepared_statement',
-        pg_node: 'PgQuery::DEALLOCATE_STMT'
-  visit 'sql', 'DEALLOCATE ALL',
-        pg_node: 'PgQuery::DEALLOCATE_STMT'
+  visit 'sql', 'PREPARE some_plan (integer) AS (SELECT $1)', pg_node: 'PgQuery::PREPARE_STMT'
+  visit 'sql', 'PREPARE some_plan AS (SELECT $1)', pg_node: 'PgQuery::PREPARE_STMT'
+  visit 'sql', 'DEALLOCATE some_prepared_statement', pg_node: 'PgQuery::DEALLOCATE_STMT'
+  visit 'sql', 'DEALLOCATE ALL', pg_node: 'PgQuery::DEALLOCATE_STMT'
   visit 'select', '1.9', pg_node: 'PgQuery::FLOAT'
   visit 'select', 'SUM("a") AS "some_a_sum"', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'rank("b")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'public.rank("c")', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'pg_catalog.obj_description("c", \'pg_class\')', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', "pg_catalog.obj_description(\"c\", 'pg_class')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'COUNT("c")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'generate_series(1, 5)', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'MAX("d")', pg_node: 'PgQuery::FUNC_CALL'
@@ -124,15 +124,16 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'SUM("a") WITHIN GROUP (ORDER BY "a")', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'mleast(VARIADIC ARRAY[10, -1, 5, 4.4])', pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'COUNT(DISTINCT "some_column")', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', "\"posts\".\"created_at\"::timestamp with time zone AT TIME ZONE 'Etc/UTC'",
+  visit 'select',
+        "\"posts\".\"created_at\"::timestamp with time zone AT TIME ZONE 'Etc/UTC'",
         pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "(1 - 1) AT TIME ZONE 'Etc/UTC'", pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'extract(\'epoch\' from "posts"."created_at")', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'extract(\'hour\' from "posts"."updated_at")', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', "extract('epoch' from \"posts\".\"created_at\")", pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', "extract('hour' from \"posts\".\"updated_at\")", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select',
         "('2001-02-1'::date, '2001-12-21'::date) OVERLAPS ('2001-10-30'::date, '2002-10-30'::date)",
         pg_node: 'PgQuery::FUNC_CALL'
-  visit 'select', 'some_function("a", \'b\', 1)', pg_node: 'PgQuery::FUNC_CALL'
+  visit 'select', "some_function(\"a\", 'b', 1)", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "position('content'::text in 'some content')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "overlay('Txxxxas' placing 'hom' from 2 for 4)", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "overlay('stuff' placing 'ing' from 3)", pg_node: 'PgQuery::FUNC_CALL'
@@ -143,39 +144,39 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "trim(leading 'yx' from 'yxTomxx')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', "trim(trailing 'xx' from 'yxTomxx')", pg_node: 'PgQuery::FUNC_CALL'
   visit 'select', 'some_func(*)', pg_node: 'PgQuery::FUNC_CALL'
-  visit 'sql', "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
-        pg_node: 'PgQuery::FUNCTION_PARAMETER',
-        sql_to_arel: false
-  visit 'sql', 'GRANT some_admins TO some_users',
-        pg_node: 'PgQuery::GRANT_ROLE_STMT',
-        sql_to_arel: false
-  visit 'sql', 'GRANT SELECT ON some_table TO some_users',
-        pg_node: 'PgQuery::GRANT_STMT',
-        sql_to_arel: false
-  visit 'sql', 'CREATE INDEX some_index ON some_table USING GIN (some_column)',
-        pg_node: 'PgQuery::INDEX_ELEM',
-        sql_to_arel: false
-  visit 'sql', 'CREATE INDEX some_index ON some_table (some_column)',
-        pg_node: 'PgQuery::INDEX_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        "CREATE FUNCTION a(integer) RETURNS integer AS 'SELECT $1;' LANGUAGE SQL;",
+        pg_node: 'PgQuery::FUNCTION_PARAMETER', sql_to_arel: false
+  visit 'sql',
+        'GRANT some_admins TO some_users',
+        pg_node: 'PgQuery::GRANT_ROLE_STMT', sql_to_arel: false
+  visit 'sql',
+        'GRANT SELECT ON some_table TO some_users',
+        pg_node: 'PgQuery::GRANT_STMT', sql_to_arel: false
+  visit 'sql',
+        'CREATE INDEX some_index ON some_table USING GIN (some_column)',
+        pg_node: 'PgQuery::INDEX_ELEM', sql_to_arel: false
+  visit 'sql',
+        'CREATE INDEX some_index ON some_table (some_column)',
+        pg_node: 'PgQuery::INDEX_STMT', sql_to_arel: false
   visit 'sql',
         'INSERT INTO "t" ("a", "b", "c", "d") ' \
-        'OVERRIDING SYSTEM VALUE ' \
-        'VALUES (1, "a", \'c\', \'t\'::bool, 2.0, $1) ' \
-        'RETURNING *, "some_column" AS "some_column_alias"',
+          'OVERRIDING SYSTEM VALUE ' \
+          "VALUES (1, \"a\", 'c', 't'::bool, 2.0, $1) " \
+          'RETURNING *, "some_column" AS "some_column_alias"',
         pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql',
         'WITH RECURSIVE "a" AS (SELECT "some_table"."a" FROM "some_table") ' \
-        'INSERT INTO "t" OVERRIDING USER VALUE VALUES (1)',
+          'INSERT INTO "t" OVERRIDING USER VALUE VALUES (1)',
         pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql', 'INSERT INTO "t" VALUES (1)', pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql', 'INSERT INTO "t" DEFAULT VALUES', pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql', 'INSERT INTO "t" VALUES (1) ON CONFLICT DO NOTHING', pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql',
         'INSERT INTO "t" VALUES (1) ON CONFLICT DO UPDATE ' \
-        'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
-        'WHERE 2 = 3 ' \
-        'RETURNING *',
+          'SET "a" = 1, "b" = DEFAULT, "c" = (SELECT 1) ' \
+          'WHERE 2 = 3 ' \
+          'RETURNING *',
         pg_node: 'PgQuery::INSERT_STMT'
   visit 'sql',
         'INSERT INTO "t" VALUES (1) ON CONFLICT ON CONSTRAINT constaint_name DO UPDATE SET "a" = 1',
@@ -195,17 +196,18 @@ describe 'Arel.sql_to_arel' do
   visit 'select', '* FROM "a" RIGHT OUTER JOIN "e" ON 1 = 1', pg_node: 'PgQuery::JOIN_EXPR'
   visit 'select', '* FROM "a" CROSS JOIN "f"', pg_node: 'PgQuery::JOIN_EXPR'
   visit 'select', '* FROM "a" NATURAL JOIN "g"', pg_node: 'PgQuery::JOIN_EXPR'
-  visit 'sql', 'LOCK TABLE some_table IN SHARE MODE;',
-        pg_node: 'PgQuery::LOCK_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'LOCK TABLE some_table IN SHARE MODE;',
+        pg_node: 'PgQuery::LOCK_STMT', sql_to_arel: false
   visit 'select', '1 FOR UPDATE NOWAIT', pg_node: 'PgQuery::LOCKING_CLAUSE'
   visit 'select', '1 FOR NO KEY UPDATE NOWAIT', pg_node: 'PgQuery::LOCKING_CLAUSE'
   visit 'select', '1 FOR SHARE SKIP LOCKED', pg_node: 'PgQuery::LOCKING_CLAUSE'
   visit 'select', '1 FOR KEY SHARE', pg_node: 'PgQuery::LOCKING_CLAUSE'
-  visit 'select', 'LEAST(1, "a", \'2\'), GREATEST($1, \'t\'::bool, NULL)',
+  visit 'select',
+        "LEAST(1, \"a\", '2'), GREATEST($1, 't'::bool, NULL)",
         pg_node: 'Arel::SqlToArel::PgQueryVisitor::MIN_MAX_EXPR'
   visit 'select', 'NULL', pg_node: 'PgQuery::NULL'
-  visit 'select', '"a" IS NULL AND \'b\' IS NOT NULL', pg_node: 'PgQuery::NULL_TEST'
+  visit 'select', "\"a\" IS NULL AND 'b' IS NOT NULL", pg_node: 'PgQuery::NULL_TEST'
   # https://github.com/mvgijssel/arel_toolkit/issues/57
   # visit 'sql', '???', pg_node: 'PgQuery::OID_LIST', sql_to_arel: false
   visit 'select', '$1', pg_node: 'PgQuery::PARAM_REF'
@@ -213,51 +215,54 @@ describe 'Arel.sql_to_arel' do
   # https://github.com/mvgijssel/arel_toolkit/issues/101
   visit 'sql',
         'PREPARE some_plan (integer) AS (SELECT $1)',
-        pg_node: 'PgQuery::PREPARE_STMT',
-        sql_to_arel: false
+        pg_node: 'PgQuery::PREPARE_STMT', sql_to_arel: false
   visit 'select', '* FROM some_function(0, 2) AS "some_alias"'
   visit 'select', '* FROM generate_series(1, 2)'
-  visit 'select', '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
+  visit 'select',
+        '* FROM LATERAL ROWS FROM (a(), b()) WITH ORDINALITY',
         pg_node: 'PgQuery::RANGE_FUNCTION'
   visit 'select',
-        '* FROM (SELECT \'b\') AS "a" INNER JOIN LATERAL (SELECT 1) AS "b" ON \'t\'::bool',
+        "* FROM (SELECT 'b') AS \"a\" INNER JOIN LATERAL (SELECT 1) AS \"b\" ON 't'::bool",
         pg_node: 'PgQuery::RANGE_SUBSELECT'
-  visit 'select', '1 FROM "public"."table_is_range_var" "alias", ONLY "b"',
+  visit 'select',
+        '1 FROM "public"."table_is_range_var" "alias", ONLY "b"',
         pg_node: 'PgQuery::RANGE_VAR'
   visit 'select', '1', pg_node: 'PgQuery::RAW_STMT'
-  visit 'sql', 'REFRESH MATERIALIZED VIEW view WITH NO DATA',
-        pg_node: 'PgQuery::REFRESH_MAT_VIEW_STMT',
-        sql_to_arel: false
-  visit 'sql', 'ALTER TABLE some_table RENAME COLUMN some_column TO a',
-        pg_node: 'PgQuery::RENAME_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'REFRESH MATERIALIZED VIEW view WITH NO DATA',
+        pg_node: 'PgQuery::REFRESH_MAT_VIEW_STMT', sql_to_arel: false
+  visit 'sql',
+        'ALTER TABLE some_table RENAME COLUMN some_column TO a',
+        pg_node: 'PgQuery::RENAME_STMT', sql_to_arel: false
   visit 'select', '1', pg_node: 'PgQuery::RES_TARGET'
-  visit 'sql', 'ALTER GROUP some_role ADD USER some_user',
-        pg_node: 'PgQuery::ROLE_SPEC',
-        sql_to_arel: false
+  visit 'sql',
+        'ALTER GROUP some_role ADD USER some_user',
+        pg_node: 'PgQuery::ROLE_SPEC', sql_to_arel: false
   visit 'select', "ROW(1, 2.5, 'a')", pg_node: 'PgQuery::ROW_EXPR'
-  visit 'sql', 'CREATE RULE a_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table',
+  visit 'sql',
+        'CREATE RULE a_rule AS ON SELECT TO some_table DO INSTEAD SELECT * FROM other_table',
         pg_node: 'PgQuery::RULE_STMT', sql_to_arel: false
   visit 'sql',
         '( ( SELECT ' \
-        "DISTINCT 'id', (SELECT DISTINCT ON ( 'a' ) 'a'), 1 " \
-        'FROM "a" ' \
-        "WHERE 't'::bool " \
-        'GROUP BY 1 ' \
-        'HAVING "a" > 1 ' \
-        'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC) ' \
-        'UNION ( ( SELECT 1 UNION ALL SELECT 2.0 ) ' \
-        'INTERSECT ( SELECT "a" INTERSECT ALL SELECT $1 ) ) ) ' \
-        "EXCEPT ( SELECT 'b' EXCEPT ALL SELECT 't'::bool ) ) " \
-        'ORDER BY 1 ASC ' \
-        'LIMIT 10 ' \
-        'OFFSET 2 ' \
-        'FOR UPDATE',
+          "DISTINCT 'id', (SELECT DISTINCT ON ( 'a' ) 'a'), 1 " \
+          'FROM "a" ' \
+          "WHERE 't'::bool " \
+          'GROUP BY 1 ' \
+          'HAVING "a" > 1 ' \
+          'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC) ' \
+          'UNION ( ( SELECT 1 UNION ALL SELECT 2.0 ) ' \
+          'INTERSECT ( SELECT "a" INTERSECT ALL SELECT $1 ) ) ) ' \
+          "EXCEPT ( SELECT 'b' EXCEPT ALL SELECT 't'::bool ) ) " \
+          'ORDER BY 1 ASC ' \
+          'LIMIT 10 ' \
+          'OFFSET 2 ' \
+          'FOR UPDATE',
         pg_node: 'PgQuery::SELECT_STMT'
-  visit 'sql', 'INSERT INTO som_table (a) VALUES (DEFAULT)',
-        pg_node: 'PgQuery::SET_TO_DEFAULT',
-        sql_to_arel: false
-  visit 'select', '1 ORDER BY "a" ASC, 2 DESC NULLS FIRST, \'3\' ASC NULLS LAST',
+  visit 'sql',
+        'INSERT INTO som_table (a) VALUES (DEFAULT)',
+        pg_node: 'PgQuery::SET_TO_DEFAULT', sql_to_arel: false
+  visit 'select',
+        "1 ORDER BY \"a\" ASC, 2 DESC NULLS FIRST, '3' ASC NULLS LAST",
         pg_node: 'PgQuery::SORT_BY'
   visit 'select', 'current_date', pg_node: 'PgQuery::SQL_VALUE_FUNCTION'
   visit 'select', 'current_time', pg_node: 'PgQuery::SQL_VALUE_FUNCTION'
@@ -276,7 +281,8 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'current_schema', pg_node: 'PgQuery::SQL_VALUE_FUNCTION'
   visit 'select', "'some_string'", pg_node: 'PgQuery::STRING'
   visit 'select', 'EXISTS (SELECT 1 = 1)', pg_node: 'PgQuery::SUB_LINK'
-  visit 'select', '"column" > ALL(SELECT AVG("amount") FROM "some_table")',
+  visit 'select',
+        '"column" > ALL(SELECT AVG("amount") FROM "some_table")',
         pg_node: 'PgQuery::SUB_LINK'
   visit 'select', '"column" = ANY(SELECT "a" FROM "b")', pg_node: 'PgQuery::SUB_LINK'
   visit 'select', '"column" IN (SELECT "a" FROM "b")', pg_node: 'PgQuery::SUB_LINK'
@@ -284,82 +290,95 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'ARRAY(SELECT 1)', pg_node: 'PgQuery::SUB_LINK'
   visit 'sql',
         'BEGIN; ' \
-        'SAVEPOINT "my_savepoint"; ' \
-        'RELEASE SAVEPOINT "my_savepoint"; ' \
-        'ROLLBACK; ' \
-        'ROLLBACK TO "my_savepoint"; ' \
-        'COMMIT',
+          'SAVEPOINT "my_savepoint"; ' \
+          'RELEASE SAVEPOINT "my_savepoint"; ' \
+          'ROLLBACK; ' \
+          'ROLLBACK TO "my_savepoint"; ' \
+          'COMMIT',
         pg_node: 'PgQuery::TRANSACTION_STMT'
   visit 'sql', 'TRUNCATE public.some_table', pg_node: 'PgQuery::TRUNCATE_STMT', sql_to_arel: false
   visit 'select', '1::integer', pg_node: 'PgQuery::TYPE_CAST'
   visit 'select', '2::bool', pg_node: 'PgQuery::TYPE_CAST'
   visit 'select', "'3'::text", pg_node: 'PgQuery::TYPE_CAST'
-  visit 'select', "(date_trunc('hour', \"p\".\"created_at\") || '-0')::timestamp with time zone",
+  visit 'select',
+        "(date_trunc('hour', \"p\".\"created_at\") || '-0')::timestamp with time zone",
         pg_node: 'PgQuery::TYPE_CAST'
   visit 'select', '"a"::varchar', pg_node: 'PgQuery::TYPE_NAME'
   visit 'sql',
         'WITH "query" AS (SELECT 1 AS "a") ' \
-        'UPDATE ONLY "some_table" "table_alias" ' \
-        'SET "b" = "query"."a", "d" = DEFAULT, "e" = (SELECT 1), "d" = ROW(DEFAULT) ' \
-        'FROM "query", "other_query" WHERE 1 = 1 ' \
-        'RETURNING *, "c" AS "some_column"',
+          'UPDATE ONLY "some_table" "table_alias" ' \
+          'SET "b" = "query"."a", "d" = DEFAULT, "e" = (SELECT 1), "d" = ROW(DEFAULT) ' \
+          'FROM "query", "other_query" WHERE 1 = 1 ' \
+          'RETURNING *, "c" AS "some_column"',
         pg_node: 'PgQuery::UPDATE_STMT'
   visit 'sql',
         'UPDATE ONLY "some_table" ' \
-        'SET "b" = "query"."a", "c" = 1.0, "d" = \'e`\', "f" = \'t\'::bool ' \
-        'WHERE CURRENT OF some_cursor',
+          "SET \"b\" = \"query\".\"a\", \"c\" = 1.0, \"d\" = 'e`', \"f\" = 't'::bool " \
+          'WHERE CURRENT OF some_cursor',
         pg_node: 'PgQuery::UPDATE_STMT'
   visit 'sql',
         'UPDATE "some_table" SET "b" = 1 - 1, "c" = 2 + 2, "d" = COALESCE(NULL, 1)',
         pg_node: 'PgQuery::UPDATE_STMT'
-  visit 'sql', 'VACUUM FULL VERBOSE ANALYZE some_table',
-        pg_node: 'PgQuery::VACUUM_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'VACUUM FULL VERBOSE ANALYZE some_table',
+        pg_node: 'PgQuery::VACUUM_STMT', sql_to_arel: false
   visit 'sql',
         'SET var1 TO 1; ' \
-        "SET LOCAL var2 TO 'some setting'; " \
-        'SET LOCAL var3 TO DEFAULT; ' \
-        "SET TIME ZONE 'UTC'; " \
-        'SET LOCAL TIME ZONE DEFAULT',
+          "SET LOCAL var2 TO 'some setting'; " \
+          'SET LOCAL var3 TO DEFAULT; ' \
+          "SET TIME ZONE 'UTC'; " \
+          'SET LOCAL TIME ZONE DEFAULT',
         pg_node: 'PgQuery::VARIABLE_SET_STMT'
   visit 'sql', 'SHOW some_variable; SHOW TIME ZONE', pg_node: 'PgQuery::VARIABLE_SHOW_STMT'
-  visit 'sql', 'CREATE VIEW some_view AS (SELECT 1)',
-        pg_node: 'PgQuery::VIEW_STMT',
-        sql_to_arel: false
+  visit 'sql',
+        'CREATE VIEW some_view AS (SELECT 1)',
+        pg_node: 'PgQuery::VIEW_STMT', sql_to_arel: false
   visit 'select', 'SUM("a") OVER (RANGE CURRENT ROW)', pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)',
+  visit 'select',
+        'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND CURRENT ROW)',
+  visit 'select',
+        'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND CURRENT ROW)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS 2 PRECEDING)',
+  visit 'select', 'SUM("a") OVER (ROWS 2 PRECEDING)', pg_node: 'PgQuery::WINDOW_DEF'
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)',
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND 1 FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND 1 FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN 1 PRECEDING AND UNBOUNDED FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN 1 PRECEDING AND UNBOUNDED FOLLOWING)',
-        pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)',
+  visit 'select',
+        'SUM("a") OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)',
         pg_node: 'PgQuery::WINDOW_DEF'
   visit 'select', 'SUM("a") OVER ()', pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'select', 'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
+  visit 'select',
+        'WINDOW "b" AS (PARTITION BY "c" ORDER BY "d" DESC)',
         pg_node: 'PgQuery::WINDOW_DEF'
-  visit 'sql', 'WITH "some_name" AS (SELECT \'a\') SELECT "some_name"',
+  visit 'sql',
+        "WITH \"some_name\" AS (SELECT 'a') SELECT \"some_name\"",
         pg_node: 'PgQuery::WITH_CLAUSE'
   visit 'select', 'SUM("a") OVER (ORDER BY "a")'
-  visit 'select', 'CAST((AVG("a") OVER running_average) AS FLOAT)',
+  visit 'select',
+        'CAST((AVG("a") OVER running_average) AS FLOAT)',
         expected_sql: 'SELECT (AVG("a") OVER running_average)::double precision'
   visit 'select',
         'SUM("a") OVER w, AVG("a") OVER w FROM "t" ' \
-        'WINDOW "w" AS (PARTITION BY "b" ORDER BY "a" DESC)'
+          'WINDOW "w" AS (PARTITION BY "b" ORDER BY "a" DESC)'
   visit 'select', '11 + (11 + 5)'
   visit 'select', '(12 - 12) - 13'
   visit 'select', '3 + (10 * 10)'
@@ -392,17 +411,17 @@ describe 'Arel.sql_to_arel' do
   visit 'select', 'ARRAY[4, 5, 6] || 7'
   visit 'select', "'192.168.1/24'::inet <<= '192.168.1/24'::inet"
   visit 'select', "'192.168.1/24'::inet >>= '192.168.1/24'::inet"
-  visit 'select', '\'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]\'::json -> 2'
-  visit 'select', '\'{"a": {"b":"foo"}}\'::json -> \'a\''
+  visit 'select', "'[{\"a\":\"foo\"},{\"b\":\"bar\"},{\"c\":\"baz\"}]'::json -> 2"
+  visit 'select', "'{\"a\": {\"b\":\"foo\"}}'::json -> 'a'"
   visit 'select', "'[1,2,3]'::json ->> 2"
-  visit 'select', '\'{"a":1,"b":2}\'::json ->> \'b\''
-  visit 'select', '\'{"a": {"b":{"c": "foo"}}}\'::json #> \'{a,b}\''
-  visit 'select', '\'{"a":[1,2,3],"b":[4,5,6]}\'::json #>> \'{a,2}\''
-  visit 'select', '\'{"a":1, "b":2}\'::jsonb @> \'{"b":2}\'::jsonb'
-  visit 'select', '\'{"b":2}\'::jsonb <@ \'{"a":1, "b":2}\'::jsonb'
-  visit 'select', '\'{"a":1, "b":2}\'::jsonb ? \'b\''
-  visit 'select', '\'{"a":1, "b":2, "c":3}\'::jsonb ?| ARRAY[\'b\', \'c\']'
-  visit 'select', '\'["a", "b"]\'::jsonb ?& ARRAY[\'a\', \'b\']'
+  visit 'select', "'{\"a\":1,\"b\":2}'::json ->> 'b'"
+  visit 'select', "'{\"a\": {\"b\":{\"c\": \"foo\"}}}'::json #> '{a,b}'"
+  visit 'select', "'{\"a\":[1,2,3],\"b\":[4,5,6]}'::json #>> '{a,2}'"
+  visit 'select', "'{\"a\":1, \"b\":2}'::jsonb @> '{\"b\":2}'::jsonb"
+  visit 'select', "'{\"b\":2}'::jsonb <@ '{\"a\":1, \"b\":2}'::jsonb"
+  visit 'select', "'{\"a\":1, \"b\":2}'::jsonb ? 'b'"
+  visit 'select', "'{\"a\":1, \"b\":2, \"c\":3}'::jsonb ?| ARRAY['b', 'c']"
+  visit 'select', "'[\"a\", \"b\"]'::jsonb ?& ARRAY['a', 'b']"
   visit 'select', "'thomas' ~ '.*thomas.*'"
   visit 'select', "'thomas' ~* '.*Thomas.*'"
   visit 'select', "'thomas' !~ '.*Thomas.*'"
@@ -470,7 +489,8 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "substring('Thomas' from '...$')"
   visit 'select', "substring('Thomas' from '%#\"o_a#\"_' for '#')"
   visit 'select', "trim(both 'xyz' from 'yxTomxx')"
-  visit 'select', "trim(both from 'yxTomxx', 'xyz')",
+  visit 'select',
+        "trim(both from 'yxTomxx', 'xyz')",
         expected_sql: "SELECT trim(both 'xyz' from 'yxTomxx')"
   visit 'select', "upper('tom')"
 
@@ -926,21 +946,19 @@ describe 'Arel.sql_to_arel' do
 
     STRING
 
-    expect do
-      Arel.sql_to_arel(sql)
-    end.to raise_error do |error|
+    expect { Arel.sql_to_arel(sql) }.to raise_error do |error|
       expect(message).to eq error.message
     end
   end
 
   it 'comparison operators work with Arel::Nodes::Quoted' do
     t = Post.arel_table
-    sql = t
-      .where(t[:id].eq(Arel::Nodes.build_quoted(nil)))
-      .where(t[:id].not_eq(Arel::Nodes.build_quoted(nil)))
-      .to_sql
+    sql =
+      t.where(t[:id].eq(Arel::Nodes.build_quoted(nil))).where(
+        t[:id].not_eq(Arel::Nodes.build_quoted(nil))
+      )
+        .to_sql
 
-    expect(sql)
-      .to eq 'SELECT FROM "posts" WHERE "posts"."id" IS NULL AND "posts"."id" IS NOT NULL'
+    expect(sql).to eq 'SELECT FROM "posts" WHERE "posts"."id" IS NULL AND "posts"."id" IS NOT NULL'
   end
 end

@@ -46,8 +46,7 @@ if Gem.loaded_specs.key?('pg_search')
     has_one :salami
   end
 
-  class Cheese < ActiveRecord::Base
-  end
+  class Cheese < ActiveRecord::Base; end
 
   class Salami < ActiveRecord::Base
     include PgSearch
@@ -55,10 +54,7 @@ if Gem.loaded_specs.key?('pg_search')
     belongs_to :cracker
     has_many :cheeses, through: :cracker
 
-    pg_search_scope :tasty_search, associated_against: {
-      cheeses: %i[kind brand],
-      cracker: :kind,
-    }
+    pg_search_scope :tasty_search, associated_against: { cheeses: %i[kind brand], cracker: :kind }
   end
 
   describe PgSearch do

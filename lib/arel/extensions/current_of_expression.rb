@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/sql-update.html
-    class CurrentOfExpression < Arel::Nodes::Unary
-    end
+    class CurrentOfExpression < Arel::Nodes::Unary; end
   end
 
   module Visitors

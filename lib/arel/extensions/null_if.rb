@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class NullIf < Arel::Nodes::Binary
-    end
+    class NullIf < Arel::Nodes::Binary; end
   end
 
   module Visitors

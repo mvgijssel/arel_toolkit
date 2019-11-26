@@ -4,19 +4,14 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.1/sql-show.html
-    class VariableShow < Arel::Nodes::Unary
-    end
+    class VariableShow < Arel::Nodes::Unary; end
   end
 
   module Visitors
     class ToSql
       def visit_Arel_Nodes_VariableShow(o, collector)
         collector << 'SHOW '
-        collector << if o.expr == 'timezone'
-                       'TIME ZONE'
-                     else
-                       o.expr
-                     end
+        collector << (o.expr == 'timezone' ? 'TIME ZONE' : o.expr)
       end
     end
   end

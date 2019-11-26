@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class CurrentSchema < Arel::Nodes::Node
-    end
+    class CurrentSchema < Arel::Nodes::Node; end
   end
 
   module Visitors

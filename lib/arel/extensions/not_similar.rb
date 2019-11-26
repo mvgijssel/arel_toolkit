@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9/functions-matching.html
-    class NotSimilar < Arel::Nodes::Similar
-    end
+    class NotSimilar < Arel::Nodes::Similar; end
   end
 
   module Visitors

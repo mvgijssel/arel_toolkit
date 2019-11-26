@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class CurrentCatalog < Arel::Nodes::Node
-    end
+    class CurrentCatalog < Arel::Nodes::Node; end
   end
 
   module Visitors

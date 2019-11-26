@@ -1,6 +1,5 @@
 module Arel
   module SqlToArel
-    class Error < StandardError
-    end
+    class Error < StandardError; end
   end
 end

@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class CrossJoin < Arel::Nodes::Join
-    end
+    class CrossJoin < Arel::Nodes::Join; end
   end
 
   module Visitors

@@ -91,11 +91,12 @@ module Arel
       def to_sql(type, &block)
         middleware = Arel::Middleware::ToSqlMiddleware.new(type)
 
-        new_chain = Arel::Middleware::Chain.new(
-          internal_middleware + [middleware],
-          internal_context,
-          Arel::Middleware::ToSqlExecutor,
-        )
+        new_chain =
+          Arel::Middleware::Chain.new(
+            internal_middleware + [middleware],
+            internal_context,
+            Arel::Middleware::ToSqlExecutor
+          )
 
         maybe_execute_block(new_chain, &block)
 

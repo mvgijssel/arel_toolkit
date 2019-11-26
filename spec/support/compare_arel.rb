@@ -27,31 +27,23 @@ module RSpec
 end
 
 RSpec::Matchers.define :be_not_identical_arel do |expected|
-  match do |actual|
-    RSpec::Matchers.different_arel_nodes(actual, expected, false).length.zero?
-  end
+  match { |actual| RSpec::Matchers.different_arel_nodes(actual, expected, false).length.zero? }
 
   failure_message do |actual|
     nodes = RSpec::Matchers.different_arel_nodes(actual, expected, false)
     message = "expected that these nodes would be different:\n\n"
-    nodes.each do |node|
-      message << "#{node.path.inspect}: #{node.object.class}\n"
-    end
+    nodes.each { |node| message << "#{node.path.inspect}: #{node.object.class}\n" }
     message
   end
 end
 
 RSpec::Matchers.define :be_identical_arel do |expected|
-  match do |actual|
-    RSpec::Matchers.different_arel_nodes(actual, expected, true).length.zero?
-  end
+  match { |actual| RSpec::Matchers.different_arel_nodes(actual, expected, true).length.zero? }
 
   failure_message do |actual|
     nodes = RSpec::Matchers.different_arel_nodes(actual, expected, true)
     message = "expected that these nodes would be the same:\n\n"
-    nodes.each do |node|
-      message << "#{node.path.inspect}: #{node.object.class}\n"
-    end
+    nodes.each { |node| message << "#{node.path.inspect}: #{node.object.class}\n" }
     message
   end
 end

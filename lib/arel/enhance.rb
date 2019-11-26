@@ -6,8 +6,7 @@ require_relative './enhance/query_methods'
 require_relative './enhance/visitor'
 
 module Arel
-  module Enhance
-  end
+  module Enhance; end
 
   def self.enhance(object)
     return object if object.is_a?(Arel::Enhance::Node)

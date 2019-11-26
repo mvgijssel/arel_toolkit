@@ -7,7 +7,7 @@ module Arel
         Arel::Middleware::Result.create(
           data: next_arel.to_sql,
           from: Arel::Middleware::StringResult,
-          to: Arel::Middleware::EmptyPGResult,
+          to: Arel::Middleware::EmptyPGResult
         )
       end
     end

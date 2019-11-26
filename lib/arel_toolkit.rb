@@ -17,5 +17,4 @@ require 'arel/middleware'
 require 'arel/enhance'
 require 'arel/transformer'
 
-module ArelToolkit
-end
+module ArelToolkit; end

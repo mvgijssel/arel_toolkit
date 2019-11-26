@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-conditional.html
-    class Coalesce < Arel::Nodes::Unary
-    end
+    class Coalesce < Arel::Nodes::Unary; end
   end
 
   module Visitors

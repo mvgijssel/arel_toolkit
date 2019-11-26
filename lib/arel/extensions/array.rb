@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class Array < Arel::Nodes::Unary
-    end
+    class Array < Arel::Nodes::Unary; end
   end
 
   module Visitors

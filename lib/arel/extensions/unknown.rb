@@ -3,8 +3,7 @@
 
 module Arel
   module Nodes
-    class Unknown < Arel::Nodes::Node
-    end
+    class Unknown < Arel::Nodes::Node; end
   end
 
   module Visitors

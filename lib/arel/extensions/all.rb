@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/8.1/sql-select.html
-    class All < Arel::Nodes::Unary
-    end
+    class All < Arel::Nodes::Unary; end
   end
 
   module Visitors

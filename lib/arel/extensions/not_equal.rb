@@ -11,10 +11,8 @@ module Arel
         if [Arel::Nodes::Unknown, Arel::Nodes::False, Arel::Nodes::True].include?(right.class)
           collector << ' IS NOT '
           visit right, collector
-
         elsif right.nil?
           collector << ' IS NOT NULL'
-
         else
           collector << ' != '
           visit right, collector

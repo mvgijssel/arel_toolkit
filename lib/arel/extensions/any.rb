@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.1/functions-comparisons.html
-    class Any < Arel::Nodes::Unary
-    end
+    class Any < Arel::Nodes::Unary; end
   end
 
   module Visitors

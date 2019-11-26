@@ -117,6 +117,5 @@ require 'arel/extensions/bind_param'
 require 'arel/extensions/node'
 
 module Arel
-  module Extensions
-  end
+  module Extensions; end
 end

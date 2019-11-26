@@ -4,8 +4,7 @@
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.1/functions-comparison.html
-    class NotBetweenSymmetric < Arel::Nodes::BetweenSymmetric
-    end
+    class NotBetweenSymmetric < Arel::Nodes::BetweenSymmetric; end
   end
 
   module Visitors

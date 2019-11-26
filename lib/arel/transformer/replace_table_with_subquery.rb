@@ -16,11 +16,8 @@ module Arel
       private
 
       def update_arel_tables(tree)
-        tree.query(
-          class: Arel::Table,
-          context: { range_variable: true },
-          schema_name: nil,
-        ).each do |node|
+        tree.query(class: Arel::Table, context: { range_variable: true }, schema_name: nil)
+          .each do |node|
           if (subquery = subquery_for_table.call(node.name.value))
             node.replace subquery.as(node.name.value)
           end
