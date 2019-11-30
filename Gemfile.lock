@@ -167,6 +167,7 @@ GEM
       hirb
       simplecov
     simplecov-html (0.10.2)
+    stackprof (0.2.13)
     thor (0.20.3)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
@@ -202,6 +203,7 @@ DEPENDENCIES
   rubocop (= 0.71.0)
   simplecov (~> 0.16.1)
   simplecov-console (~> 0.4.2)
+  stackprof
 
 BUNDLED WITH
    2.0.2
