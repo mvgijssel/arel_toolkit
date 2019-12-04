@@ -11,10 +11,12 @@ module Arel
         @middleware = middleware
       end
 
-      def run(enhanced_arel, context, final_block)
+      def run(arel, context, final_block)
         @index = 0
         @context = context
         @final_block = final_block
+
+        enhanced_arel = Arel.enhance(arel)
 
         result = call(enhanced_arel)
         check_return_type result

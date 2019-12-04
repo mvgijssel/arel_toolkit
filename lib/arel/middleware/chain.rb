@@ -21,9 +21,9 @@ module Arel
         check_middleware_recursion(sql)
 
         updated_context = context.merge(original_sql: sql)
-        enhanced_arel = Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
+        arel = Arel.sql_to_arel(sql, binds: binds)
 
-        result = executor.run(enhanced_arel, updated_context, execute_sql)
+        result = executor.run(arel, updated_context, execute_sql)
 
         result.to_casted_result
       rescue ::PgQuery::ParseError
