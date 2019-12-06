@@ -16,9 +16,7 @@ module Arel
         @context = context
         @final_block = final_block
 
-        enhanced_arel = Arel.enhance(arel)
-
-        result = call(enhanced_arel)
+        result = call(arel)
         check_return_type result
         result
       ensure

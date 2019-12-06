@@ -26,8 +26,8 @@ module Arel
       def execute(sql, binds = [], &execute_sql)
         return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
-        if (csql = cache.get(sql))
-          return execute_sql.call(csql, binds).to_casted_result
+        if (cached_sql = cache.get(sql))
+          return execute_sql.call(cached_sql, binds).to_casted_result
         end
 
         check_middleware_recursion(sql)
@@ -39,8 +39,9 @@ module Arel
         )
 
         arel = Arel.sql_to_arel(sql, binds: binds)
+        enhanced_arel = Arel.enhance(arel)
 
-        result = executor.run(arel, updated_context, execute_sql)
+        result = executor.run(enhanced_arel, updated_context, execute_sql)
 
         result.to_casted_result
       rescue ::PgQuery::ParseError
