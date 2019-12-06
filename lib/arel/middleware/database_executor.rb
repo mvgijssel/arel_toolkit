@@ -48,7 +48,12 @@ module Arel
 
       def execute_sql(next_arel)
         sql, binds = next_arel.to_sql_and_binds
+
+        # TODO: don't set cache if the binds != context[:original_binds]
+        context[:cache].set context[:original_sql], sql
+
         sql_result = final_block.call(sql, binds)
+
         check_return_type sql_result
         sql_result
       end

@@ -3,24 +3,41 @@ module Arel
     class Chain
       attr_reader :executing_middleware
       attr_reader :executor
+      attr_reader :cache
+
+      class NoOpCache
+        def get(original_sql); end
+        def set(original_sql, modified_sql); end
+      end
 
       def initialize(
         internal_middleware = [],
         internal_context = {},
-        executor_class = Arel::Middleware::DatabaseExecutor
+        executor_class = Arel::Middleware::DatabaseExecutor,
+        cache = NoOpCache.new
       )
         @internal_middleware = internal_middleware
         @internal_context = internal_context
         @executor = executor_class.new(internal_middleware)
         @executing_middleware = false
+        @cache = cache
       end
 
       def execute(sql, binds = [], &execute_sql)
         return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
+        if (csql = cache.get(sql))
+          return execute_sql.call(csql, binds).to_casted_result
+        end
+
         check_middleware_recursion(sql)
 
-        updated_context = context.merge(original_sql: sql)
+        updated_context = context.merge(
+          original_sql: sql,
+          original_binds: binds,
+          cache: cache,
+        )
+
         arel = Arel.sql_to_arel(sql, binds: binds)
 
         result = executor.run(arel, updated_context, execute_sql)
