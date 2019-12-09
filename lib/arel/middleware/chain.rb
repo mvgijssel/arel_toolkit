@@ -1,20 +1,20 @@
 module Arel
   module Middleware
+    module NoOpCache
+      def self.get(*_); end
+      def self.set(**_); end
+    end
+
     class Chain
       attr_reader :executing_middleware
       attr_reader :executor
       attr_reader :cache
 
-      class NoOpCache
-        def get(original_sql); end
-        def set(original_sql, modified_sql); end
-      end
-
       def initialize(
         internal_middleware = [],
         internal_context = {},
         executor_class = Arel::Middleware::DatabaseExecutor,
-        cache = NoOpCache.new
+        cache: NoOpCache
       )
         @internal_middleware = internal_middleware
         @internal_context = internal_context
@@ -35,7 +35,7 @@ module Arel
         updated_context = context.merge(
           original_sql: sql,
           original_binds: binds,
-          cache: cache,
+          cache: cache, # I'm not sure if passing cache through context is the way to go
         )
 
         arel = Arel.sql_to_arel(sql, binds: binds)
@@ -54,9 +54,9 @@ module Arel
         internal_middleware.dup
       end
 
-      def apply(middleware, &block)
+      def apply(middleware, cache: NoOpCache, &block)
         new_middleware = Array.wrap(middleware)
-        continue_chain(new_middleware, internal_context, &block)
+        continue_chain(new_middleware, internal_context, cache: cache, &block)
       end
       alias only apply
 
@@ -127,8 +127,8 @@ module Arel
 
       private
 
-      def continue_chain(middleware, context, &block)
-        new_chain = Arel::Middleware::Chain.new(middleware, context)
+      def continue_chain(middleware, context, cache: NoOpCache, &block)
+        new_chain = Arel::Middleware::Chain.new(middleware, context, cache: cache)
         maybe_execute_block(new_chain, &block)
       end
 
