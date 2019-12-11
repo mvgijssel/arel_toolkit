@@ -12,11 +12,13 @@ describe 'Middleware Query Caching' do
 
     cache = spy('cache', get: nil, set: nil)
 
-    Arel.middleware.apply([transformer], cache: cache) { Post.first }
+    Arel.middleware.apply([], cache: cache) do
+      Arel.middleware.apply([transformer]) { Post.first }
+    end
 
     expect(cache).to \
       have_received(:get).with('SELECT  "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1')
 
-    expect(cache).to have_received(:set) # .with(......)
+    expect(cache).to have_received(:set)
   end
 end
