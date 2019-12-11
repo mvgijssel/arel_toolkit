@@ -2,6 +2,7 @@ module Arel
   module Middleware
     module NoOpCache
       def self.get(*_); end
+
       def self.set(**_); end
     end
 
@@ -30,20 +31,7 @@ module Arel
           return execute_sql.call(cached_sql, binds).to_casted_result
         end
 
-        check_middleware_recursion(sql)
-
-        updated_context = context.merge(
-          original_sql: sql,
-          original_binds: binds,
-          cache: cache
-        )
-
-        arel = Arel.sql_to_arel(sql, binds: binds)
-        enhanced_arel = Arel.enhance(arel)
-
-        result = executor.run(enhanced_arel, updated_context, execute_sql)
-
-        result.to_casted_result
+        execute_with_middleware(sql, binds, execute_sql).to_casted_result
       rescue ::PgQuery::ParseError
         execute_sql.call(sql, binds)
       ensure
@@ -126,6 +114,21 @@ module Arel
       attr_reader :internal_context
 
       private
+
+      def execute_with_middleware(sql, binds, execute_sql)
+        check_middleware_recursion(sql)
+
+        updated_context = context.merge(
+          original_sql: sql,
+          original_binds: binds,
+          cache: cache,
+        )
+
+        arel = Arel.sql_to_arel(sql, binds: binds)
+        enhanced_arel = Arel.enhance(arel)
+
+        executor.run(enhanced_arel, updated_context, execute_sql)
+      end
 
       def continue_chain(middleware, context, cache:, &block)
         new_chain = Arel::Middleware::Chain.new(middleware, context, cache: cache)
