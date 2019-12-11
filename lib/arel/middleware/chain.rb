@@ -14,13 +14,13 @@ module Arel
         internal_middleware = [],
         internal_context = {},
         executor_class = Arel::Middleware::DatabaseExecutor,
-        cache: NoOpCache
+        cache: nil
       )
         @internal_middleware = internal_middleware
         @internal_context = internal_context
         @executor = executor_class.new(internal_middleware)
         @executing_middleware = false
-        @cache = cache
+        @cache = cache || NoOpCache
       end
 
       def execute(sql, binds = [], &execute_sql)
@@ -35,7 +35,7 @@ module Arel
         updated_context = context.merge(
           original_sql: sql,
           original_binds: binds,
-          cache: cache, # I'm not sure if passing cache through context is the way to go
+          cache: cache
         )
 
         arel = Arel.sql_to_arel(sql, binds: binds)
@@ -54,46 +54,46 @@ module Arel
         internal_middleware.dup
       end
 
-      def apply(middleware, cache: NoOpCache, &block)
+      def apply(middleware, cache: nil, &block)
         new_middleware = Array.wrap(middleware)
-        continue_chain(new_middleware, internal_context, cache: cache, &block)
+        continue_chain(new_middleware, internal_context, cache: cache || @cache, &block)
       end
       alias only apply
 
       def none(&block)
-        continue_chain([], internal_context, &block)
+        continue_chain([], internal_context, cache: cache || @cache, &block)
       end
 
-      def except(without_middleware, &block)
+      def except(without_middleware, cache: nil, &block)
         without_middleware = Array.wrap(without_middleware)
         new_middleware = internal_middleware - without_middleware
-        continue_chain(new_middleware, internal_context, &block)
+        continue_chain(new_middleware, internal_context, cache: cache || @cache, &block)
       end
 
-      def insert_before(new_middleware, existing_middleware, &block)
+      def insert_before(new_middleware, existing_middleware, cache: nil, &block)
         new_middleware = Array.wrap(new_middleware)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index, *new_middleware)
-        continue_chain(updated_middleware, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, cache: cache || @cache, &block)
       end
 
-      def prepend(new_middleware, &block)
+      def prepend(new_middleware, cache: nil, &block)
         new_middleware = Array.wrap(new_middleware)
         updated_middleware = new_middleware + internal_middleware
-        continue_chain(updated_middleware, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, cache: cache || @cache, &block)
       end
 
-      def insert_after(new_middleware, existing_middleware, &block)
+      def insert_after(new_middleware, existing_middleware, cache: nil, &block)
         new_middleware = Array.wrap(new_middleware)
         index = internal_middleware.index(existing_middleware)
         updated_middleware = internal_middleware.insert(index + 1, *new_middleware)
-        continue_chain(updated_middleware, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, cache: cache || @cache, &block)
       end
 
-      def append(new_middleware, &block)
+      def append(new_middleware, cache: nil, &block)
         new_middleware = Array.wrap(new_middleware)
         updated_middleware = internal_middleware + new_middleware
-        continue_chain(updated_middleware, internal_context, &block)
+        continue_chain(updated_middleware, internal_context, cache: cache || @cache, &block)
       end
 
       def context(new_context = nil, &block)
@@ -103,7 +103,7 @@ module Arel
 
         return internal_context if new_context.nil?
 
-        continue_chain(internal_middleware, new_context, &block)
+        continue_chain(internal_middleware, new_context, cache: @cache, &block)
       end
 
       def to_sql(type, &block)
@@ -127,7 +127,7 @@ module Arel
 
       private
 
-      def continue_chain(middleware, context, cache: NoOpCache, &block)
+      def continue_chain(middleware, context, cache:, &block)
         new_chain = Arel::Middleware::Chain.new(middleware, context, cache: cache)
         maybe_execute_block(new_chain, &block)
       end
