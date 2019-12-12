@@ -49,7 +49,9 @@ module Arel
 
         context[:cache_accessor].set(
           transformed_sql: sql,
+          transformed_binds: binds,
           original_sql: context[:original_sql],
+          original_binds: context[:original_binds],
         )
 
         sql_result = final_block.call(sql, binds)

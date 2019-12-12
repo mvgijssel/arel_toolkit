@@ -13,24 +13,19 @@ module Arel
         @cache = cache
       end
 
-      def get(sql)
-        cache.get(cache_key(sql))
+      def get(original_sql)
+        cache.get cache_key(original_sql)
       end
 
-      def set(transformed_sql:, original_sql:)
-        # no set if bind params changed order
-        # no set if anonymous middleware is given
-        # no set if one or more middlewares explicitly opt-out for caching (this is an idea)
+      def set(transformed_sql:, transformed_binds:, original_sql:, original_binds:)
+        # The order of binds was changed and therefore we can't reuse the query
+        return if transformed_binds != original_binds
 
         cache.set(cache_key(original_sql), transformed_sql)
       end
 
-      def cache_key(sql)
-        # Original SQL
-        # Applied middleware keys (class names or some other id)
-        # Given context? Context can change middleware outcome, should it be part
-        # of the cache key?
-        sql
+      def cache_key(original_sql)
+        original_sql
       end
     end
 
