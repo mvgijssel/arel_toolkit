@@ -6,6 +6,33 @@ module Arel
       def self.set(**_); end
     end
 
+    class CacheAccessor
+      attr_reader :cache
+
+      def initialize(cache)
+        @cache = cache
+      end
+
+      def get(sql)
+        cache.get(sql)
+      end
+
+      def set(**kwargs)
+        # no set if bind params changed order
+        # no set if anonymous middleware is given
+        # no set if one or more middlewares explicitly opt-out for caching (this is an idea)
+
+        cache.set(kwargs)
+      end
+
+      def cache_key
+        # Original SQL
+        # Applied middleware keys (class names or some other id)
+        # Given context? Context can change middleware outcome, should it be part
+        # of the cache key?
+      end
+    end
+
     class Chain
       attr_reader :executing_middleware
       attr_reader :executor
@@ -24,10 +51,14 @@ module Arel
         @cache = cache || NoOpCache
       end
 
+      def cache_accessor
+        # memorize?
+        CacheAccessor.new @cache
+      end
       def execute(sql, binds = [], &execute_sql)
         return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
-        if (cached_sql = cache.get(sql))
+        if (cached_sql = cache_accessor.get(sql))
           return execute_sql.call(cached_sql, binds).to_casted_result
         end
 
@@ -121,7 +152,7 @@ module Arel
         updated_context = context.merge(
           original_sql: sql,
           original_binds: binds,
-          cache: cache,
+          cache_accessor: cache_accessor,
         )
 
         arel = Arel.sql_to_arel(sql, binds: binds)
