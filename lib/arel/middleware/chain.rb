@@ -25,6 +25,7 @@ module Arel
       end
 
       def cache_key(original_sql)
+        # TODO: Add the active middleware to the cache key
         original_sql
       end
     end
