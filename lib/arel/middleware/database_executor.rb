@@ -48,10 +48,8 @@ module Arel
         sql, binds = next_arel.to_sql_and_binds
 
         context[:cache_accessor].set(
-          sql: sql,
-          binds: binds,
-          context: context,
-          middleware: middleware,
+          transformed_sql: sql,
+          original_sql: context[:original_sql],
         )
 
         sql_result = final_block.call(sql, binds)
