@@ -319,9 +319,11 @@ describe 'Arel.sql_to_arel' do
         'SET var1 TO 1; ' \
         "SET LOCAL var2 TO 'some setting'; " \
         'SET LOCAL var3 TO DEFAULT; ' \
+        'SET SESSION var4 TO \'\'; ' \
         "SET TIME ZONE 'UTC'; " \
         'SET LOCAL TIME ZONE DEFAULT',
         pg_node: 'PgQuery::VARIABLE_SET_STMT'
+  visit 'sql', "SET SESSION var4 TO ''", expected_sql: "SET var4 TO ''"
   visit 'sql', 'SHOW some_variable; SHOW TIME ZONE', pg_node: 'PgQuery::VARIABLE_SHOW_STMT'
   visit 'sql', 'CREATE VIEW some_view AS (SELECT 1)',
         pg_node: 'PgQuery::VIEW_STMT',
