@@ -22,6 +22,12 @@ SELECT COUNT("hacktivity_items"."id") FROM (SELECT "hacktivity_items".* FROM (SE
 def do_it
   arel = Arel.sql_to_arel SQL
   enhanced_arel = Arel.enhance(arel)
+
+  enhanced_arel.query(class: Arel::Attributes::Attribute).each do |node|
+    node.replace node.object
+  end
+
+  enhanced_arel
 end
 
 # Warm up
