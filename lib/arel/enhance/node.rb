@@ -151,14 +151,19 @@ module Arel
         end
       end
 
+      def gaan(tree)
+        children.each_value do |child|
+          tree_child = tree.send(*child.path.current.method)
+          child.object = tree_child
+          child.gaan(tree_child)
+        end
+      end
+
       def deep_copy_object
         # https://github.com/mvgijssel/arel_toolkit/issues/97
         new_object = Marshal.load(Marshal.dump(object))
-
-        each do |node|
-          selected_object = node.path.dig_send(new_object)
-          node.object = selected_object
-        end
+        object = new_object
+        gaan(new_object)
       end
 
       def mark_as_dirty
