@@ -63,8 +63,18 @@ module Arel
         end
       end
 
-      def visit(object)
-        Arel::Visitors::Visitor.instance_method(:visit).bind(self).call(object)
+      # arel/lib/arel/visitors/visitor.rb:29
+      def visit object
+        dispatch_method = dispatch[object.class]
+        send dispatch_method, object
+      rescue NoMethodError => e
+        raise e if respond_to?(dispatch_method, true)
+        superklass = object.class.ancestors.find { |klass|
+          respond_to?(dispatch[klass], true)
+        }
+        raise(TypeError, "Cannot visit #{object.class}") unless superklass
+        dispatch[object.class] = dispatch[superklass]
+        retry
       end
 
       def current_node
