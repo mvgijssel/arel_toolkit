@@ -3,7 +3,7 @@ module Arel
     class Node
       attr_reader :object
       attr_reader :parent
-      attr_reader :path
+      attr_reader :current_path
       attr_reader :fields
       attr_reader :children
       attr_reader :root_node
@@ -11,7 +11,6 @@ module Arel
 
       def initialize(object)
         @object = object
-        @path = Path.new
         @root_node = self
         @fields = []
         @children = {}
@@ -56,7 +55,7 @@ module Arel
       end
 
       def add(path_node, node)
-        node.path = path.append(path_node)
+        node.current_path = path_node
         node.parent = self
         node.root_node = root_node
         @children[path_node.value.to_s] = node
@@ -109,15 +108,27 @@ module Arel
 
       protected
 
-      attr_writer :path
+      attr_writer :current_path
       attr_writer :parent
       attr_writer :root_node
+
+      def full_path
+        the_path = [current_path]
+        current_parent = parent
+
+        while current_parent do
+          the_path.unshift current_parent.current_path
+          current_parent = current_parent.parent
+        end
+
+        the_path.compact
+      end
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       def recursive_inspect(string, indent = 1)
-        string << "<#{inspect_name} #{path.inspect}\n"
+        string << "<#{inspect_name} #{current_path.inspect}\n"
         string << "#{spacing(indent)}sql = #{to_sql}\n" unless to_sql.nil?
         string << "#{spacing(indent)}parent = #{parent.nil? ? nil.inspect : parent.inspect_name}"
         string << "\n" unless children.length.zero?
@@ -153,7 +164,7 @@ module Arel
 
       def gaan(tree)
         children.each_value do |child|
-          tree_child = tree.send(*child.path.current.method)
+          tree_child = tree.send(*child.current_path.method)
           child.object = tree_child
           child.gaan(tree_child)
         end
@@ -162,7 +173,8 @@ module Arel
       def deep_copy_object
         # https://github.com/mvgijssel/arel_toolkit/issues/97
         new_object = Marshal.load(Marshal.dump(object))
-        object = new_object
+        self.object = new_object
+
         gaan(new_object)
       end
 
@@ -184,26 +196,26 @@ module Arel
         parent_object = parent.object
         new_node = [] if remove && object.is_a?(Array)
 
-        if parent_object.respond_to?("#{path.current.value}=")
-          parent_object.send("#{path.current.value}=", new_node)
+        if parent_object.respond_to?("#{current_path.value}=")
+          parent_object.send("#{current_path.value}=", new_node)
 
-        elsif parent_object.instance_values.key?(path.current.value)
-          parent_object.instance_variable_set("@#{path.current.value}", new_node)
+        elsif parent_object.instance_values.key?(current_path.value)
+          parent_object.instance_variable_set("@#{current_path.value}", new_node)
 
-        elsif path.current.arguments? && parent_object.respond_to?(path.current.method[0])
+        elsif current_path.arguments? && parent_object.respond_to?(current_path.method[0])
           if remove
-            parent_object.delete_at(path.current.value)
+            parent_object.delete_at(current_path.value)
 
           else
-            parent_object[path.current.value] = new_node
+            parent_object[current_path.value] = new_node
           end
         else
-          raise "Don't know how to replace `#{path.current.value}` in #{parent_object.inspect}"
+          raise "Don't know how to replace `#{current_path.value}` in #{parent_object.inspect}"
         end
 
         new_parent_tree = Visitor.new.accept_with_root(parent_object, parent)
-        parent.parent.add(parent.path.current, new_parent_tree)
-        new_parent_tree[path.current.value]
+        parent.parent.add(parent.current_path, new_parent_tree)
+        new_parent_tree[current_path.value]
       end
       # rubocop:enable Metrics/PerceivedComplexity
       # rubocop:enable Metrics/CyclomaticComplexity
