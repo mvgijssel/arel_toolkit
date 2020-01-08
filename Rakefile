@@ -10,7 +10,9 @@ GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.user = 'mvgijssel'
   config.project = 'arel_toolkit'
   config.future_release = "v#{ArelToolkit::VERSION}"
-  config.pulls = false
+  config.add_pr_wo_labels = false
+  config.enhancement_labels = %w[enhancement dependencies]
+  config.exclude_tags = ['v0.1.0']
 end
 
 require 'rake/extensiontask'

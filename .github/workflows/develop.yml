@@ -47,6 +47,8 @@ jobs:
     - name: Rebase
       if: matrix.rebase
       run: |
+        git config --global user.email "ci@github.com"
+        git config --global user.name "GitHub CI"
         git fetch origin $GITHUB_REF
         git rebase $GITHUB_SHA
 
