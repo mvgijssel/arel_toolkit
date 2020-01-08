@@ -28,7 +28,7 @@ def do_it
   enhanced_arel = Arel.enhance(arel)
 
   enhanced_arel.query(class: Arel::Attributes::Attribute).each do |node|
-    node.replace node.object
+    node.replace node
   end
 
   enhanced_arel
