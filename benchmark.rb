@@ -40,3 +40,13 @@ File.write('stackprof.json', JSON.generate(profile))
 
 report = MemoryProfiler.report { do_it }
 puts report.pretty_print
+
+n = 100
+
+Benchmark.bm do |benchmark|
+  benchmark.report do
+    n.times do
+      do_it
+    end
+  end
+end
