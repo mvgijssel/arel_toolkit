@@ -63,19 +63,23 @@ module Arel
         end
       end
 
+      # rubocop:disable Metrics/AbcSize
       # arel/lib/arel/visitors/visitor.rb:29
-      def visit object
+      def visit(object)
         dispatch_method = dispatch[object.class]
         send dispatch_method, object
       rescue NoMethodError => e
         raise e if respond_to?(dispatch_method, true)
-        superklass = object.class.ancestors.find { |klass|
+
+        superklass = object.class.ancestors.find do |klass|
           respond_to?(dispatch[klass], true)
-        }
+        end
         raise(TypeError, "Cannot visit #{object.class}") unless superklass
+
         dispatch[object.class] = dispatch[superklass]
         retry
       end
+      # rubocop:enable Metrics/AbcSize
 
       def current_node
         @node_stack.last
