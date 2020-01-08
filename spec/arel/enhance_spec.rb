@@ -188,6 +188,35 @@ describe 'Arel.enhance' do
     expect(where_tree.parent.object).to be_a(Arel::Nodes::SelectCore)
   end
 
+  it 'can update the ast with an existing enhanced ast' do
+    result = Arel.sql_to_arel("SELECT id FROM users WHERE username ILIKE '%friend%'")
+    tree = Arel.enhance(result)
+
+    new_table = User.arel_table.dup
+    new_table.name = "active_users"
+    new_enhanced_table = Arel.enhance(new_table)
+
+    old_table = tree.child_at_path([0, 'ast', 'cores', 0, 'source', 'left'])
+    new_node_from_replace = nil
+
+    expect do
+      new_node_from_replace = old_table.replace(new_enhanced_table)
+    end
+      .to change { new_enhanced_table.full_path.map(&:value) }
+      .from([])
+      .to([0, 'ast', 'cores', 0, 'source', 'left'])
+
+    new_table_from_tree = tree.child_at_path([0, 'ast', 'cores', 0, 'source', 'left'])
+    expect(new_table_from_tree).is_a?(Arel::Table)
+
+    expect(new_node_from_replace).to eq new_enhanced_table
+    expect(new_node_from_replace.root_node).to eq tree.root_node
+
+    expect(result.to_sql)
+      .to eq "SELECT \"id\" FROM \"users\" WHERE \"username\" ILIKE '%friend%'"
+
+  end
+
   it 'does not change the original arel when replacing' do
     result = Arel.sql_to_arel('SELECT 1, 2 FROM posts WHERE id = 1')
     tree = Arel.enhance(result)
