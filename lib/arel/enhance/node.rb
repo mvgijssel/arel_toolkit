@@ -50,8 +50,8 @@ module Arel
         mutate(nil, remove: true)
       end
 
-      def replace(new_node)
-        mutate(new_node)
+      def replace(new_arel_node)
+        mutate(new_arel_node)
       end
 
       def add(path_node, node)
@@ -195,28 +195,34 @@ module Arel
         root_node.mark_as_dirty
 
         parent_object = parent.object
-        new_node = [] if remove && object.is_a?(Array)
+        new_arel_node = new_node.is_a?(Arel::Enhance::Node) ? new_node.object : new_node
+        new_arel_node = [] if remove && object.is_a?(Array)
 
         if parent_object.respond_to?("#{local_path.value}=")
-          parent_object.send("#{local_path.value}=", new_node)
+          parent_object.send("#{local_path.value}=", new_arel_node)
 
         elsif parent_object.instance_values.key?(local_path.value)
-          parent_object.instance_variable_set("@#{local_path.value}", new_node)
+          parent_object.instance_variable_set("@#{local_path.value}", new_arel_node)
 
         elsif local_path.arguments? && parent_object.respond_to?(local_path.method[0])
           if remove
             parent_object.delete_at(local_path.value)
 
           else
-            parent_object[local_path.value] = new_node
+            parent_object[local_path.value] = new_arel_node
           end
         else
           raise "Don't know how to replace `#{local_path.value}` in #{parent_object.inspect}"
         end
 
-        new_parent_tree = Visitor.new.accept_with_root(parent_object, parent)
-        parent.parent.add(parent.local_path, new_parent_tree)
-        new_parent_tree[local_path.value]
+        if new_node.is_a?(Arel::Enhance::Node)
+          parent.add(local_path, new_node)
+          parent[local_path.value]
+        else
+          new_parent_tree = Visitor.new.accept_with_root(parent_object, parent)
+          parent.parent.add(parent.local_path, new_parent_tree)
+          new_parent_tree[local_path.value]
+        end
       end
       # rubocop:enable Metrics/PerceivedComplexity
       # rubocop:enable Metrics/CyclomaticComplexity
