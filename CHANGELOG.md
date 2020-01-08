@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.4.2](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.2) (2020-01-08)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.1...v0.4.2)
+
+**Breaking changes:**
+
+- Remove path, inline visit and improve recursion for improved performance [\#152](https://github.com/mvgijssel/arel_toolkit/pull/152) ([Willianvdv](https://github.com/Willianvdv))
+
+**Implemented enhancements:**
+
+- Validate whether setting a session variable transformation does the right thing [\#155](https://github.com/mvgijssel/arel_toolkit/issues/155)
+- Add ability to mutate nodes with precomputed Arel::Nodes::Enhance [\#158](https://github.com/mvgijssel/arel_toolkit/pull/158) ([mvgijssel](https://github.com/mvgijssel))
+
 ## [v0.4.1](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.1) (2019-11-13)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.0...v0.4.1)
@@ -18,6 +31,7 @@
 
 **Fixed bugs:**
 
+- Bundle install fails with missing arel\_toolkit/pg\_result\_init [\#148](https://github.com/mvgijssel/arel_toolkit/issues/148)
 - Handle column reference with 3 \(or more\) fields [\#145](https://github.com/mvgijssel/arel_toolkit/issues/145)
 - Error when aliasing a range select  [\#144](https://github.com/mvgijssel/arel_toolkit/issues/144)
 - Make sure the method signatures of PostgreSQLAdapter match [\#122](https://github.com/mvgijssel/arel_toolkit/issues/122)
@@ -30,15 +44,15 @@
 
 **Implemented enhancements:**
 
+- Replace Arel::Nodes::UnboundColumnReference with Arel::Nodes::UnqualifiedColumn [\#91](https://github.com/mvgijssel/arel_toolkit/issues/91)
+- Add brakeman to check for security vulnerabilities [\#10](https://github.com/mvgijssel/arel_toolkit/issues/10)
 - Rename Arel.transformer to Arel.enhance [\#111](https://github.com/mvgijssel/arel_toolkit/issues/111)
 - Ability to query an Arel transformer tree [\#103](https://github.com/mvgijssel/arel_toolkit/issues/103)
 - Implement PREPARE and DEALLOCATE statement [\#101](https://github.com/mvgijssel/arel_toolkit/issues/101)
-- Replace Arel::Nodes::UnboundColumnReference with Arel::Nodes::UnqualifiedColumn [\#91](https://github.com/mvgijssel/arel_toolkit/issues/91)
 - Create Arel transformer class to safely and easily mutate an Arel AST [\#89](https://github.com/mvgijssel/arel_toolkit/issues/89)
 - Test and verify compatibility with Arel extension gems [\#81](https://github.com/mvgijssel/arel_toolkit/issues/81)
 - Automatically load Railtie when gem is included in Rails [\#66](https://github.com/mvgijssel/arel_toolkit/issues/66)
 - Create remove ActiveRecord specifics transformer [\#63](https://github.com/mvgijssel/arel_toolkit/issues/63)
-- Add brakeman to check for security vulnerabilities [\#10](https://github.com/mvgijssel/arel_toolkit/issues/10)
 
 **Fixed bugs:**
 
@@ -79,6 +93,7 @@
 **Implemented enhancements:**
 
 - Handle op in pg\_query\_visitor\#visit\_SelectStmt [\#38](https://github.com/mvgijssel/arel_toolkit/issues/38)
+- Introduce Guard [\#5](https://github.com/mvgijssel/arel_toolkit/issues/5)
 - Add WITH, OVERRIDING and RETURNING to INSERT [\#28](https://github.com/mvgijssel/arel_toolkit/issues/28)
 - Return \(Select|Update|Insert|Delete\)Manager instead of \(Select|Update|Insert|Delete\)Statement [\#25](https://github.com/mvgijssel/arel_toolkit/issues/25)
 - Implement UNION in sql\_to\_arel [\#24](https://github.com/mvgijssel/arel_toolkit/issues/24)
@@ -87,10 +102,8 @@
 - Implement pg\_query\_visitor method for INSERT [\#21](https://github.com/mvgijssel/arel_toolkit/issues/21)
 - Implement pg\_query\_visitor method for UPDATE [\#20](https://github.com/mvgijssel/arel_toolkit/issues/20)
 - Implement all the visitor methods in PgQueryVisitor for SELECT statements [\#11](https://github.com/mvgijssel/arel_toolkit/issues/11)
-- Introduce Guard [\#5](https://github.com/mvgijssel/arel_toolkit/issues/5)
 - 22/implement delete [\#30](https://github.com/mvgijssel/arel_toolkit/pull/30) ([mvgijssel](https://github.com/mvgijssel))
 - Added WITH, OVERRIDING and RETURINING to INSERT [\#29](https://github.com/mvgijssel/arel_toolkit/pull/29) ([mvgijssel](https://github.com/mvgijssel))
-- Initial UPDATE\_STMT [\#27](https://github.com/mvgijssel/arel_toolkit/pull/27) ([mvgijssel](https://github.com/mvgijssel))
 - Added badges to README \(and fix setup\) [\#3](https://github.com/mvgijssel/arel_toolkit/pull/3) ([mvgijssel](https://github.com/mvgijssel))
 - Configure codeclimate [\#2](https://github.com/mvgijssel/arel_toolkit/pull/2) ([mvgijssel](https://github.com/mvgijssel))
 - Updated travis file [\#1](https://github.com/mvgijssel/arel_toolkit/pull/1) ([mvgijssel](https://github.com/mvgijssel))
@@ -101,9 +114,9 @@
 
 **Closed issues:**
 
-- Create issues for unknown branches in pg\_query\_visitor [\#19](https://github.com/mvgijssel/arel_toolkit/issues/19)
 - Remove unnecessary to\_arel remains [\#15](https://github.com/mvgijssel/arel_toolkit/issues/15)
 - Merge to\_arel gem [\#4](https://github.com/mvgijssel/arel_toolkit/issues/4)
+- Create issues for unknown branches in pg\_query\_visitor [\#19](https://github.com/mvgijssel/arel_toolkit/issues/19)
 
 
 
