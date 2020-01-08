@@ -175,8 +175,8 @@ describe 'Arel.enhance' do
     expect(where_nodes).to all(satisfy { |n| n.root_node == tree.root_node })
     expect(projections_nodes).to all(satisfy { |n| n.root_node == tree.root_node })
 
-    expect(where_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
-    expect(projections_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
+    expect(where_nodes).to all(satisfy { |n| n.full_path.map(&:value).include?('cores') })
+    expect(projections_nodes).to all(satisfy { |n| n.full_path.map(&:value).include?('cores') })
   end
 
   it 'returns the partial enhanced tree after mutating' do
@@ -184,7 +184,7 @@ describe 'Arel.enhance' do
     tree = Arel.enhance(result)
     where_tree = tree[0]['ast']['cores'][0]['wheres'].remove
 
-    expect(where_tree.path.to_a).to eq [0, 'ast', 'cores', 0, 'wheres']
+    expect(where_tree.full_path.map(&:value)).to eq [0, 'ast', 'cores', 0, 'wheres']
     expect(where_tree.parent.object).to be_a(Arel::Nodes::SelectCore)
   end
 
