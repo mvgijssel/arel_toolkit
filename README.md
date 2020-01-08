@@ -65,7 +65,7 @@ enhanced_arel.child_at_path(['ast', 'cores', 0, 'projections', 1]).object
 ```
 
 ##### Replace or remove nodes without modifying the original arel
-`remove` and `replace` allow for modifications to the Arel AST. The changes are aplied to a new copy of the AST, making sure the original AST is not touched.
+`remove` and `replace` allow for modifications to the Arel AST. The changes are aplied to a new copy of the AST, making sure the original AST is not touched. The `replace` method accepts any Arel node or a precomputed enhanced node for improved performance.
 
 ```ruby
 enhanced_arel.child_at_path(['ast', 'cores', 0, 'projections', 1]).replace(Post.arel_table[:content])
