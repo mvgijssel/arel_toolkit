@@ -1,3 +1,5 @@
+GC.disable
+
 require 'arel'
 require 'active_record'
 require 'memory_profiler'
