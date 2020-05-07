@@ -24,9 +24,13 @@ module Arel
         cache.set(cache_key(original_sql), transformed_sql)
       end
 
-      def cache_key(original_sql)
-        # TODO: Add the active middleware to the cache key
-        original_sql
+      def cache_key_for_sql(sql)
+        Digest::SHA256.hexdigest(sql)
+      end
+
+      def cache_key(sql)
+        active_middleware_cache_key = Arel.middleware.current.map(&:hash).join('&') || 0
+        active_middleware_cache_key + '|' + cache_key_for_sql(sql)
       end
     end
 
@@ -49,9 +53,9 @@ module Arel
       end
 
       def cache_accessor
-        # memorize?
-        CacheAccessor.new @cache
+        @cache_accessor ||= CacheAccessor.new @cache
       end
+
       def execute(sql, binds = [], &execute_sql)
         return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
