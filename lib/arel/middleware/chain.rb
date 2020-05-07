@@ -29,6 +29,10 @@ module Arel
       end
 
       def cache_key(sql)
+        # An important aspect of this cache key method is that it includes hashes of all active
+        # middlewares. If multiple Arel middleware chains that are using the same cache backend,
+        # this cache key mechanism will prevent cache entries leak in the wrong chain.
+
         active_middleware_cache_key = Arel.middleware.current.map(&:hash).join('&') || 0
         active_middleware_cache_key + '|' + cache_key_for_sql(sql)
       end
