@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dpl', '~> 1.10.11'
   spec.add_development_dependency 'github_changelog_generator', '~> 1.15'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rake-compiler', '~> 1.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'approvals', '~> 0.0.24'
@@ -48,6 +48,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'guard-rubocop', '~> 1.3.0'
   spec.add_development_dependency 'guard-rake', '~> 1.0.0'
+
+  spec.add_development_dependency 'stackprof', '~> 0.2'
+  spec.add_development_dependency 'memory_profiler', '~> 0.9'
 
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-nav'

@@ -175,8 +175,8 @@ describe 'Arel.enhance' do
     expect(where_nodes).to all(satisfy { |n| n.root_node == tree.root_node })
     expect(projections_nodes).to all(satisfy { |n| n.root_node == tree.root_node })
 
-    expect(where_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
-    expect(projections_nodes).to all(satisfy { |n| n.path.to_a.include?('cores') })
+    expect(where_nodes).to all(satisfy { |n| n.full_path.map(&:value).include?('cores') })
+    expect(projections_nodes).to all(satisfy { |n| n.full_path.map(&:value).include?('cores') })
   end
 
   it 'returns the partial enhanced tree after mutating' do
@@ -184,8 +184,37 @@ describe 'Arel.enhance' do
     tree = Arel.enhance(result)
     where_tree = tree[0]['ast']['cores'][0]['wheres'].remove
 
-    expect(where_tree.path.to_a).to eq [0, 'ast', 'cores', 0, 'wheres']
+    expect(where_tree.full_path.map(&:value)).to eq [0, 'ast', 'cores', 0, 'wheres']
     expect(where_tree.parent.object).to be_a(Arel::Nodes::SelectCore)
+  end
+
+  it 'can update the ast with an existing enhanced ast' do
+    result = Arel.sql_to_arel("SELECT id FROM users WHERE username ILIKE '%friend%'")
+    tree = Arel.enhance(result)
+
+    new_table = User.arel_table.dup
+    new_table.name = "active_users"
+    new_enhanced_table = Arel.enhance(new_table)
+
+    old_table = tree.child_at_path([0, 'ast', 'cores', 0, 'source', 'left'])
+    new_node_from_replace = nil
+
+    expect do
+      new_node_from_replace = old_table.replace(new_enhanced_table)
+    end
+      .to change { new_enhanced_table.full_path.map(&:value) }
+      .from([])
+      .to([0, 'ast', 'cores', 0, 'source', 'left'])
+
+    new_table_from_tree = tree.child_at_path([0, 'ast', 'cores', 0, 'source', 'left'])
+    expect(new_table_from_tree).is_a?(Arel::Table)
+
+    expect(new_node_from_replace).to eq new_enhanced_table
+    expect(new_node_from_replace.root_node).to eq tree.root_node
+
+    expect(result.to_sql)
+      .to eq "SELECT \"id\" FROM \"users\" WHERE \"username\" ILIKE '%friend%'"
+
   end
 
   it 'does not change the original arel when replacing' do
