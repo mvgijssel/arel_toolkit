@@ -7,15 +7,15 @@ module Arel
         @cache = cache
       end
 
-      def get(original_sql)
-        cache.get cache_key(original_sql)
+      def read(original_sql)
+        cache.read cache_key(original_sql)
       end
 
-      def set(transformed_sql:, transformed_binds:, original_sql:, original_binds:)
+      def write(transformed_sql:, transformed_binds:, original_sql:, original_binds:)
         # To play it safe, the order of binds was changed and therefore we won't reuse the query
         return if transformed_binds != original_binds
 
-        cache.set(cache_key(original_sql), transformed_sql)
+        cache.write(cache_key(original_sql), transformed_sql)
       end
 
       def cache_key_for_sql(sql)

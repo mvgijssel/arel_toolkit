@@ -1,9 +1,9 @@
 module Arel
   module Middleware
     module NoOpCache
-      def self.get(key); end
+      def self.read(key); end
 
-      def self.set(key, sql); end
+      def self.write(key, sql); end
     end
   end
 end

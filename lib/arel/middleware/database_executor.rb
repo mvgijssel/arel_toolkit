@@ -47,7 +47,7 @@ module Arel
       def execute_sql(next_arel)
         sql, binds = next_arel.to_sql_and_binds
 
-        context[:cache_accessor].set(
+        context[:cache_accessor].write(
           transformed_sql: sql,
           transformed_binds: binds,
           original_sql: context[:original_sql],

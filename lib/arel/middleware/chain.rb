@@ -28,7 +28,7 @@ module Arel
       def execute(sql, binds = [], &execute_sql)
         return execute_sql.call(sql, binds).to_casted_result if internal_middleware.length.zero?
 
-        if (cached_sql = cache_accessor.get(sql))
+        if (cached_sql = cache_accessor.read(sql))
           return execute_sql.call(cached_sql, binds).to_casted_result
         end
 
