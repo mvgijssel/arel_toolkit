@@ -12,7 +12,7 @@ module Arel
       end
 
       def set(transformed_sql:, transformed_binds:, original_sql:, original_binds:)
-        # The order of binds was changed and therefore we can't reuse the query
+        # To play it safe, the order of binds was changed and therefore we won't reuse the query
         return if transformed_binds != original_binds
 
         cache.set(cache_key(original_sql), transformed_sql)
