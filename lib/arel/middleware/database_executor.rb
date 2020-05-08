@@ -11,12 +11,12 @@ module Arel
         @middleware = middleware
       end
 
-      def run(enhanced_arel, context, final_block)
+      def run(arel, context, final_block)
         @index = 0
         @context = context
         @final_block = final_block
 
-        result = call(enhanced_arel)
+        result = call(arel)
         check_return_type result
         result
       ensure
@@ -46,7 +46,16 @@ module Arel
 
       def execute_sql(next_arel)
         sql, binds = next_arel.to_sql_and_binds
+
+        context[:cache_accessor].write(
+          transformed_sql: sql,
+          transformed_binds: binds,
+          original_sql: context[:original_sql],
+          original_binds: context[:original_binds],
+        )
+
         sql_result = final_block.call(sql, binds)
+
         check_return_type sql_result
         sql_result
       end

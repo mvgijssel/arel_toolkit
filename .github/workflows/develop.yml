@@ -47,8 +47,10 @@ jobs:
     - name: Rebase
       if: matrix.rebase
       run: |
-        git config --global user.email "ci@github.com"
-        git config --global user.name "GitHub CI"
+        export GIT_AUTHOR_NAME=${CI_COMMIT_AUTHOR_NAME=GithubCI}
+        export GIT_AUTHOR_EMAIL=${CI_COMMIT_AUTHOR_EMAIL=ci@github.comm}
+        export GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME}
+        export GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL}
         git fetch origin $GITHUB_REF
         git rebase $GITHUB_SHA
 
