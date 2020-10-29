@@ -16,7 +16,7 @@ module Arel
         if o.name
           collector << 'ON CONSTRAINT '
           collector << o.left
-          collector << SPACE
+          collector << ' '
         end
 
         if o.right

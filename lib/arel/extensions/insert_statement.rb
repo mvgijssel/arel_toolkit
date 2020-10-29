@@ -30,7 +30,7 @@ module Arel
       def visit_Arel_Nodes_InsertStatement(o, collector)
         if o.with
           collector = visit o.with, collector
-          collector << SPACE
+          collector << ' '
         end
 
         collector << 'INSERT INTO '

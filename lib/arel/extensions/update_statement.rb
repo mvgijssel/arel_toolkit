@@ -30,7 +30,7 @@ module Arel
       def visit_Arel_Nodes_UpdateStatement(o, collector)
         if o.with
           collector = visit o.with, collector
-          collector << SPACE
+          collector << ' '
         end
 
         wheres = if o.orders.empty? && o.limit.nil?
