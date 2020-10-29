@@ -13,8 +13,9 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_SelectCore(o, collector)
         collector << 'SELECT'
-
-        collector = maybe_visit o.top, collector
+        
+        collector = maybe_visit o, collector
+        # collector = maybe_visit o.top, collector
 
         collector = maybe_visit o.set_quantifier, collector
 
