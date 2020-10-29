@@ -13,13 +13,12 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_SelectCore(o, collector)
         collector << 'SELECT'
-        
-        collector = maybe_visit o, collector
+
         # collector = maybe_visit o.top, collector
 
         collector = maybe_visit o.set_quantifier, collector
 
-        collect_nodes_for o.projections, collector, SPACE
+        collect_nodes_for o.projections, collector, ' '
 
         maybe_visit o.into, collector
 
@@ -28,13 +27,13 @@ module Arel
           collector = visit o.source, collector
         end
 
-        collect_nodes_for o.wheres, collector, WHERE, AND
-        collect_nodes_for o.groups, collector, GROUP_BY
+        collect_nodes_for o.wheres, collector, ' WHERE ', ' AND '
+        collect_nodes_for o.groups, collector, ' GROUP BY '
         unless o.havings.empty?
           collector << ' HAVING '
-          inject_join o.havings, collector, AND
+          inject_join o.havings, collector, ' AND '
         end
-        collect_nodes_for o.windows, collector, WINDOW
+        collect_nodes_for o.windows, collector, ' WINDOW '
 
         collector
       end
@@ -46,7 +45,7 @@ module Arel
           super
 
           visit_edge o, 'into'
-          visit_edge o, 'top'
+          # visit_edge o, 'top'
         end
       end
 
