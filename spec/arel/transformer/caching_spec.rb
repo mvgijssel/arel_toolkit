@@ -25,7 +25,7 @@ describe 'Middleware Query Caching' do
   it 'stores the result of the middleware transformation' do
     Post.first # Warm up cache
 
-    sql = 'SELECT  "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1'
+    sql = 'SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1'
 
     middleware_one = MiddlewareOne.new
     middleware_two = MiddlewareTwo.new
