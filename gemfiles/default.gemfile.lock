@@ -3,9 +3,8 @@ PATH
   specs:
     arel_toolkit (0.4.2)
       activerecord
-      arel (~> 9.0.0)
       pg (~> 1.1.4)
-      pg_query (~> 1.1.0)
+      pg_query
 
 GEM
   remote: https://rubygems.org/
