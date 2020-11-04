@@ -19,8 +19,8 @@ module Arel
       
       def eql?(other)
         super &&
-          self.top == other.top
-          self.into == other.into &&
+          self.top == other.top &&
+          self.into == other.into
       end
     end
   end
