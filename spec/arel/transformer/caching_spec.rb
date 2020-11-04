@@ -25,15 +25,16 @@ describe 'Middleware Query Caching' do
   it 'stores the result of the middleware transformation' do
     Post.first # Warm up cache
 
-    sql = 'SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1'
-
     middleware_one = MiddlewareOne.new
     middleware_two = MiddlewareTwo.new
 
     allow_any_instance_of(Arel::Middleware::CacheAccessor)
-      .to receive(:cache_key_for_sql).with(sql).and_return('sql_cache_key')
+      .to receive(:cache_key_for_sql)
+      .with('SELECT  "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1')
+      .and_return('sql_cache_key')
 
     cache = spy('cache', read: nil, write: nil)
+    sql = 'SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1'
 
     Arel.middleware.apply([middleware_one], cache: cache) do
       Post.first
