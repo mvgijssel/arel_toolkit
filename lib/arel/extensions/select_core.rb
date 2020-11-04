@@ -6,6 +6,22 @@ module Arel
   module Nodes
     class SelectCore < Arel::Nodes::Node
       attr_accessor :into
+      attr_accessor :top
+
+      private
+      
+      def hash
+        [
+          @source, @set_quantifier, @projections, @optimizer_hints,
+          @wheres, @groups, @havings, @windows, @comment, @top, @into
+        ].hash
+      end
+      
+      def eql?(other)
+        super &&
+          self.top == other.top
+          self.into == other.into &&
+      end
     end
   end
 
@@ -14,7 +30,7 @@ module Arel
       def visit_Arel_Nodes_SelectCore(o, collector)
         collector << 'SELECT'
 
-        # collector = maybe_visit o.top, collector
+        collector = maybe_visit o.top, collector
 
         collector = maybe_visit o.set_quantifier, collector
 
@@ -45,7 +61,7 @@ module Arel
           super
 
           visit_edge o, 'into'
-          # visit_edge o, 'top'
+          visit_edge o, 'top'
         end
       end
 
