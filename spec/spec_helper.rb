@@ -22,7 +22,6 @@ require 'rails_helper' if Gem.loaded_specs.key?('rspec-rails')
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
-  config.full_backtrace = true
   config.example_status_persistence_file_path = '.rspec_status'
 
   # Disable RSpec exposing methods globally on `Module` and `main`
