@@ -719,6 +719,9 @@ module Arel
         select_core.havings = [visit(having_clause)] if having_clause
         select_core.windows = visit(window_clause) if window_clause
         select_core.into = visit(into_clause) if into_clause
+        if (ActiveRecord.version.version.to_i != 6) && limit_count
+          select_core.top = ::Arel::Nodes::Top.new visit(limit_count)
+        end
 
         if distinct_clause == [nil]
           select_core.set_quantifier = Arel::Nodes::Distinct.new
