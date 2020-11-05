@@ -9,7 +9,7 @@ module Arel
       attr_reader :cache
 
       MAX_RECURSION_DEPTH = 10
-      
+
       def initialize(
         internal_middleware = [],
         internal_context = {},
@@ -33,6 +33,7 @@ module Arel
         if (cached_sql = cache_accessor.read(sql))
           return execute_sql.call(cached_sql, binds).to_casted_result
         end
+
         execute_with_middleware(sql, binds, execute_sql).to_casted_result
       rescue ::PgQuery::ParseError
         execute_sql.call(sql, binds)

@@ -9,18 +9,18 @@ module Arel
       attr_accessor :top
 
       private
-      
+
       def hash
         [
           @source, @set_quantifier, @projections, @optimizer_hints,
           @wheres, @groups, @havings, @windows, @comment, @top, @into
         ].hash
       end
-      
+
       def eql?(other)
         super &&
-          self.top == other.top &&
-          self.into == other.into
+          top == other.top &&
+          into == other.into
       end
     end
   end
@@ -29,7 +29,7 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_SelectCore(o, collector)
         collector << 'SELECT'
-        
+
         collector = maybe_visit o.set_quantifier, collector
 
         collect_nodes_for o.projections, collector, ' '

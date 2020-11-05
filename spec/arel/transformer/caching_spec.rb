@@ -11,7 +11,6 @@ describe 'Middleware Query Caching' do
     end
   end
 
-
   class MiddlewareTwo
     def call(arel, next_middleware)
       next_middleware.call arel
@@ -29,14 +28,14 @@ describe 'Middleware Query Caching' do
     middleware_two = MiddlewareTwo.new
 
     sql = 'SELECT "posts".* FROM "posts" ORDER BY "posts"."id" ASC LIMIT $1'
-    
+
     allow_any_instance_of(Arel::Middleware::CacheAccessor)
       .to receive(:cache_key_for_sql)
       .with(sql)
       .and_return('sql_cache_key')
-    
+
     cache = spy('cache', read: nil, write: nil)
-    
+
     Arel.middleware.apply([middleware_one], cache: cache) do
       Post.first
 

@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/pg_result_init/extconf.rb']
-  
+
   spec.add_dependency 'activerecord'
   spec.add_dependency 'pg', '~> 1.1.4'
   spec.add_dependency 'pg_query'

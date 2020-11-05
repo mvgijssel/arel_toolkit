@@ -193,7 +193,7 @@ describe 'Arel.enhance' do
     tree = Arel.enhance(result)
 
     new_table = User.arel_table.dup
-    new_table.name = "active_users"
+    new_table.name = 'active_users'
     new_enhanced_table = Arel.enhance(new_table)
 
     old_table = tree.child_at_path([0, 'ast', 'cores', 0, 'source', 'left'])
@@ -214,7 +214,6 @@ describe 'Arel.enhance' do
 
     expect(result.to_sql)
       .to eq "SELECT \"id\" FROM \"users\" WHERE \"username\" ILIKE '%friend%'"
-
   end
 
   it 'does not change the original arel when replacing' do
