@@ -10,5 +10,4 @@ end
 
 appraise 'active_record_6' do
   gem 'activerecord', '~> 6.0.0'
-  gem 'pg_query', '~> 1.2.0'
 end
