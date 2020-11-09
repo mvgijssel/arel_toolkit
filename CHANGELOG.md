@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.4.3](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.3) (2020-11-09)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.2...v0.4.3)
+
+**Implemented enhancements:**
+
+- Upgrade active\_record to 6 [\#167](https://github.com/mvgijssel/arel_toolkit/pull/167) ([khaleksa](https://github.com/khaleksa))
+- Bump json from 2.2.0 to 2.3.1 [\#166](https://github.com/mvgijssel/arel_toolkit/pull/166) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump activesupport from 5.2.3 to 5.2.4.3 [\#165](https://github.com/mvgijssel/arel_toolkit/pull/165) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update rake requirement from ~\> 10.0 to ~\> 13.0 [\#161](https://github.com/mvgijssel/arel_toolkit/pull/161) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump nokogiri from 1.10.4 to 1.10.8 [\#160](https://github.com/mvgijssel/arel_toolkit/pull/160) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Adds cache mechanism to middleware [\#154](https://github.com/mvgijssel/arel_toolkit/pull/154) ([Willianvdv](https://github.com/Willianvdv))
+
 ## [v0.4.2](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.2) (2020-01-08)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.1...v0.4.2)
