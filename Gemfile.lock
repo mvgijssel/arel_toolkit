@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    arel_toolkit (0.4.2)
+    arel_toolkit (0.4.3)
       activerecord
       pg (~> 1.1.4)
       pg_query (~> 1.2.0)
@@ -205,4 +205,4 @@ DEPENDENCIES
   stackprof (~> 0.2)
 
 BUNDLED WITH
-   2.0.2
+   2.1.4
