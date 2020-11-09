@@ -322,6 +322,7 @@ describe 'Arel.middleware' do
     connection = ActiveRecord::Base.connection
 
     Post.transaction(requires_new: true) do
+      Post.first
       expect(connection).to receive(:execute).and_call_original
       expect(NoopMiddleware)
         .to receive(:call)
@@ -394,9 +395,10 @@ describe 'Arel.middleware' do
     after_sql = []
 
     logger = lambda do |next_arel, next_middleware, context|
+      result = next_middleware.call(next_arel)
       after_sql << next_arel.to_sql
       before_sql << context[:original_sql]
-      next_middleware.call(next_arel)
+      result
     end
 
     post = Post.create!
@@ -423,9 +425,10 @@ describe 'Arel.middleware' do
     after_sql = []
 
     logger = lambda do |next_arel, next_middleware, context|
+      result = next_middleware.call(next_arel)
       after_sql << next_arel.to_sql
       before_sql << context[:original_sql]
-      next_middleware.call(next_arel)
+      result
     end
 
     Arel.middleware.apply([logger]) do
@@ -451,9 +454,10 @@ describe 'Arel.middleware' do
     after_sql = []
 
     logger = lambda do |next_arel, next_middleware, context|
+      result = next_middleware.call(next_arel)
       after_sql << next_arel.to_sql
       before_sql << context[:original_sql]
-      next_middleware.call(next_arel)
+      result
     end
 
     post = Post.create! title: 't'

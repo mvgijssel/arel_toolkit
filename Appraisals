@@ -7,3 +7,7 @@ end
 
 appraise 'default' do
 end
+
+appraise 'active_record_6' do
+  gem 'activerecord', '~> 6.0.0'
+end

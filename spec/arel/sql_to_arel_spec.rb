@@ -409,7 +409,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', "'thomas' !~ '.*Thomas.*'"
   visit 'select', "'thomas' !~* '.*vadim.*'"
   visit 'select', "('a' || 'b') @@ (to_tsquery('a') && to_tsquery('b'))"
-  visit 'select', '1 FETCH FIRST 2 ROWS ONLY', expected_sql: 'SELECT  1 LIMIT 2'
+  visit 'select', '1 FETCH FIRST 2 ROWS ONLY', expected_sql: 'SELECT 1 LIMIT 2'
   visit 'select', 'CAST(3 AS TEXT)', expected_sql: 'SELECT 3::text'
   visit 'select', "inet '192.168.1.6'", expected_sql: "SELECT '192.168.1.6'::inet"
   visit 'select', '"a" <= SOME(SELECT 1)', expected_sql: 'SELECT "a" <= ANY(SELECT 1)'
@@ -895,7 +895,7 @@ describe 'Arel.sql_to_arel' do
 
   it 'handles binds from ActiveRecord' do
     query = Post.where(id: 7)
-    sql, binds = ActiveRecord::Base.connection.send(:to_sql_and_binds, query)
+    sql, binds = ActiveRecord::Base.connection.send(:to_sql_and_binds, query.arel)
     parsed_arel = Arel.sql_to_arel(sql, binds: binds)
 
     expect(query.arel.to_sql).to eq parsed_arel.to_sql

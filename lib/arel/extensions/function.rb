@@ -46,7 +46,7 @@ module Arel
         end
 
         if o.orders.any?
-          collector << SPACE unless o.within_group
+          collector << ' ' unless o.within_group
           collector << 'ORDER BY '
           collector = inject_join o.orders, collector, ', '
         end

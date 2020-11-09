@@ -4,9 +4,11 @@ require_relative './cache_accessor'
 module Arel
   module Middleware
     class Chain
-      attr_reader :executing_middleware
+      attr_reader :executing_middleware_depth
       attr_reader :executor
       attr_reader :cache
+
+      MAX_RECURSION_DEPTH = 10
 
       def initialize(
         internal_middleware = [],
@@ -17,7 +19,7 @@ module Arel
         @internal_middleware = internal_middleware
         @internal_context = internal_context
         @executor = executor_class.new(internal_middleware)
-        @executing_middleware = false
+        @executing_middleware_depth = 0
         @cache = cache || NoOpCache
       end
 
@@ -36,7 +38,7 @@ module Arel
       rescue ::PgQuery::ParseError
         execute_sql.call(sql, binds)
       ensure
-        @executing_middleware = false
+        @executing_middleware_depth -= 1
       end
 
       def current
@@ -147,7 +149,7 @@ module Arel
       end
 
       def check_middleware_recursion(sql)
-        if executing_middleware
+        if executing_middleware_depth > MAX_RECURSION_DEPTH
           message = <<~ERROR
             Middleware is being called from within middleware, aborting execution
             to prevent endless recursion. You can do the following if you want to execute SQL
@@ -162,7 +164,7 @@ module Arel
 
           raise message
         else
-          @executing_middleware = true
+          @executing_middleware_depth += 1
         end
       end
     end

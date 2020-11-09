@@ -115,6 +115,7 @@ require 'arel/extensions/active_model_attribute_with_cast_value'
 require 'arel/extensions/exists'
 require 'arel/extensions/bind_param'
 require 'arel/extensions/node'
+require 'arel/extensions/top'
 
 module Arel
   module Extensions

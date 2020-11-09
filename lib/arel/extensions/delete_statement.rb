@@ -27,7 +27,7 @@ module Arel
       def visit_Arel_Nodes_DeleteStatement(o, collector)
         if o.with
           collector = visit o.with, collector
-          collector << SPACE
+          collector << ' '
         end
 
         collector << 'DELETE FROM '
@@ -39,8 +39,8 @@ module Arel
         end
 
         if o.wheres.any?
-          collector << WHERE
-          collector = inject_join o.wheres, collector, AND
+          collector << ' WHERE '
+          collector = inject_join o.wheres, collector, ' AND '
         end
 
         unless o.returning.empty?
