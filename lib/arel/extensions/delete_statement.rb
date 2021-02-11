@@ -9,11 +9,14 @@ module Arel
         attr_accessor :using
         attr_accessor :with
         attr_accessor :returning
+        attr_accessor :orders
 
         def initialize(relation = nil, wheres = [])
           super
 
           @returning = []
+          @orders = []
+          @using = []
         end
       end
 
@@ -30,24 +33,26 @@ module Arel
           collector << ' '
         end
 
-        collector << 'DELETE FROM '
+        if Gem.loaded_specs['activerecord'].version >= Gem::Version.new('6.0.0')
+          o = prepare_delete_statement(o)
+
+          if has_join_sources?(o)
+            collector << 'DELETE '
+            visit o.relation.left, collector
+            collector << ' FROM '
+          else
+            collector << 'DELETE FROM '
+          end
+        else
+          collector << 'DELETE FROM '
+        end
+
         collector = visit o.relation, collector
 
-        if o.using
-          collector << ' USING '
-          collector = inject_join o.using, collector, ', '
-        end
-
-        if o.wheres.any?
-          collector << ' WHERE '
-          collector = inject_join o.wheres, collector, ' AND '
-        end
-
-        unless o.returning.empty?
-          collector << ' RETURNING '
-          collector = inject_join o.returning, collector, ', '
-        end
-
+        collect_nodes_for o.using, collector, ' USING ', ', '
+        collect_nodes_for o.wheres, collector, ' WHERE ', ' AND '
+        collect_nodes_for o.returning, collector, ' RETURNING ', ', '
+        collect_nodes_for o.orders, collector, ' ORDER BY '
         maybe_visit o.limit, collector
       end
       # rubocop:enable Metrics/AbcSize

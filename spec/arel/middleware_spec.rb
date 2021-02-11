@@ -505,7 +505,8 @@ describe 'Arel.middleware' do
     expect(post.attributes).to eq('id' => nil, 'title' => 'some title')
   end
 
-  it 'does not use middleware when configuring a connection to prevent endless checkouts' do
+  it 'does not use middleware when configuring a connection to prevent endless checkouts',
+     database_cleaner: :truncation do
     # New thread makes sure we're not reusing the same connection
     Thread.new do
       # Apply middleware in the new thread otherwise it won't be picked up
