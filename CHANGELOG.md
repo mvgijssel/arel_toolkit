@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.3...v0.4.4)
 
+**Implemented enhancements:**
+
+- Bump nokogiri from 1.10.8 to 1.11.1 [\#171](https://github.com/mvgijssel/arel_toolkit/pull/171) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 **Fixed bugs:**
 
 - Fix conditional update and delete statements in Rails 6 [\#170](https://github.com/mvgijssel/arel_toolkit/pull/170) ([mvgijssel](https://github.com/mvgijssel))
