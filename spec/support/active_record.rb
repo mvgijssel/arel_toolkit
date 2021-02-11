@@ -60,6 +60,8 @@ class Post < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
+  self.primary_key = 'id'
+
   has_many :posts, foreign_key: :owner_id
 end
 

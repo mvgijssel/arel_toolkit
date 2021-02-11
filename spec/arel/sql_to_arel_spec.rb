@@ -24,6 +24,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'GRANT INSERT, UPDATE ON mytable TO myuser',
         pg_node: 'PgQuery::ACCESS_PRIV',
         sql_to_arel: false
+
   visit 'select', '1 FROM "a" "b"', pg_node: 'PgQuery::ALIAS'
   visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
         pg_node: 'PgQuery::ALTER_TABLE_CMD',
@@ -89,6 +90,7 @@ describe 'Arel.sql_to_arel' do
         'RETURNING *, "some_delete_query"."some_column"',
         pg_node: 'PgQuery::DELETE_STMT'
   visit 'sql', 'DELETE FROM "a" WHERE CURRENT OF some_cursor_name', pg_node: 'PgQuery::DELETE_STMT'
+  visit 'sql', 'DELETE FROM "a" WHERE "a"."id" IN (SELECT 2)', pg_node: 'PgQuery::DELETE_STMT'
   visit 'sql', 'DELETE FROM "a"', pg_node: 'PgQuery::DELETE_STMT'
   # https://github.com/mvgijssel/arel_toolkit/issues/55
   # visit 'sql', 'DISCARD ALL', pg_node: 'PgQuery::DISCARD_STMT', sql_to_arel: false
@@ -311,6 +313,9 @@ describe 'Arel.sql_to_arel' do
         pg_node: 'PgQuery::UPDATE_STMT'
   visit 'sql',
         'UPDATE "some_table" SET "b" = 1 - 1, "c" = 2 + 2, "d" = COALESCE(NULL, 1)',
+        pg_node: 'PgQuery::UPDATE_STMT'
+  visit 'sql',
+        'UPDATE "some_table" SET "b" = 1 WHERE "b"."id" IN (SELECT 2)',
         pg_node: 'PgQuery::UPDATE_STMT'
   visit 'sql', 'VACUUM FULL VERBOSE ANALYZE some_table',
         pg_node: 'PgQuery::VACUUM_STMT',
@@ -891,6 +896,29 @@ describe 'Arel.sql_to_arel' do
 
     expect(query_arel).to eq parsed_arel
     expect(query_arel.to_sql).to eq parsed_arel.to_sql
+  end
+
+  it 'works for conditional deletes from active record' do
+    delete_sql = Arel.middleware.to_sql(:delete) do
+      Post.joins(:owner).where(users: { id: 1 }).delete_all
+    end
+
+    expected_sql = 'DELETE FROM "posts" WHERE "posts"."id" IN (SELECT "posts"."id" FROM "posts" '\
+      'INNER JOIN "users" ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
+
+    expect(delete_sql).to eq([expected_sql])
+  end
+
+  it 'works for conditional updates from active record' do
+    update_sql = Arel.middleware.to_sql(:update) do
+      Post.joins(:owner).where(users: { id: 1 }).update_all public: true
+    end
+
+    expected_sql = 'UPDATE "posts" SET "public" = \'t\'::bool WHERE ' \
+                   '"posts"."id" IN (SELECT "posts"."id" FROM "posts" INNER JOIN "users" '\
+                   'ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
+
+    expect(update_sql).to eq([expected_sql])
   end
 
   it 'handles binds from ActiveRecord' do
