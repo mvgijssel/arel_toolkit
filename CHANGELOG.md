@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.4](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.4) (2021-02-11)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.3...v0.4.4)
+
+**Fixed bugs:**
+
+- Fix conditional update and delete statements in Rails 6 [\#170](https://github.com/mvgijssel/arel_toolkit/pull/170) ([mvgijssel](https://github.com/mvgijssel))
+
 ## [v0.4.3](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.3) (2020-11-09)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.2...v0.4.3)
