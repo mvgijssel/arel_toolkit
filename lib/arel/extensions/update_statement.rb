@@ -24,16 +24,17 @@ module Arel
 
   module Visitors
     class ToSql
-      # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/PerceivedComplexity
       def visit_Arel_Nodes_UpdateStatement(o, collector)
         if o.with
           collector = visit o.with, collector
           collector << ' '
         end
 
-        wheres = if o.orders.empty? && o.limit.nil?
+        wheres = if Gem.loaded_specs['activerecord'].version >= Gem::Version.new('6.0.0')
+                   o = prepare_update_statement(o)
+                   o.wheres
+                 elsif o.orders.empty? && o.limit.nil?
                    o.wheres
                  else
                    [Nodes::In.new(o.key, [build_subselect(o.key, o)])]
@@ -41,31 +42,16 @@ module Arel
 
         collector << 'UPDATE '
         collector = visit o.relation, collector
-        unless o.values.empty?
-          collector << ' SET '
-          collector = inject_join o.values, collector, ', '
-        end
 
-        unless o.froms.empty?
-          collector << ' FROM '
-          collector = inject_join o.froms, collector, ', '
-        end
+        collect_nodes_for o.values, collector, ' SET '
+        collect_nodes_for o.froms, collector, ' FROM ', ', '
 
-        unless wheres.empty?
-          collector << ' WHERE '
-          collector = inject_join wheres, collector, ' AND '
-        end
-
-        unless o.returning.empty?
-          collector << ' RETURNING '
-          collector = inject_join o.returning, collector, ', '
-        end
+        collect_nodes_for wheres, collector, ' WHERE ', ' AND '
+        collect_nodes_for o.returning, collector, ' RETURNING ', ', '
 
         collector
       end
       # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
     end
 
     class Dot

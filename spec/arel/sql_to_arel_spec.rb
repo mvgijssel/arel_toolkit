@@ -899,26 +899,37 @@ describe 'Arel.sql_to_arel' do
   end
 
   it 'works for conditional deletes from active record' do
-    delete_sql = Arel.middleware.to_sql(:delete) do
-      Post.joins(:owner).where(users: { id: 1 }).delete_all
-    end
+    user = User.create! id: 1
+    Post.create! owner: user
+    Post.create!
+
+    operation = -> { Post.joins(:owner).where(users: { id: user }).delete_all }
+    delete_sql = Arel.middleware.to_sql(:delete) { operation.call }
 
     expected_sql = 'DELETE FROM "posts" WHERE "posts"."id" IN (SELECT "posts"."id" FROM "posts" '\
       'INNER JOIN "users" ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
 
     expect(delete_sql).to eq([expected_sql])
+    expect { operation.call }.to change { Post.count }.from(2).to(1)
   end
 
   it 'works for conditional updates from active record' do
-    update_sql = Arel.middleware.to_sql(:update) do
-      Post.joins(:owner).where(users: { id: 1 }).update_all public: true
+    user = User.create! id: 1
+    Post.create! owner: user, public: false
+    Post.create! public: false
+
+    operation = lambda do
+      Post.joins(:owner).where(users: { id: user }).update_all public: Arel.sql("'t'::bool")
     end
+    update_sql = Arel.middleware.to_sql(:update) { operation.call }
 
     expected_sql = 'UPDATE "posts" SET "public" = \'t\'::bool WHERE ' \
                    '"posts"."id" IN (SELECT "posts"."id" FROM "posts" INNER JOIN "users" '\
                    'ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
 
     expect(update_sql).to eq([expected_sql])
+
+    expect { operation.call }.to change { Post.where(public: true).reload.count }.from(0).to(1)
   end
 
   it 'handles binds from ActiveRecord' do

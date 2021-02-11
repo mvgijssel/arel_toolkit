@@ -55,8 +55,8 @@ module Arel
         collect_nodes_for o.orders, collector, ' ORDER BY '
         maybe_visit o.limit, collector
       end
-     # rubocop:enable Metrics/AbcSize
-   end
+      # rubocop:enable Metrics/AbcSize
+    end
 
     class Dot
       module DeleteStatementExtension
