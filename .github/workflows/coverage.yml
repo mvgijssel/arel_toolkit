@@ -1,0 +1,47 @@
+# download coverage artifact
+# upload to code climate
+# update github pages if everything passed
+
+name: Coverage
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types: 
+      - completed
+
+# permissions:
+#   # down scope as necessary via https://docs.github.com/en/actions/reference/authentication-in-a-workflow#modifying-the-permissions-for-the-github_token
+
+jobs:
+  upload_coverage:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+    - env:
+        GITHUB: ${{ toJson(github) }}
+        ENV: ${{ toJson(env) }}
+        JOB: ${{ toJson(job) }}
+        STEPS: ${{ toJson(steps) }}
+        RUNNER: ${{ toJson(runner) }}
+        SECRETS: ${{ toJson(secrets) }}
+        STRATEGY: ${{ toJson(strategy) }}
+        MATRIX: ${{ toJson(matrix) }}
+        NEEDS: ${{ toJson(needs) }}
+      run: |
+        env
+
+    # - name: Report to codeclimate
+    #   if: always()
+    #   shell: bash
+    #   env:
+    #     JOB_STATUS: ${{ job.status == 'Success' }}
+    #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+    #   run: |
+    #     EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
+    #     ./cc-test-reporter after-build --exit-code $EXIT_CODE
+
+    # - name: Upload coverage to GitHub pages
+    #   uses: maxheld83/ghpages@v0.2.1
+    #   env:
+    #     BUILD_DIR: ./coverage
+    #     GH_PAT: ${{ secrets.GH_PAT }}
