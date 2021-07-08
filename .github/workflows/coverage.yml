@@ -42,7 +42,7 @@ jobs:
         ./cc-test-reporter after-build --exit-code $EXIT_CODE
 
     - name: Upload coverage to GitHub pages
-      # if: ${{ github.event.workflow_run.head_branch == 'master' }}
+      if: ${{ github.event.workflow_run.head_branch == 'master' }}
       uses: maxheld83/ghpages@v0.2.1
       env:
         BUILD_DIR: ./coverage
