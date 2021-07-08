@@ -1,0 +1,49 @@
+name: Coverage
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types: 
+      - completed
+
+# permissions:
+#   # down scope as necessary via https://docs.github.com/en/actions/reference/authentication-in-a-workflow#modifying-the-permissions-for-the-github_token
+
+jobs:
+  upload_coverage:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+    - env:
+        GITHUB: ${{ toJson(github) }}
+      run: |
+        env
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha }}
+    - name: Download coverage
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: test.yml
+        commit: ${{github.event.workflow_run.head_sha}}
+        run_id: ${{ github.event.workflow_run.id }}
+        run_number: ${{ github.event.workflow_run.run_number }}
+        name: rspec-coverage
+        path: ./coverage
+    - name: Report to codeclimate
+      if: always()
+      shell: bash
+      env:
+        JOB_STATUS: ${{ job.status == 'Success' }}
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
+        ./cc-test-reporter after-build --exit-code $EXIT_CODE
+
+    - name: Upload coverage to GitHub pages
+      if: ${{ github.event.workflow_run.head_branch == 'master' }}
+      uses: maxheld83/ghpages@v0.2.1
+      env:
+        BUILD_DIR: ./coverage
+        GH_PAT: ${{ secrets.GH_PAT }}

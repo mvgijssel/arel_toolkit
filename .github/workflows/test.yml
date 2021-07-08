@@ -1,0 +1,51 @@
+name: Test
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+
+jobs:
+  rspec:
+    name: RSpec
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        image: postgres:10.10
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: arel_toolkit_test
+          POSTGRES_USER: postgres
+    steps:
+    # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
+    - env:
+        GITHUB: ${{ toJson(github) }}
+      run: |
+        env
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - run: bundle exec appraisal install
+    - name: Compile extension
+      run: |
+        bundle exec rake clean
+        bundle exec rake compile
+    - name: Start coverage
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+    - name: RSpec
+      run: |
+        bundle exec appraisal rspec --force-color
+    - uses: actions/upload-artifact@v2
+      with:
+        name: rspec-coverage
+        path: ./coverage
