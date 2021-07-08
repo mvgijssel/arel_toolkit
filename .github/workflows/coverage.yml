@@ -19,46 +19,28 @@ jobs:
     steps:
     - env:
         GITHUB: ${{ toJson(github) }}
-        ENV: ${{ toJson(env) }}
-        JOB: ${{ toJson(job) }}
-        STEPS: ${{ toJson(steps) }}
-        RUNNER: ${{ toJson(runner) }}
-        SECRETS: ${{ toJson(secrets) }}
-        STRATEGY: ${{ toJson(strategy) }}
-        MATRIX: ${{ toJson(matrix) }}
-        NEEDS: ${{ toJson(needs) }}
       run: |
         env
     - name: Download coverage
       uses: dawidd6/action-download-artifact@v2
       with:
-        # Required, workflow file name or ID
         workflow: test.yml
-        # Optional, the status or conclusion of a completed workflow to search for
-        # Can be one of a workflow conclusion::
-        # "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
-        # Or a workflow status:
-        # "completed", "in_progress", "queued"
-        # Default: "completed,success"
-        # workflow_conclusion: success
-
         commit: ${{github.event.workflow_run.head_sha}}
         run_id: ${{ github.event.workflow_run.id }}
         run_number: ${{ github.event.workflow_run.run_number }}
         name: rspec-coverage
         path: ./coverage
-    - run: ls -la ./coverage
-
-
-    # - name: Report to codeclimate
-    #   if: always()
-    #   shell: bash
-    #   env:
-    #     JOB_STATUS: ${{ job.status == 'Success' }}
-    #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-    #   run: |
-    #     EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
-    #     ./cc-test-reporter after-build --exit-code $EXIT_CODE
+    - name: Report to codeclimate
+      if: always()
+      shell: bash
+      env:
+        JOB_STATUS: ${{ job.status == 'Success' }}
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        EXIT_CODE=$([[ "$JOB_STATUS" == true ]] && echo 0 || echo 1)
+        ./cc-test-reporter after-build --exit-code $EXIT_CODE
 
     # - name: Upload coverage to GitHub pages
     #   uses: maxheld83/ghpages@v0.2.1
