@@ -24,13 +24,15 @@ jobs:
     - uses: actions/checkout@v2
 
     # Based on https://github.com/paambaati/codeclimate-action/blob/0f8af43fca84b500025ca48b581bcff933244252/src/main.ts#L39-L57
-    - run: |
+    - name: Set env for push event
+      run: |
         echo "GIT_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
         echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
       if: ${{ github.event_name == 'push' }}
-    - run: |
-        echo "GIT_BRANCH=${{ github.head.ref }}" >> $GITHUB_ENV
-        echo "GIT_COMMIT_SHA=${{ github.head.sha }}" >> $GITHUB_ENV
+    - name: Set env for pull_request event
+      run: |
+        echo "GIT_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+        echo "GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
       if: ${{ github.event_name == 'pull_request' }}
 
     # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
