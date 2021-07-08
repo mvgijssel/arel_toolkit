@@ -1,7 +1,3 @@
-# download coverage artifact
-# upload to code climate
-# update github pages if everything passed
-
 name: Coverage
 on:
   workflow_run:
