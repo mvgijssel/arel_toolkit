@@ -26,7 +26,8 @@ jobs:
     # Based on https://github.com/paambaati/codeclimate-action/blob/0f8af43fca84b500025ca48b581bcff933244252/src/main.ts#L39-L57
     - name: Set env for push event
       run: |
-        echo "GIT_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+        GIT_BRANCH=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///g')
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
         echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
       if: ${{ github.event_name == 'push' }}
     - name: Set env for pull_request event
