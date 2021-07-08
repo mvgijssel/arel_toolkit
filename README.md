@@ -143,9 +143,20 @@ This gem aims to have full support for PostgreSQL's SQL. In order to do so, it n
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment. To install this gem onto your local machine, run `bundle exec rake install`.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+## Releasing
+
+1. Update version in `version.rb`
+1. Create a new branch `v<<VERSION_HERE>>`
+1. Run `bundle install`
+1. Run `bundle exec appraisal install`
+1. Run `bundle exec rake changelog`
+1. Commit the changes
+1. Open a PR with name `Version <<VERSION_HERE>>` ([example](https://github.com/mvgijssel/arel_toolkit/pull/172))
+1. Merge the PR
+1. Checkout the master branch and pull latest changes
+1. Run `bundle exec rake release`
 
 ## Contributing
 

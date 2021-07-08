@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.4.5](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.5) (2021-07-08)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.4...v0.4.5)
+
+**Implemented enhancements:**
+
+- Refactor test setup [\#181](https://github.com/mvgijssel/arel_toolkit/issues/181)
+- Bump nokogiri from 1.11.1 to 1.11.7 [\#176](https://github.com/mvgijssel/arel_toolkit/pull/176) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump activerecord from 5.2.4.3 to 6.1.3 [\#173](https://github.com/mvgijssel/arel_toolkit/pull/173) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.4.4](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.4) (2021-02-11)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.3...v0.4.4)
