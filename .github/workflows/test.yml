@@ -22,6 +22,17 @@ jobs:
           POSTGRES_USER: postgres
     steps:
     - uses: actions/checkout@v2
+
+    # Based on https://github.com/paambaati/codeclimate-action/blob/0f8af43fca84b500025ca48b581bcff933244252/src/main.ts#L39-L57
+    - run: |
+        echo "GIT_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+        echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
+      if: ${{ github.event_name == 'push' }}
+    - run: |
+        echo "GIT_BRANCH=${{ github.head.ref }}" >> $GITHUB_ENV
+        echo "GIT_COMMIT_SHA=${{ github.head.sha }}" >> $GITHUB_ENV
+      if: ${{ github.event_name == 'pull_request' }}
+
     # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
     - env:
         GITHUB: ${{ toJson(github) }}
@@ -36,9 +47,6 @@ jobs:
         bundle exec rake clean
         bundle exec rake compile
     - name: Start coverage
-      # env:
-      #   GIT_BRANCH: ${{ github.head.ref }}
-      #   GIT_COMMIT_SHA: ${{ github.head.sha }}
       run: |
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         chmod +x ./cc-test-reporter
