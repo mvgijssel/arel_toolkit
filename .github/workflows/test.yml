@@ -1,8 +1,6 @@
 name: Test
 on:
   push:
-    branches: 
-      - master
   pull_request:
 
 jobs:
@@ -38,6 +36,9 @@ jobs:
         bundle exec rake clean
         bundle exec rake compile
     - name: Start coverage
+      # env:
+      #   GIT_BRANCH: ${{ github.head.ref }}
+      #   GIT_COMMIT_SHA: ${{ github.head.sha }}
       run: |
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         chmod +x ./cc-test-reporter
