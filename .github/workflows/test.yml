@@ -23,12 +23,12 @@ jobs:
           POSTGRES_DB: arel_toolkit_test
           POSTGRES_USER: postgres
     steps:
+    - uses: actions/checkout@v2
     # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
     - env:
         GITHUB: ${{ toJson(github) }}
       run: |
         env
-    - uses: actions/checkout@v2
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
