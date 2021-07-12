@@ -6,7 +6,7 @@ end
 ActiveRecord::Base.establish_connection(
   adapter: 'postgresql',
   host: 'localhost',
-  databse: 'arel_toolkit_test',
+  database: 'arel_toolkit_test',
   username: 'postgres',
   password: 'postgres',
 )
