@@ -8,6 +8,7 @@ ActiveRecord::Base.establish_connection(
   host: 'localhost',
   databse: 'arel_toolkit_test',
   username: 'postgres',
+  password: 'postgres',
 )
 
 ActiveRecord::Schema.define do
