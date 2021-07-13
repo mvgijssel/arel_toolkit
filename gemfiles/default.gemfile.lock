@@ -2,7 +2,7 @@ PATH
   remote: ..
   specs:
     arel_toolkit (0.4.5)
-      activerecord
+      activerecord (>= 5.0.0, < 6.1.0)
       pg (~> 1.1.4)
       pg_query (~> 1.3)
 

@@ -143,7 +143,13 @@ This gem aims to have full support for PostgreSQL's SQL. In order to do so, it n
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment. To install this gem onto your local machine, run `bundle exec rake install`.
+1. Check out the repo
+1. Run `bin/setup` to install dependencies.
+1. Start the postgres database `docker compose up`
+1. Run `bundle exec rspec` to run the tests
+1. Run `bundle exec appraisal rspec` to run the tests for the different gem sets
+
+You can also run `bin/console` for an interactive prompt that will allow you to experiment. To install this gem onto your local machine, run `bundle exec rake install`.
 
 ## Releasing
 

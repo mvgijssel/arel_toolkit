@@ -58,6 +58,9 @@ jobs:
         ./cc-test-reporter before-build
     - name: RSpec
       run: |
+        bundle exec rspec --force-color
+    - name: Appraisal RSpec
+      run: |
         bundle exec appraisal rspec --force-color
     - uses: actions/upload-artifact@v2
       with:
