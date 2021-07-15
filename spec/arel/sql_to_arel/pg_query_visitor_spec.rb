@@ -5,12 +5,9 @@ describe Arel::SqlToArel::PgQueryVisitor do
 
       parser = described_class.new
       message = <<~STRING
-
-
         SQL: #{sql}
         BINDS: []
         message: uh oh
-
       STRING
 
       expect(parser).to receive(:visit_ResTarget).and_wrap_original do |_m, *_args|

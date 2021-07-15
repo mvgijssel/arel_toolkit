@@ -27,7 +27,7 @@ describe Arel::Transformer::PrefixSchemaName do
     end
 
     expect(query_sql).to eq 'SELECT "posts".* FROM "posts"'
-    expect(middleware_sql).to eq 'SELECT "posts".* FROM "public"."posts"'
+    expect(middleware_sql).to eq 'SELECT "posts".* FROM "public"."posts" '
   end
 
   context 'table' do
@@ -37,7 +37,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."posts"'
+      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."posts" '
     end
 
     it 'does not add a schema when a schema is already defined' do
@@ -46,7 +46,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "some_schema"."posts"'
+      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "some_schema"."posts" '
     end
 
     it 'allows to override the default schema' do
@@ -59,7 +59,7 @@ describe Arel::Transformer::PrefixSchemaName do
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq(
-        'SELECT "posts"."id" FROM "secret"."posts" INNER JOIN "public"."users" ON \'t\'::bool',
+        'SELECT "posts"."id" FROM "secret"."posts" INNER JOIN "public"."users" ON \'t\'::bool ',
       )
     end
 
@@ -73,12 +73,12 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT * FROM "priority"."posts", "normal"."comments"'
+      expect(prefixed_sql).to eq 'SELECT * FROM "priority"."posts", "normal"."comments" '
     end
 
     it 'does not prefix a table in the pg_catalog namespace' do
       transformer = Arel::Transformer::PrefixSchemaName.new
-      sql = 'SELECT * FROM "pg_class"'
+      sql = 'SELECT * FROM "pg_class" '
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
@@ -105,7 +105,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq "SELECT 'public.posts'::regclass"
+      expect(prefixed_sql).to eq "SELECT 'public.posts'::regclass "
     end
 
     it 'prefixes a quoted string casted as a regclass' do
@@ -115,7 +115,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq %(SELECT 'public.\"posts\"'::regclass)
+      expect(prefixed_sql).to eq %(SELECT 'public.\"posts\"'::regclass )
     end
 
     it 'does not update a string which already has a schema' do
@@ -124,7 +124,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq "SELECT 'secret.posts'::regclass"
+      expect(prefixed_sql).to eq "SELECT 'secret.posts'::regclass "
     end
 
     it 'raises when the regclass consists of three or more parts' do
@@ -145,7 +145,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."public_posts"'
+      expect(prefixed_sql).to eq 'SELECT "posts"."id" FROM "public"."public_posts" '
     end
 
     it 'adds a schema to a materialized view' do
@@ -154,7 +154,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq 'SELECT "posts_count".* FROM "public"."posts_count"'
+      expect(prefixed_sql).to eq 'SELECT "posts_count".* FROM "public"."posts_count" '
     end
   end
 
@@ -165,7 +165,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq %(SELECT public.view_count())
+      expect(prefixed_sql).to eq %(SELECT public.view_count() )
     end
 
     it 'adds a schema to an aggregate' do
@@ -174,7 +174,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq %(SELECT public.sum_view_count("id" ORDER BY "created_at"))
+      expect(prefixed_sql).to eq 'SELECT public.sum_view_count("id" ORDER BY "created_at") '
     end
 
     it 'works for an existing Arel aggregate node without a name' do
@@ -183,7 +183,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq %(SELECT COUNT(*))
+      expect(prefixed_sql).to eq 'SELECT COUNT(*) '
     end
 
     it 'does not consider LEAST, GREATEST, NULLIF, COALESCE and EXISTS as a function' do
@@ -193,7 +193,7 @@ describe Arel::Transformer::PrefixSchemaName do
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
       expect(prefixed_sql).to eq(
-        %(SELECT EXISTS (SELECT 1), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5)),
+        'SELECT EXISTS (SELECT 1 ), LEAST(1, 2), GREATEST(1, 2), NULLIF(3, 3), COALESCE(NULL, 5) ',
       )
     end
   end

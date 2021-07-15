@@ -9,7 +9,7 @@ shared_examples 'sql_to_arel' do |sql, expected_sql|
   it "expects the sql `#{sql}` to parse the same" do
     expected_sql ||= sql
     parsed_sql = Arel.sql_to_arel(sql).to_sql
-    expect(parsed_sql).to eq expected_sql
+    expect(parsed_sql.strip).to eq expected_sql
   end
 end
 

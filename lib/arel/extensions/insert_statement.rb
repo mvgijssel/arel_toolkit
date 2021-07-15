@@ -42,11 +42,11 @@ module Arel
         end
 
         case o.override
-        when nil, 0
+        when :OVERRIDING_KIND_UNDEFINED, :OVERRIDING_NOT_SET, nil
           collector << ''
-        when 1
+        when :OVERRIDING_USER_VALUE
           collector << ' OVERRIDING USER VALUE'
-        when 2
+        when :OVERRIDING_SYSTEM_VALUE
           collector << ' OVERRIDING SYSTEM VALUE'
         else
           raise "Unknown override `#{o.override}`"

@@ -21,12 +21,12 @@ module Arel
         visit(o.infer, collector) if o.infer
 
         case o.action
-        when 1
+        when :ONCONFLICT_NOTHING
           collector << 'DO NOTHING'
-        when 2
+        when :ONCONFLICT_UPDATE
           collector << 'DO UPDATE SET '
         else
-          raise "Unknown conflict clause `#{action}`"
+          raise "Unknown conflict clause `#{o.action}`"
         end
 
         o.values.any? && (inject_join o.values, collector, ', ')
