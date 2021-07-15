@@ -32,7 +32,7 @@ if Gem.loaded_specs.key?('postgres_ext')
       _other_score = Score.create! game: Game.create!
       query = Score
         .with(my_games: Game.where(id: game))
-        .joins('INNER JOIN "my_games" ON "scores"."game_id" = "my_games"."id"')
+        .joins('INNER JOIN "my_games" ON "scores"."game_id" = "my_games"."id" ')
 
       expect(PostgresExtMiddleware)
         .to receive(:call)
