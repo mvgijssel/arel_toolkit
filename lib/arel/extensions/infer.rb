@@ -13,13 +13,13 @@ module Arel
   module Visitors
     class ToSql
       def visit_Arel_Nodes_Infer(o, collector)
-        if o.name
+        if o.name.present?
           collector << 'ON CONSTRAINT '
           collector << o.left
           collector << ' '
         end
 
-        if o.right
+        if o.right.present?
           collector << '('
           inject_join o.right, collector, ', '
           collector << ') '

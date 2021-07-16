@@ -90,8 +90,8 @@ describe 'Arel.enhance' do
       old_projections.replace(new_projections)
     end
       .to change { tree.to_sql }
-      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1')
-      .to('SELECT 3, 4 FROM "posts" WHERE "id" = 1')
+      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1 ')
+      .to('SELECT 3, 4 FROM "posts" WHERE "id" = 1 ')
   end
 
   it 'replaces a node using an instance variable' do
@@ -104,8 +104,8 @@ describe 'Arel.enhance' do
       old_type_name.replace(new_type_name)
     end
       .to change { tree.to_sql }
-      .from('SELECT 1::integer')
-      .to('SELECT 1::real')
+      .from('SELECT 1::integer ')
+      .to('SELECT 1::real ')
   end
 
   it 'replaces a node using an array modification' do
@@ -118,8 +118,8 @@ describe 'Arel.enhance' do
       old_projection.replace(new_projection)
     end
       .to change { tree.to_sql }
-      .from('SELECT "a", "b"')
-      .to('SELECT "c", "b"')
+      .from('SELECT "a", "b" ')
+      .to('SELECT "c", "b" ')
   end
 
   it 'removes a node using an array modification' do
@@ -131,8 +131,8 @@ describe 'Arel.enhance' do
       tree[0]['ast']['cores'][0]['projections'][1].remove
     end
       .to change { tree.to_sql }
-      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1')
-      .to('SELECT 1 FROM "posts"')
+      .from('SELECT 1, 2 FROM "posts" WHERE "id" = 1 ')
+      .to('SELECT 1 FROM "posts" ')
   end
 
   it 'can enhance a Hash like object' do
@@ -213,7 +213,7 @@ describe 'Arel.enhance' do
     expect(new_node_from_replace.root_node).to eq tree.root_node
 
     expect(result.to_sql)
-      .to eq "SELECT \"id\" FROM \"users\" WHERE \"username\" ILIKE '%friend%'"
+      .to eq "SELECT \"id\" FROM \"users\" WHERE \"username\" ILIKE '%friend%' "
   end
 
   it 'does not change the original arel when replacing' do
