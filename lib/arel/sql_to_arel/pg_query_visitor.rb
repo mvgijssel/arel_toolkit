@@ -507,11 +507,10 @@ module Arel
       end
 
       def visit_Node(attribute, context = nil)
-        node_key = attribute.to_h.compact.keys.first
+        return attribute.list.items.map { |item| visit_Node(item, context) } if
+          attribute.node == :list
 
-        return attribute.list.items.map { |item| visit_Node(item, context) } if node_key == :list
-
-        visit(attribute.send(node_key), context)
+        visit(attribute[attribute.node.to_s], context)
       end
 
       def visit_Null(_attribute)
@@ -1043,13 +1042,15 @@ module Arel
           attribute.is_a?(Google::Protobuf::RepeatedField) || attribute.is_a?(Array)
 
         dispatch_method = "visit_#{attribute.class.name.demodulize}"
-        method = method(dispatch_method)
 
-        arg_has_context = (method.parameters.include?(%i[opt context]) ||
-          method.parameters.include?(%i[req context])) && context
-
-        if arg_has_context
-          send dispatch_method, attribute, context
+        if context.present?
+          method = method(dispatch_method)
+          if method.parameters.include?(%i[opt context]) ||
+             method.parameters.include?(%i[req context])
+            send dispatch_method, attribute, context
+          else
+            send dispatch_method, attribute
+          end
         else
           send dispatch_method, attribute
         end
