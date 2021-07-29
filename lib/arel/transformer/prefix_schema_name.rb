@@ -119,17 +119,19 @@ module Arel
 
       # https://www.rubydoc.info/github/rubyworks/facets/String:unquote
       def unquote_string(string)
+        s = string.dup
+
         case string[0, 1]
         when "'", '"', '`'
-          string[0] = ''
+          s[0] = ''
         end
 
         case string[-1, 1]
         when "'", '"', '`'
-          string[-1] = ''
+          s[-1] = ''
         end
 
-        string
+        s
       end
 
       def database_object_mapping

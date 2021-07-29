@@ -1,21 +1,15 @@
 module Arel
   module Enhance
     class Node
+      attr_reader :local_path
       attr_reader :object
       attr_reader :parent
-      attr_reader :local_path
-      attr_reader :fields
-      attr_reader :children
       attr_reader :root_node
-      attr_reader :context
 
       def initialize(object)
         @object = object
         @root_node = self
-        @fields = []
-        @children = {}
         @dirty = false
-        @context = {}
       end
 
       def inspect
@@ -25,7 +19,7 @@ module Arel
       def value
         return unless value?
 
-        @fields.first
+        fields.first
       end
 
       def each(&block)
@@ -58,7 +52,7 @@ module Arel
         node.local_path = path_node
         node.parent = self
         node.root_node = root_node
-        @children[path_node.value.to_s] = node
+        children[path_node.value.to_s] = node
       end
 
       def to_sql(engine = Table.engine)
@@ -78,19 +72,19 @@ module Arel
       end
 
       def method_missing(name, *args, &block)
-        child = @children[name.to_s]
+        child = children[name.to_s]
         return super if child.nil?
 
         child
       end
 
       def respond_to_missing?(method, include_private = false)
-        child = @children[method.to_s]
+        child = children[method.to_s]
         child.present? || super
       end
 
       def [](key)
-        @children.fetch(key.to_s)
+        children.fetch(key.to_s)
       end
 
       def child_at_path(path_items)
@@ -116,6 +110,18 @@ module Arel
         end
 
         the_path.compact
+      end
+
+      def children
+        @children ||= {}
+      end
+
+      def fields
+        @fields ||= []
+      end
+
+      def context
+        @context ||= {}
       end
 
       protected

@@ -16,21 +16,21 @@ module Arel
     class ToSql
       def visit_Arel_Nodes_Transaction(o, collector)
         case o.type
-        when 0
+        when 1
           collector << 'BEGIN'
-        when 2
-          collector << 'COMMIT'
         when 3
-          collector << 'ROLLBACK'
+          collector << 'COMMIT'
         when 4
-          collector << 'SAVEPOINT '
-          collector << o.options.join(' ')
+          collector << 'ROLLBACK'
         when 5
-          collector << 'RELEASE SAVEPOINT '
-          collector << o.options.join(' ')
+          collector << 'SAVEPOINT '
+          collector << o.right
         when 6
+          collector << 'RELEASE SAVEPOINT '
+          collector << o.right
+        when 7
           collector << 'ROLLBACK TO '
-          collector << o.options.join(' ')
+          collector << o.right
         else
           raise "Unknown transaction type `#{o.type}`"
         end

@@ -46,8 +46,12 @@ describe 'Middleware Query Caching' do
     Arel.middleware.apply([middleware_one, middleware_two], cache: cache) do
       Post.first
 
-      expect(cache).to have_received(:read).with('hash_of_middleware_one&hash_of_middleware_two|sql_cache_key')
-      expect(cache).to have_received(:write).with('hash_of_middleware_one&hash_of_middleware_two|sql_cache_key', sql)
+      expect(cache).to have_received(:read)
+        .with('hash_of_middleware_one&hash_of_middleware_two|sql_cache_key')
+      expect(cache).to have_received(:write).with(
+        'hash_of_middleware_one&hash_of_middleware_two|sql_cache_key',
+        sql,
+      )
     end
   end
 end

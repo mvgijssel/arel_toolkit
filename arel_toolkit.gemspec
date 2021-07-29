@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activerecord', '>= 5.0.0', '< 6.0.4'
   spec.add_dependency 'pg', '~> 1.1.4'
-  spec.add_dependency 'pg_query', '~> 1.3'
+  spec.add_dependency 'pg_query', '~> 2.1'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dpl', '~> 1.10.11'
@@ -47,10 +47,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'guard-rubocop', '~> 1.3.0'
   spec.add_development_dependency 'guard-rake', '~> 1.0.0'
-
   spec.add_development_dependency 'stackprof', '~> 0.2'
   spec.add_development_dependency 'memory_profiler', '~> 0.9'
-
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-nav'
   spec.add_development_dependency 'pry-doc'
