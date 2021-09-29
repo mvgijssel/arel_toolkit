@@ -12,7 +12,7 @@ appraise 'active_record_6' do
   gem 'activerecord', '~> 6.0.0'
 end
 
-appraise 'active_record_6' do
+appraise 'active_record_6_1' do
   gem 'activerecord', '~> 6.1.0'
 end
 
