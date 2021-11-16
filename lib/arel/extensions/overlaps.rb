@@ -4,7 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
-    class Overlaps < Arel::Nodes::Node
+    class Overlaps < Arel::Nodes::InfixOperation
       attr_reader :start1
       attr_reader :end1
       attr_reader :start2

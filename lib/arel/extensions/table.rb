@@ -2,6 +2,8 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/ParameterLists
 
+require 'pry'
+
 module Arel
   class Table
     module TableExtension
@@ -15,7 +17,8 @@ module Arel
       def initialize(
         name,
         as: nil,
-        type_caster: nil,
+        klass: nil,
+        type_caster: klass&.type_caster,
         only: false,
         schema_name: nil,
         relpersistence: 'p'
@@ -24,7 +27,7 @@ module Arel
         @schema_name = schema_name
         @relpersistence = relpersistence
 
-        super(name, as: as, type_caster: type_caster)
+        super(name, klass: klass, as: as, type_caster: type_caster)
       end
     end
 
