@@ -32,24 +32,6 @@ describe 'Arel.middleware' do
     Post.where(id: 0).load
   end
 
-  it 'calls the middleware before executing the SQL query' do
-    query = Post.where(id: 7)
-    query_arel = remove_active_record_info(query.arel)
-    query.instance_variable_set(:@arel, query_arel)
-
-    expect(NoopMiddleware)
-      .to receive(:call)
-      .and_wrap_original do |m, passed_arel, next_middleware|
-        expect(passed_arel.object.first).to eq(query_arel)
-
-        m.call(passed_arel, next_middleware)
-      end
-
-    Arel.middleware.apply([NoopMiddleware]) do
-      query.load
-    end
-  end
-
   it 'allows to get the current applied middleware' do
     current = nil
 
@@ -335,45 +317,6 @@ describe 'Arel.middleware' do
       Arel.middleware.apply([NoopMiddleware]) do
         Post.create!
       end
-    end
-  end
-
-  it 'calls PostgreSQLAdapter#exec_no_cache' do
-    connection = ActiveRecord::Base.connection
-    query = Post.where(id: [1, 2]) # IN is not a prepared statement (no cache)
-
-    expect(connection).to receive(:exec_no_cache).and_call_original
-
-    expect(NoopMiddleware)
-      .to receive(:call)
-      .and_wrap_original do |m, middleware_arel, next_middleware|
-      expect(remove_active_record_info(middleware_arel.object.first))
-        .to eq remove_active_record_info(query.arel)
-
-      m.call(middleware_arel, next_middleware)
-    end
-
-    Arel.middleware.apply([NoopMiddleware]) do
-      query.load
-    end
-  end
-
-  it 'calls PostgreSQLAdapter#exec_cache' do
-    connection = ActiveRecord::Base.connection
-    query = Post.where(id: 1)
-
-    expect(connection).to receive(:exec_cache).and_call_original
-    expect(NoopMiddleware)
-      .to receive(:call)
-      .and_wrap_original do |m, middleware_arel, next_middleware|
-      expect(remove_active_record_info(middleware_arel.object.first))
-        .to eq remove_active_record_info(query.arel)
-
-      m.call(middleware_arel, next_middleware)
-    end
-
-    Arel.middleware.apply([NoopMiddleware]) do
-      query.load
     end
   end
 

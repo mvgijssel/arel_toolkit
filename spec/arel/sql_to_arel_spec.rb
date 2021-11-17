@@ -802,28 +802,6 @@ describe 'Arel.sql_to_arel' do
     expect(new_result).to be_a(Arel::SqlToArel::Result)
   end
 
-  it 'translates an ActiveRecord query ast into the same ast and sql' do
-    query = Post.select(:id).where(public: true).limit(10).order(id: :asc).offset(1)
-    query_arel = remove_active_record_info(query.arel)
-    sql = query_arel.to_sql
-    result = Arel.sql_to_arel(sql)
-    parsed_arel = result.first
-
-    expect(query_arel.to_sql).to eq parsed_arel.to_sql
-    # expect(query_arel).to eq parsed_arel
-  end
-
-  it 'translates an ActiveRecord for a single where argument' do
-    query = Post.where(id: 7)
-    query_arel = remove_active_record_info(query.arel)
-    sql = query_arel.to_sql
-    result = Arel.sql_to_arel(sql)
-    parsed_arel = result.first
-
-    # expect(query_arel).to eq parsed_arel
-    expect(query_arel.to_sql).to eq parsed_arel.to_sql
-  end
-
   it 'works for conditional deletes from active record' do
     user = User.create! id: 1
     Post.create! owner: user

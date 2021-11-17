@@ -27,7 +27,11 @@ module Arel
         @schema_name = schema_name
         @relpersistence = relpersistence
 
-        super(name, klass: klass, as: as, type_caster: type_caster)
+        if Gem.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0')
+          super(name, as: as, type_caster: type_caster)
+        else
+          super(name, klass: klass, as: as, type_caster: type_caster)
+        end
       end
     end
 
