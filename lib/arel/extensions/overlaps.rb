@@ -4,7 +4,7 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
-    inheritance_class = if em.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0')
+    inheritance_class = if Gem.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0')
                           Arel::Nodes::Node
                         else
                           Arel::Nodes::InfixOperation
