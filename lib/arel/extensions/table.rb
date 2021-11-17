@@ -2,8 +2,6 @@
 # rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/ParameterLists
 
-require 'pry'
-
 module Arel
   class Table
     module TableExtension

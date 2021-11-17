@@ -7,7 +7,7 @@ ActiveRecord::Base.establish_connection(
 )
 
 ActiveRecord::Schema.define do
-  self.verbose = true
+  self.verbose = false
 
   create_table :users, force: :cascade do |t|
     t.string :username
