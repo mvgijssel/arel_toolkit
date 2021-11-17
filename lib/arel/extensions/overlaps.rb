@@ -4,7 +4,11 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
-    inheritance_class = Gem.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0') ? Arel::Nodes::Node : Arel::Nodes::InfixOperation
+    inheritance_class = if em.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0')
+                          Arel::Nodes::Node
+                        else
+                          Arel::Nodes::InfixOperation
+                        end
 
     class Overlaps < inheritance_class
       attr_reader :start1

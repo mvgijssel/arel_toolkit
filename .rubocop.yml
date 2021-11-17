@@ -1,6 +1,7 @@
 AllCops:
   Exclude:
     - 'gemfiles/active_record_6.gemfile'
+    - 'gemfiles/active_record_6_1.gemfile'
     - 'gemfiles/arel_gems.gemfile'
     - 'gemfiles/default.gemfile'
 
