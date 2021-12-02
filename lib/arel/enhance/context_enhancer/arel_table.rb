@@ -43,6 +43,10 @@ module Arel
           elsif parent_object.is_a?(Arel::Nodes::Join)
             context[:range_variable] = true
 
+          elsif parent_object.is_a?(Arel::Nodes::TableAlias) &&
+              node.parent.parent.object.is_a?(Arel::Nodes::Join)
+            context[:range_variable] = true
+
           # Using Arel::Table as an attribute SELECT <table>.id ...
           elsif parent_object.is_a?(Arel::Attributes::Attribute)
             context[:column_reference] = true
