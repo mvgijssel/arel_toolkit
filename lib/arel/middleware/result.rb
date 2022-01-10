@@ -14,7 +14,6 @@ module Arel
     # activerecord/lib/active_record/result.rb
     class Result
       attr_reader :original_data
-      delegate :fields, :clear, :ftype, :fmod, :values, to: :@original_data
 
       def self.create(from:, to:, data:)
         Result.new from, to, data
