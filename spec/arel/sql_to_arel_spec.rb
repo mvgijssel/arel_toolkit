@@ -25,7 +25,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
         sql_to_arel: false
   visit 'select', "B'0101'"
-  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))'
+  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', expected_sql: 'SELECT 1 WHERE ((1 AND 2) OR ("a" AND (NOT ("b"))))'
   visit 'select', '1 IS TRUE'
   visit 'select', '"a" IS NOT TRUE'
   visit 'select', "'a' IS FALSE"
