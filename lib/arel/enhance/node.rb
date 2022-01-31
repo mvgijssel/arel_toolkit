@@ -217,6 +217,8 @@ module Arel
           else
             parent_object[local_path.value] = new_arel_node
           end
+        elsif parent_object.is_a?(Arel::Nodes::TableAlias) && local_path.value == 'relation'
+          parent_object.instance_variable_set('@left', new_arel_node)
         else
           raise "Don't know how to replace `#{local_path.value}` in #{parent_object.inspect}"
         end

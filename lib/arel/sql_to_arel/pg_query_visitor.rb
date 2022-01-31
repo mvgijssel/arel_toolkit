@@ -630,7 +630,7 @@ module Arel
         select_core.projections = visit(attribute.target_list, :select) if attribute.target_list
 
         if attribute.where_clause
-          where_clause = visit(attribute.where_clause)
+          where_clause = visit(attribute.where_clause, :select)
           where_clause = if where_clause.is_a?(Arel::Nodes::And)
                            where_clause
                          else

@@ -9,9 +9,9 @@ module Arel
   module Enhance
   end
 
-  def self.enhance(object)
+  def self.enhance(object, context_enhancers = Arel::Enhance::Visitor::DEFAULT_CONTEXT_ENHANCERS)
     return object if object.is_a?(Arel::Enhance::Node)
 
-    Arel::Enhance::Visitor.new.accept(object)
+    Arel::Enhance::Visitor.new.accept(object, context_enhancers)
   end
 end

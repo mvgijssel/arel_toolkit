@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/pg_result_init/extconf.rb']
 
-  spec.add_dependency 'activerecord', '>= 5.0.0', '< 6.0.4'
+  spec.add_dependency 'activerecord', '>= 5.0.0'
   spec.add_dependency 'pg', '~> 1.1.4'
   spec.add_dependency 'pg_query', '~> 2.1'
 

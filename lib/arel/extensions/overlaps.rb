@@ -4,7 +4,13 @@
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
-    class Overlaps < Arel::Nodes::Node
+    inheritance_class = if Gem.loaded_specs['activerecord'].version < Gem::Version.new('6.1.0')
+                          Arel::Nodes::Node
+                        else
+                          Arel::Nodes::InfixOperation
+                        end
+
+    class Overlaps < inheritance_class
       attr_reader :start1
       attr_reader :end1
       attr_reader :start2

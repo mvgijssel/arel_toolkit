@@ -14,7 +14,7 @@ module Arel
         @context_enhancers = context_enhancers
 
         root_node = Arel::Enhance::Node.new(object)
-        accept_with_root(object, root_node)
+        accept_with_root(object, root_node, context_enhancers)
       end
 
       def accept_with_root(object, root_node, context_enhancers = DEFAULT_CONTEXT_ENHANCERS)

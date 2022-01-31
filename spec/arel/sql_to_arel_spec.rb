@@ -25,7 +25,7 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
         sql_to_arel: false
   visit 'select', "B'0101'"
-  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))'
+  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', expected_sql: 'SELECT 1 WHERE ((1 AND 2) OR ("a" AND (NOT ("b"))))'
   visit 'select', '1 IS TRUE'
   visit 'select', '"a" IS NOT TRUE'
   visit 'select', "'a' IS FALSE"
@@ -800,28 +800,6 @@ describe 'Arel.sql_to_arel' do
 
     expect(result).to be_a(Arel::SqlToArel::Result)
     expect(new_result).to be_a(Arel::SqlToArel::Result)
-  end
-
-  it 'translates an ActiveRecord query ast into the same ast and sql' do
-    query = Post.select(:id).where(public: true).limit(10).order(id: :asc).offset(1)
-    query_arel = remove_active_record_info(query.arel)
-    sql = query_arel.to_sql
-    result = Arel.sql_to_arel(sql)
-    parsed_arel = result.first
-
-    expect(query_arel.to_sql).to eq parsed_arel.to_sql
-    # expect(query_arel).to eq parsed_arel
-  end
-
-  it 'translates an ActiveRecord for a single where argument' do
-    query = Post.where(id: 7)
-    query_arel = remove_active_record_info(query.arel)
-    sql = query_arel.to_sql
-    result = Arel.sql_to_arel(sql)
-    parsed_arel = result.first
-
-    # expect(query_arel).to eq parsed_arel
-    expect(query_arel.to_sql).to eq parsed_arel.to_sql
   end
 
   it 'works for conditional deletes from active record' do
