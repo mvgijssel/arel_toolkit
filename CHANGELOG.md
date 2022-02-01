@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.4.7](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.7) (2022-02-01)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.6...v0.4.7)
+
+**Implemented enhancements:**
+
+- Bump google-protobuf from 3.17.3 to 3.19.2 [\#190](https://github.com/mvgijssel/arel_toolkit/pull/190) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump nokogiri from 1.11.7 to 1.12.5 [\#189](https://github.com/mvgijssel/arel_toolkit/pull/189) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add Rails 6.1 support [\#188](https://github.com/mvgijssel/arel_toolkit/pull/188) ([Willianvdv](https://github.com/Willianvdv))
+
 ## [v0.4.6](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.6) (2021-07-29)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.5...v0.4.6)
