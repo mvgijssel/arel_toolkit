@@ -14,7 +14,7 @@ module Arel
       end
 
       def ==(other)
-        arg == other.arg && type_name == other.type_name
+        self.class == other.class && arg == other.arg && type_name == other.type_name
       end
     end
   end
