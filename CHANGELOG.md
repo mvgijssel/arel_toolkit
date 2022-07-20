@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.8](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.8) (2022-07-20)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.7...v0.4.8)
+
+**Fixed bugs:**
+
+- Comparing a type case node against any other type of node [\#196](https://github.com/mvgijssel/arel_toolkit/pull/196) ([Willianvdv](https://github.com/Willianvdv))
+
 ## [v0.4.7](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.7) (2022-02-01)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.6...v0.4.7)
