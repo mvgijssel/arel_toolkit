@@ -13,7 +13,7 @@ module Arel
         each do |item|
           sql, binds = item.to_sql_and_binds(engine)
           sql_collection << sql
-          binds_collection.concat(binds)
+          binds_collection.concat(binds) if binds
         end
 
         [
