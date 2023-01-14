@@ -8,7 +8,7 @@ on:
 jobs:
   rspec:
     name: RSpec
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     services:
       postgres:
         options: >-
@@ -16,12 +16,13 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        image: postgres:10.10
+        image: postgres:13.4
         ports:
           - 5432:5432
         env:
           POSTGRES_DB: arel_toolkit_test
           POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
     steps:
     - uses: actions/checkout@v2
 
@@ -46,6 +47,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
+        bundler: default
     - run: bundle exec appraisal install
     - name: Compile extension
       run: |

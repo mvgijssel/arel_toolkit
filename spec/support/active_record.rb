@@ -1,6 +1,6 @@
 ActiveRecord::Base.establish_connection(
   adapter: 'postgresql',
-  host: 'localhost',
+  host: ENV.fetch('POSTGRES_HOST', 'localhost'),
   database: 'arel_toolkit_test',
   username: 'postgres',
   password: 'postgres',

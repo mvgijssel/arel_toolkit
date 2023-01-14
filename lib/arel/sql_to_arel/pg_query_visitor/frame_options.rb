@@ -84,10 +84,10 @@ module Arel
             case PG.library_version.to_s[0, 2]
             when '09', '10'
               FRAMEOPTIONS_V10
-            when '11', '12', '13', '14'
+            when '11', '12', '13', '14', '15'
               FRAMEOPTIONS_V11_AND_UP
             else
-              boom "Version #{PG.library_version.to_s[0, 2]} not supported"
+              raise "Version #{PG.library_version.to_s[0, 2]} not supported"
             end
           end
 
