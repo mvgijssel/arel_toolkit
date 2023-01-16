@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   database:
-    image: postgres:latest
+    image: postgres:13.4
     container_name: arel_toolkit_database
     environment:
       POSTGRES_PASSWORD: postgres
@@ -9,3 +9,11 @@ services:
       POSTGRES_DB: arel_toolkit_test
     ports:
       - 5432:5432
+  arel_toolkit:
+    profiles:
+      - tests
+    build: .
+    environment:
+      - POSTGRES_HOST=database
+    volumes:
+      - ./:/app
