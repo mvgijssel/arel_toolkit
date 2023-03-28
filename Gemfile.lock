@@ -130,7 +130,7 @@ GEM
     parser (3.2.1.1)
       ast (~> 2.4.1)
     pg (1.4.6)
-    pg_query (2.2.0)
+    pg_query (2.2.1)
       google-protobuf (>= 3.19.2)
     protocol-hpack (1.4.2)
     protocol-http (0.23.12)
