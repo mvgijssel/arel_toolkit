@@ -69,8 +69,8 @@ module Arel
       def check_return_type(return_object)
         return if return_object.is_a?(Arel::Middleware::Result)
 
-        raise 'Object returned from middleware needs to be wrapped in `Arel::Middleware::Result`' \
-              " for object `#{return_object}`"
+        raise 'Object returned from middleware needs to be wrapped in `Arel::Middleware::Result` ' \
+              "for object `#{return_object}`"
       end
     end
   end

@@ -25,7 +25,8 @@ describe 'Arel.sql_to_arel' do
   visit 'sql', 'ALTER TABLE stuff ADD COLUMN address text',
         sql_to_arel: false
   visit 'select', "B'0101'"
-  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))', expected_sql: 'SELECT 1 WHERE ((1 AND 2) OR ("a" AND (NOT ("b"))))'
+  visit 'select', '1 WHERE (1 AND 2) OR ("a" AND (NOT ("b")))',
+        expected_sql: 'SELECT 1 WHERE ((1 AND 2) OR ("a" AND (NOT ("b"))))'
   visit 'select', '1 IS TRUE'
   visit 'select', '"a" IS NOT TRUE'
   visit 'select', "'a' IS FALSE"
@@ -46,7 +47,7 @@ describe 'Arel.sql_to_arel' do
   visit 'select', '"public"."posts"."id"'
   visit 'select', '"database"."public"."posts"."id"'
   visit 'sql',
-        'WITH "a" AS (SELECT 1) '\
+        'WITH "a" AS (SELECT 1) ' \
         'SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c") AS "d"'
   visit 'sql', 'CREATE TABLE a (b integer NOT NULL)',
         sql_to_arel: false
@@ -810,8 +811,8 @@ describe 'Arel.sql_to_arel' do
     operation = -> { Post.joins(:owner).where(users: { id: user }).delete_all }
     delete_sql = Arel.middleware.to_sql(:delete) { operation.call }
 
-    expected_sql = 'DELETE FROM "posts" WHERE "posts"."id" IN (SELECT "posts"."id" FROM "posts" '\
-      'INNER JOIN "users" ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
+    expected_sql = 'DELETE FROM "posts" WHERE "posts"."id" IN (SELECT "posts"."id" FROM "posts" ' \
+                   'INNER JOIN "users" ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
 
     expect(delete_sql).to eq([expected_sql])
     expect { operation.call }.to change { Post.count }.from(2).to(1)
@@ -828,7 +829,7 @@ describe 'Arel.sql_to_arel' do
     update_sql = Arel.middleware.to_sql(:update) { operation.call }
 
     expected_sql = 'UPDATE "posts" SET "public" = \'t\'::bool WHERE ' \
-                   '"posts"."id" IN (SELECT "posts"."id" FROM "posts" INNER JOIN "users" '\
+                   '"posts"."id" IN (SELECT "posts"."id" FROM "posts" INNER JOIN "users" ' \
                    'ON "users"."id" = "posts"."owner_id" WHERE "users"."id" = $1)'
 
     expect(update_sql).to eq([expected_sql])

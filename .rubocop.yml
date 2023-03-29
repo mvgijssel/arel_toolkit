@@ -14,7 +14,7 @@ Gemspec/OrderedDependencies:
 
 Layout/LineLength:
   Enabled: true
-  Max: 100
+  Max: 120
 
 Metrics/ClassLength:
   Enabled: false

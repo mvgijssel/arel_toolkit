@@ -8,16 +8,16 @@ CONFIG['optflags'] = '-O0'
 
 pg_include_dir = ENV['POSTGRES_INCLUDE'] ||
                  (begin
-                    IO.popen('pg_config --includedir').readline.chomp
-                  rescue StandardError
-                    nil
-                  end)
+                   IO.popen('pg_config --includedir').readline.chomp
+                 rescue StandardError
+                   nil
+                 end)
 pg_lib_dir = ENV['POSTGRES_LIB'] ||
              (begin
-                IO.popen('pg_config --libdir').readline.chomp
-              rescue StandardError
-                nil
-              end)
+               IO.popen('pg_config --libdir').readline.chomp
+             rescue StandardError
+               nil
+             end)
 
 dir_config(
   'pg',
