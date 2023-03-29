@@ -1,10 +1,5 @@
 version: "2"
 plugins:
-  rubocop:
-    enabled: true
-    channel: rubocop-0-71
-    config:
-      file: .rubocop.yml
   bundler-audit:
     enabled: true
   fixme:

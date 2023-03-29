@@ -7,6 +7,10 @@ Gem::Specification.new do |spec|
   spec.version       = ArelToolkit::VERSION
   spec.authors       = ['maarten']
   spec.email         = ['maarten@vgijssel.nl']
+  spec.metadata      = {
+    'rubygems_mfa_required' => 'true',
+  }
+  spec.required_ruby_version = '>= 3.0.0'
 
   spec.summary       = 'Collection of tools for Arel'
   spec.description   = <<~STRING
@@ -43,6 +47,7 @@ Gem::Specification.new do |spec|
 
   # When updating also update .codeclimate.yml:5
   spec.add_development_dependency 'rubocop', '~> 1'
+  spec.add_development_dependency 'rubocop-rails', '~> 2'
   spec.add_development_dependency 'guard', '~> 2.15'
   spec.add_development_dependency 'guard-rspec', '~> 4.7'
   spec.add_development_dependency 'guard-rubocop', '~> 1.5.0'
