@@ -1,5 +1,5 @@
-appraise 'active_record_6_1_6_1' do
-  gem 'activerecord', '= 6.1.6.1'
+appraise 'active_record_6_1_6_3' do
+  gem 'activerecord', '= 6.1.6.3'
 end
 
 appraise 'active_record_6_1_7' do

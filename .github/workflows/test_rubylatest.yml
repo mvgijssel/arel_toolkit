@@ -1,0 +1,40 @@
+name: Ruby 3.2 Tests
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+
+jobs:
+  rspec:
+    name: RSpec
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        image: postgres:13.4
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: arel_toolkit_test
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+        bundler: default
+        ruby-version: '3.2'
+    - run: bundle exec appraisal install
+    - name: Compile extension
+      run: |
+        bundle exec rake clean
+        bundle exec rake compile
+    - name: RSpec
+      run: |
+        bundle exec rspec --force-color

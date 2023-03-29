@@ -1,4 +1,4 @@
-name: Test
+name: Test Ruby 3
 on:
   push:
     branches: 
@@ -8,7 +8,7 @@ on:
 jobs:
   rspec:
     name: RSpec
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       postgres:
         options: >-
