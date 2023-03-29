@@ -1,5 +1,4 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Attributes
@@ -44,4 +43,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

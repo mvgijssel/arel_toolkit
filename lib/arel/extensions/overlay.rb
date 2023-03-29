@@ -1,15 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
-# rubocop:disable Metrics/AbcSize
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
     class Overlay < Arel::Nodes::Node
-      attr_reader :string
-      attr_reader :substring
-      attr_reader :start
-      attr_reader :length
+      attr_reader :string, :substring, :start, :length
 
       def initialize(string, substring, start, length = nil)
         @string = string
@@ -49,5 +44,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName
-# rubocop:enable Metrics/AbcSize

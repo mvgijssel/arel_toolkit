@@ -1,15 +1,11 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/sql-delete.html
     class DeleteStatement
       module DeleteStatementExtension
-        attr_accessor :using
-        attr_accessor :with
-        attr_accessor :returning
-        attr_accessor :orders
+        attr_accessor :using, :with, :returning, :orders
 
         def initialize(relation = nil, wheres = [])
           super
@@ -75,4 +71,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

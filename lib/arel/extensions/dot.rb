@@ -1,5 +1,3 @@
-# rubocop:disable Naming/UncommunicativeMethodParamName
-
 module Arel
   module Visitors
     class Dot
@@ -7,5 +5,3 @@ module Arel
     end
   end
 end
-
-# rubocop:enable Naming/UncommunicativeMethodParamName

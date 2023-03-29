@@ -1,8 +1,7 @@
 module Arel
   module Middleware
     class Column
-      attr_reader :name
-      attr_reader :metadata
+      attr_reader :name, :metadata
 
       def initialize(name, metadata)
         @name = name
@@ -59,20 +58,18 @@ module Arel
 
       def hash_rows
         @hash_rows ||=
-          begin
-            rows.map do |row|
-              hash = {}
+          rows.map do |row|
+            hash = {}
 
-              index = 0
-              length = columns.length
+            index = 0
+            length = columns.length
 
-              while index < length
-                hash[columns[index]] = row[index]
-                index += 1
-              end
-
-              hash
+            while index < length
+              hash[columns[index]] = row[index]
+              index += 1
             end
+
+            hash
           end
       end
 

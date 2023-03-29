@@ -1,14 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.5/sql-insert.html
     class Conflict < Arel::Nodes::Node
-      attr_accessor :action
-      attr_accessor :infer
-      attr_accessor :values
-      attr_accessor :wheres
+      attr_accessor :action, :infer, :values, :wheres
     end
   end
 
@@ -53,4 +49,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

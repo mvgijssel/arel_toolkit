@@ -1,12 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 # rubocop:disable Metrics/AbcSize
 
 module Arel
   module Nodes
     class SelectCore < Arel::Nodes::Node
-      attr_accessor :into
-      attr_accessor :top
+      attr_accessor :into, :top
 
       private
 
@@ -70,4 +68,3 @@ end
 
 # rubocop:enable Metrics/AbcSize
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

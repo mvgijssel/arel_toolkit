@@ -4,9 +4,7 @@ require_relative './cache_accessor'
 module Arel
   module Middleware
     class Chain
-      attr_reader :executing_middleware_depth
-      attr_reader :executor
-      attr_reader :cache
+      attr_reader :executing_middleware_depth, :executor, :cache
 
       MAX_RECURSION_DEPTH = 10
 
@@ -113,8 +111,7 @@ module Arel
 
       protected
 
-      attr_reader :internal_middleware
-      attr_reader :internal_context
+      attr_reader :internal_middleware, :internal_context
 
       private
 

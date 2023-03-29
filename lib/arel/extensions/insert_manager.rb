@@ -1,5 +1,4 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   class InsertManager < Arel::TreeManager
@@ -18,4 +17,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

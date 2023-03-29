@@ -4,8 +4,7 @@ module Arel
       PG_CATALOG = 'pg_catalog'.freeze
       DEFAULT_SCHEMA_PRIORITY = ['public', PG_CATALOG].freeze
 
-      attr_reader :object_mapping
-      attr_reader :schema_priority
+      attr_reader :object_mapping, :schema_priority
 
       def initialize(
         schema_priority = DEFAULT_SCHEMA_PRIORITY,

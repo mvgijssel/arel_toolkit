@@ -12,9 +12,7 @@ module Arel
       PG_CATALOG = 'pg_catalog'.freeze
       MIN_MAX_EXPR = 'MinMaxExpr'.freeze
 
-      attr_reader :object
-      attr_reader :binds
-      attr_reader :sql
+      attr_reader :object, :binds, :sql
 
       def accept(sql, binds = [])
         tree = PgQuery.parse(sql).tree
@@ -664,12 +662,8 @@ module Arel
           boom "Unknown distinct clause `#{attribute.distinct_clause}`"
         end
 
-        if attribute.limit_count
-          select_statement.limit = ::Arel::Nodes::Limit.new visit(attribute.limit_count)
-        end
-        if attribute.limit_offset
-          select_statement.offset = ::Arel::Nodes::Offset.new visit(attribute.limit_offset)
-        end
+        select_statement.limit = ::Arel::Nodes::Limit.new visit(attribute.limit_count) if attribute.limit_count
+        select_statement.offset = ::Arel::Nodes::Offset.new visit(attribute.limit_offset) if attribute.limit_offset
         select_statement.orders = visit(attribute.sort_clause.to_a)
         select_statement.with = visit(attribute.with_clause) if attribute.with_clause
         select_statement.lock = visit(attribute.locking_clause) if attribute.locking_clause.present?
@@ -829,9 +823,7 @@ module Arel
 
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/40' if attribute.typemod != -1
         boom 'https://github.com/mvgijssel/arel_toolkit/issues/41' if names.length > 1
-        if array_bounds != [] && array_bounds != [-1]
-          boom 'https://github.com/mvgijssel/arel_toolkit/issues/86'
-        end
+        boom 'https://github.com/mvgijssel/arel_toolkit/issues/86' if array_bounds != [] && array_bounds != [-1]
 
         type_name = names.first
         type_name = case type_name
@@ -925,7 +917,7 @@ module Arel
           Arel::Nodes::Addition.new(left, right)
         when '-'
           if left.nil?
-            Arel::Nodes::UnaryOperation.new(:'-', right)
+            Arel::Nodes::UnaryOperation.new(:-, right)
           else
             Arel::Nodes::Subtraction.new(left, right)
           end

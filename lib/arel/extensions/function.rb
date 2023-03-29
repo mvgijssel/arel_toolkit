@@ -1,5 +1,3 @@
-# rubocop:disable Naming/UncommunicativeMethodParamName
-
 module Arel
   module Nodes
     # Postgres: https://www.postgresql.org/docs/9.1/functions-comparison.html
@@ -7,9 +5,7 @@ module Arel
       module FunctionExtension
         # postgres only: https://www.postgresql.org/docs/9.5/functions-aggregate.html
         attr_accessor :orders
-        attr_accessor :filter
-        attr_accessor :within_group
-        attr_accessor :variardic
+        attr_accessor :filter, :within_group, :variardic
         # postgres only: https://www.postgresql.org/docs/10/ddl-schemas.html
         attr_accessor :schema_name
 
@@ -94,5 +90,3 @@ module Arel
     end
   end
 end
-
-# rubocop:enable Naming/UncommunicativeMethodParamName

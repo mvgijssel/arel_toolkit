@@ -4,7 +4,7 @@ AllCops:
     - 'gemfiles/arel_gems.gemfile'
     - 'gemfiles/default.gemfile'
     - 'vendor/bundle/**/*'
-
+  SuggestExtensions: false
 
 Bundler/OrderedGems:
   Enabled: false

@@ -1,5 +1,4 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
@@ -11,10 +10,7 @@ module Arel
                         end
 
     class Overlaps < inheritance_class
-      attr_reader :start1
-      attr_reader :end1
-      attr_reader :start2
-      attr_reader :end2
+      attr_reader :start1, :end1, :start2, :end2
 
       def initialize(start1, end1, start2, end2)
         @start1 = start1
@@ -52,4 +48,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

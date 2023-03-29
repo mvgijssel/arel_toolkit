@@ -1,5 +1,4 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
@@ -7,8 +6,7 @@ module Arel
       module UpdateStatementExtension
         # https://www.postgresql.org/docs/10/sql-update.html
         attr_accessor :with
-        attr_accessor :froms
-        attr_accessor :returning
+        attr_accessor :froms, :returning
 
         def initialize
           super
@@ -71,4 +69,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

@@ -1,6 +1,5 @@
 module RSpec
   module Matchers
-    # rubocop:disable Metrics/AbcSize
     def self.different_arel_nodes(actual, expected, similar)
       actual_array = Arel.enhance(actual).each.to_a
       expected_array = Arel.enhance(expected).each.to_a
@@ -18,11 +17,10 @@ module RSpec
         when Integer
           next false
         else
-          similar ^ (expected_value.object.object_id == actual_value.object.object_id)
+          similar ^ (expected_value.object.equal?(actual_value.object))
         end
       end
     end
-    # rubocop:enable Metrics/AbcSize
   end
 end
 

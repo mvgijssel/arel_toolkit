@@ -1,14 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.3/sql-set.html
     class VariableSet < Arel::Nodes::Node
-      attr_reader :type
-      attr_reader :args
-      attr_reader :name
-      attr_reader :local
+      attr_reader :type, :args, :name, :local
 
       def initialize(type, args, name, local)
         @type = type
@@ -52,4 +48,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

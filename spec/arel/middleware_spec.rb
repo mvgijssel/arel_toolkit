@@ -378,7 +378,6 @@ describe 'Arel.middleware' do
       Post.create! title: 't'
     end
 
-    # rubocop:disable Metrics/LineLength
     expect(before_sql).to eq [
       'SAVEPOINT active_record_1',
       'INSERT INTO "posts" ("title", "created_at", "updated_at") VALUES ($1, $2, $3) RETURNING "id"',
@@ -389,7 +388,6 @@ describe 'Arel.middleware' do
       'INSERT INTO "posts" ("title", "created_at", "updated_at") VALUES ($1, $2, $3) RETURNING "id"',
       'RELEASE SAVEPOINT "active_record_1"',
     ]
-    # rubocop:enable Metrics/LineLength
   end
 
   it 'has the same SQL before and next_middleware middleware for DELETE' do

@@ -1,7 +1,4 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
-# rubocop:disable Metrics/CyclomaticComplexity
-# rubocop:disable Metrics/AbcSize
 
 module Arel
   module Nodes
@@ -40,6 +37,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName
-# rubocop:enable Metrics/CyclomaticComplexity
-# rubocop:enable Metrics/AbcSize

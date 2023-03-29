@@ -1,15 +1,11 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     class InsertStatement
       # https://www.postgresql.org/docs/9.5/sql-insert.html
       module InsertStatementExtension
-        attr_accessor :with
-        attr_accessor :conflict
-        attr_accessor :override
-        attr_accessor :returning
+        attr_accessor :with, :conflict, :override, :returning
 
         def initialize
           super
@@ -92,4 +88,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

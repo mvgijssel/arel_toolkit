@@ -1,8 +1,7 @@
 module Arel
   module Enhance
     class PathNode
-      attr_reader :method
-      attr_reader :value
+      attr_reader :method, :value
 
       def initialize(method, value)
         @method = method

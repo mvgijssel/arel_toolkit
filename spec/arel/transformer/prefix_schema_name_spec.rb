@@ -115,7 +115,7 @@ describe Arel::Transformer::PrefixSchemaName do
       arel = Arel.sql_to_arel(sql)
       prefixed_sql = transformer.call(arel.first, next_middleware).to_sql
 
-      expect(prefixed_sql).to eq %(SELECT 'public.\"posts\"'::regclass)
+      expect(prefixed_sql).to eq %(SELECT 'public."posts"'::regclass)
     end
 
     it 'does not update a string which already has a schema' do

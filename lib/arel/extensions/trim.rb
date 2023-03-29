@@ -1,13 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/10/functions-string.html
     class Trim < Arel::Nodes::Node
-      attr_reader :type
-      attr_reader :substring
-      attr_reader :string
+      attr_reader :type, :substring, :string
 
       def initialize(type, substring, string)
         @type = type
@@ -41,4 +38,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

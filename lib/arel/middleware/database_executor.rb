@@ -1,11 +1,9 @@
 module Arel
   module Middleware
     class DatabaseExecutor
-      attr_reader :middleware
+      attr_reader :middleware, :context, :final_block
 
       attr_accessor :index
-      attr_reader :context
-      attr_reader :final_block
 
       def initialize(middleware)
         @middleware = middleware

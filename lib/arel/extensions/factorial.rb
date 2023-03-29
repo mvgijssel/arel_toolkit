@@ -1,12 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.4/functions-math.html
     class Factorial < Arel::Nodes::Node
-      attr_accessor :prefix
-      attr_accessor :expr
+      attr_accessor :prefix, :expr
 
       def initialize(expr, prefix)
         @expr = expr
@@ -37,5 +35,4 @@ module Arel
   end
 end
 
-# rubocop:enable Naming/UncommunicativeMethodParamName
 # rubocop:enable Naming/MethodName

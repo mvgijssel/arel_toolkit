@@ -1,12 +1,10 @@
 # rubocop:disable Naming/MethodName
-# rubocop:disable Naming/UncommunicativeMethodParamName
 
 module Arel
   module Nodes
     # https://www.postgresql.org/docs/9.2/functions-datetime.html#FUNCTIONS-DATETIME-ZONECONVERT
     class AtTimeZone < Arel::Nodes::Node
-      attr_reader :timezone
-      attr_reader :expr
+      attr_reader :timezone, :expr
 
       def initialize(expr, timezone)
         @expr = expr
@@ -34,4 +32,3 @@ module Arel
 end
 
 # rubocop:enable Naming/MethodName
-# rubocop:enable Naming/UncommunicativeMethodParamName

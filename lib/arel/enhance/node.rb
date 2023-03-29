@@ -1,10 +1,7 @@
 module Arel
   module Enhance
     class Node
-      attr_reader :local_path
-      attr_reader :object
-      attr_reader :parent
-      attr_reader :root_node
+      attr_reader :local_path, :object, :parent, :root_node
 
       def initialize(object)
         @object = object
@@ -126,9 +123,7 @@ module Arel
 
       protected
 
-      attr_writer :local_path
-      attr_writer :parent
-      attr_writer :root_node
+      attr_writer :local_path, :parent, :root_node
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
