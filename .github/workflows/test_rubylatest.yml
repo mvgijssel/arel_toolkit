@@ -38,3 +38,6 @@ jobs:
     - name: RSpec
       run: |
         bundle exec rspec --force-color
+    - name: Lint
+      run: |
+        bundle exec rubocop
