@@ -24,7 +24,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true

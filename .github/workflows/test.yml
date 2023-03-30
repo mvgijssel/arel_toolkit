@@ -24,7 +24,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_HOST_AUTH_METHOD: trust
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     # Based on https://github.com/paambaati/codeclimate-action/blob/0f8af43fca84b500025ca48b581bcff933244252/src/main.ts#L39-L57
     - name: Set env for push event
