@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.10](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.10) (2023-04)
+
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.9...v0.4.10)
+
+- Update of many dependencies
+- Increase minimum required ruby version from 2.7 to 3.0
+- Housekeeping and preparation for activerecord 7 migration
+
 ## [v0.4.9](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.9) (2023-01-16)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.8...v0.4.9)

@@ -1,8 +1,7 @@
 AllCops:
   Exclude:
-    - 'gemfiles/active_record_6_1_7.gemfile'
-    - 'gemfiles/arel_gems.gemfile'
-    - 'gemfiles/default.gemfile'
+    - 'gemfiles/*.gemfile'
+    - 'gemfiles/*.lock'
     - 'vendor/bundle/**/*'
   SuggestExtensions: false
 
