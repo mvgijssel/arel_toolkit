@@ -3,6 +3,7 @@ AllCops:
     - 'gemfiles/*.gemfile'
     - 'gemfiles/*.lock'
     - 'vendor/bundle/**/*'
+    - 'tmp/**/*'
   SuggestExtensions: false
 
 Bundler/OrderedGems:
