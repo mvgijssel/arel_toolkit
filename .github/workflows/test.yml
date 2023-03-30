@@ -64,7 +64,7 @@ jobs:
     - name: Appraisal RSpec
       run: |
         bundle exec appraisal rspec --force-color
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: rspec-coverage
         path: ./coverage
