@@ -1,6 +1,14 @@
 # Changelog
 
-## [v0.5.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.10) (2023-04)
+## [v0.6.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.6.0) (2023-04)
+
+- Tidy up local development stack
+  - Ruby 3.2.x in docker container
+  - Postgres 13.10
+  - Use YJIT in local development
+- Support both activerecord 6.1 and 7.0
+
+## [v0.5.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.5.0) (2023-04)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.9...v0.5.0)
 

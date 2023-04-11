@@ -10,12 +10,12 @@ asdf install
 asdf reshim ruby
 
 # Need specific version of bundler for this ruby version
-gem install bundler -v 2.4.10
+gem install bundler -v 2.4.11
 
 # Make sure "bundle" is available
 asdf reshim ruby
 
-EXPECTED_VERSION="Bundler version 2.4.10"
+EXPECTED_VERSION="Bundler version 2.4.11"
 BUNDLER_VERSION=$(bundle --version)
 
 if [[ "$BUNDLER_VERSION" != "$EXPECTED_VERSION" ]]; then
