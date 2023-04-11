@@ -7,8 +7,8 @@ module Arel
       module InsertStatementExtension
         attr_accessor :with, :conflict, :override, :returning
 
-        def initialize
-          super
+        def initialize(relation = nil)
+          super(relation)
 
           @returning = []
         end

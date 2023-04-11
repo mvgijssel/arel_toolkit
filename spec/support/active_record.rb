@@ -6,25 +6,25 @@ ActiveRecord::Base.establish_connection(
   password: 'postgres',
 )
 
-ActiveRecord::Schema.define do
-  self.verbose = false
-
-  create_table :users, force: :cascade do |t|
-    t.string :username
-
-    t.timestamps
-  end
-
-  create_table :posts, force: :cascade do |t|
-    t.string :title
-    t.text :content
-    t.boolean :public
-    t.integer :owner_id
-    t.json :additional_data
-
-    t.timestamps
-  end
-end
+#ActiveRecord::Schema.define do
+#  self.verbose = false
+#
+#  create_table :users, force: :cascade do |t|
+#    t.string :username
+#
+#    t.timestamps
+#  end
+#
+#  create_table :posts, force: :cascade do |t|
+#    t.string :title
+#    t.text :content
+#    t.boolean :public
+#    t.integer :owner_id
+#    t.json :additional_data
+#
+#    t.timestamps
+#  end
+#end
 
 ActiveRecord::Base.connection.execute(
   'CREATE OR REPLACE VIEW public_posts AS SELECT * FROM posts WHERE public = true',
