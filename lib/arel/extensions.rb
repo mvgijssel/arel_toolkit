@@ -110,8 +110,8 @@ require 'arel/extensions/prepare'
 require 'arel/extensions/dealocate'
 require 'arel/extensions/active_record_type_caster_map'
 require 'arel/extensions/active_record_type_caster_connection'
-require 'arel/extensions/active_record_relation_query_attribute'
-require 'arel/extensions/active_model_attribute_with_cast_value'
+require 'arel/extensions/active_record_relation_query_attribute' #
+require 'arel/extensions/active_model_attribute_with_cast_value' #
 require 'arel/extensions/exists'
 require 'arel/extensions/bind_param'
 require 'arel/extensions/node'

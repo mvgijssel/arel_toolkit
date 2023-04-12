@@ -9,11 +9,11 @@ module Arel
       end
     end
 
-    class ToSql
-      def visit_ActiveModel_Attribute_WithCastValue(_o, collector)
-        collector
-      end
-    end
+    # class ToSql
+    #   def visit_ActiveModel_Attribute_WithCastValue(_o, collector)
+    #     collector
+    #   end
+    # end
   end
 end
 

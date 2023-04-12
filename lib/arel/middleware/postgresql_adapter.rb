@@ -39,7 +39,7 @@ module Arel
       end
 
       def exec_no_cache(sql, name, binds, async: false)
-        # binding.pry if sql =~ /ORDER BY \"posts\"/
+        # binding.pry
         Arel::Middleware.current_chain.execute(sql, binds) do |processed_sql, processed_binds|
           Arel::Middleware::Result.create(
             data: super(processed_sql, name, processed_binds, async: async),
@@ -49,10 +49,10 @@ module Arel
         end
       end
 
-      def exec_cache(sql, name, binds)
+      def exec_cache(sql, name, binds, async: false)
         Arel::Middleware.current_chain.execute(sql, binds) do |processed_sql, processed_binds|
           Arel::Middleware::Result.create(
-            data: super(processed_sql, name, processed_binds),
+            data: super(processed_sql, name, processed_binds, async: async),
             from: Arel::Middleware::PGResult,
             to: Arel::Middleware::PGResult,
           )
