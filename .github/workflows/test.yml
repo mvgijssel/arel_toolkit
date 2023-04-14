@@ -38,7 +38,7 @@ jobs:
       with:
         bundler-cache: true
         bundler: default
-        ruby-version: '${{ matrix.ruby-version }}''
+        ruby-version: ${{ matrix.ruby-version }}
     - name: Install
       run: |
         bundle install -j $(nproc)

@@ -9,11 +9,11 @@ module Arel
       end
     end
 
-    #class ToSql
+    # class ToSql
     #  def visit_ActiveRecord_Relation_QueryAttribute(_o, collector)
     #    collector
     #  end
-    #end
+    # end
   end
 end
 
