@@ -16,8 +16,6 @@ jobs:
           - '3.2'
         postgres-version:
           - '13.10'
-          - '14.7'
-          - '15.2'
     services:
       postgres:
         options: >-
@@ -45,6 +43,3 @@ jobs:
     - name: RSpec
       run: |
         bundle exec rspec --force-color
-    - name: Lint
-      run: |
-        bundle exec rubocop

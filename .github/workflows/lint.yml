@@ -1,0 +1,28 @@
+name: Lint
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+
+jobs:
+  rspec:
+    name: RSpec
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        ruby-version:
+          - '3.2'
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+        bundler: default
+        ruby-version: ${{ matrix.ruby-version }}
+    - name: Install
+      run: |
+        bundle install -j $(nproc)
+    - name: Lint
+      run: |
+        bundle exec rubocop
