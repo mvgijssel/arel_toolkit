@@ -24,6 +24,5 @@ if [[ "$BUNDLER_VERSION" != "$EXPECTED_VERSION" ]]; then
 fi
 
 bundle install
-bundle exec appraisal install
 bundle exec rake clean
 bundle exec rake compile

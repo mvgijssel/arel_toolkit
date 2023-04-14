@@ -147,7 +147,6 @@ This gem aims to have full support for PostgreSQL's SQL. In order to do so, it n
 1. Run `bin/setup` to install dependencies.
 1. Start the postgres database `docker compose up`
 1. Run `bundle exec rspec` to run the tests
-1. Run `bundle exec appraisal rspec` to run the tests for the different gem sets
 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment. To install this gem onto your local machine, run `bundle exec rake install`.
 
@@ -156,7 +155,6 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 1. Update version in `version.rb`
 1. Create a new branch `v<<VERSION_HERE>>`
 1. Run `bundle install`
-1. Run `bundle exec appraisal install`
 1. Run `bundle exec rake changelog`
 1. Commit the changes
 1. Open a PR with name `Version <<VERSION_HERE>>` ([example](https://github.com/mvgijssel/arel_toolkit/pull/172))

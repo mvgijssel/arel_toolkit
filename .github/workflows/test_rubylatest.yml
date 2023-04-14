@@ -30,11 +30,6 @@ jobs:
         bundler-cache: true
         bundler: default
         ruby-version: '3.2'
-    - run: bundle exec appraisal install
-    - name: Compile extension
-      run: |
-        bundle exec rake clean
-        bundle exec rake compile
     - name: RSpec
       run: |
         bundle exec rspec --force-color

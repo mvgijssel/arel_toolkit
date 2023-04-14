@@ -48,11 +48,6 @@ jobs:
       with:
         bundler-cache: true
         bundler: default
-    - run: bundle exec appraisal install
-    - name: Compile extension
-      run: |
-        bundle exec rake clean
-        bundle exec rake compile
     - name: Start coverage
       run: |
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -61,9 +56,6 @@ jobs:
     - name: RSpec
       run: |
         bundle exec rspec --force-color
-    - name: Appraisal RSpec
-      run: |
-        bundle exec appraisal rspec --force-color
     - uses: actions/upload-artifact@v3
       with:
         name: rspec-coverage
