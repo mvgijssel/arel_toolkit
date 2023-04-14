@@ -118,6 +118,26 @@
                     <Node(Array) [0, 'ast', 'cores', 0, 'windows']
                       parent = Node(Arel::Nodes::SelectCore)
                       value = nil>
+                  groups =
+                    <Node(Array) [0, 'ast', 'cores', 0, 'groups']
+                      parent = Node(Arel::Nodes::SelectCore)
+                      value = nil>
+                  comment =
+                    <Node(NilClass) [0, 'ast', 'cores', 0, 'comment']
+                      parent = Node(Arel::Nodes::SelectCore)
+                      value = nil>
+                  havings =
+                    <Node(Array) [0, 'ast', 'cores', 0, 'havings']
+                      parent = Node(Arel::Nodes::SelectCore)
+                      value = nil>
+                  set_quantifier =
+                    <Node(NilClass) [0, 'ast', 'cores', 0, 'set_quantifier']
+                      parent = Node(Arel::Nodes::SelectCore)
+                      value = nil>
+                  optimizer_hints =
+                    <Node(NilClass) [0, 'ast', 'cores', 0, 'optimizer_hints']
+                      parent = Node(Arel::Nodes::SelectCore)
+                      value = nil>
                   into =
                     <Node(NilClass) [0, 'ast', 'cores', 0, 'into']
                       parent = Node(Arel::Nodes::SelectCore)

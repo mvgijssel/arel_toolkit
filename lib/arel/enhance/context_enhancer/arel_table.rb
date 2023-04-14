@@ -90,6 +90,10 @@ module Arel
                 node.parent.parent.parent.object.is_a?(Arel::Nodes::With)
             context[:alias] = true
 
+          # TODO: Using Arel::Table as an "alias" for WITH <table> AS (SELECT 1) SELECT 1
+          elsif parent_object.is_a?(Arel::Nodes::With)
+            context[:alias] = true
+
           # Using Arel::Table as an "alias" for WITH RECURSIVE <table> AS (SELECT 1) SELECT 1
           elsif parent_object.is_a?(Arel::Nodes::As) &&
                 node.parent.parent.parent.object.is_a?(Arel::Nodes::WithRecursive)
@@ -100,6 +104,7 @@ module Arel
             context[:alias] = true
 
           else
+            # binding.pry
             raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"
           end
         end
