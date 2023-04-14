@@ -11,9 +11,7 @@ module Arel
 
     class ToSql
       def visit_ActiveModel_Attribute_WithCastValue(o, collector)
-        #binding.pry
         visit(o.value_for_database, collector)
-        # collector
       end
     end
   end

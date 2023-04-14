@@ -70,12 +70,6 @@ module Arel
     class Dot
       module FunctionExtension
         def function(o)
-          begin # fixme
-            super
-          rescue => e
-            # binding.pry
-          end
-
           visit_edge o, 'orders'
           visit_edge o, 'filter'
           visit_edge o, 'within_group'

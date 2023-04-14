@@ -104,7 +104,8 @@ module Arel
             context[:alias] = true
 
           else
-            # binding.pry
+            # You can "binding.pry" here to debug why this might happen if you
+            # run into errors whilst upgrading
             raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"
           end
         end

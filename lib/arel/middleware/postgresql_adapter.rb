@@ -39,7 +39,6 @@ module Arel
       end
 
       def exec_no_cache(sql, name, binds, async: false)
-        # binding.pry
         Arel::Middleware.current_chain.execute(sql, binds) do |processed_sql, processed_binds|
           Arel::Middleware::Result.create(
             data: super(processed_sql, name, processed_binds, async: async),
