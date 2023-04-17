@@ -47,3 +47,25 @@ jobs:
     - name: RSpec
       run: |
         bundle exec rspec --force-color
+
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        ruby-version:
+          - '3.2'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          bundler: default
+          ruby-version: ${{ matrix.ruby-version }}
+      - name: Install
+        run: |
+          bundle install -j $(nproc)
+      - name: Lint
+        run: |
+          bundle exec rubocop
