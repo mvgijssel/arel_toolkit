@@ -1,29 +1,33 @@
 # Changelog
 
-## [v0.6.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.6.0) (2023-04)
+## [v0.6.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.6.0) (2023-04-17)
 
-- Tidy up local development stack
-  - Ruby 3.2.x in docker container
-  - Postgres 13.10
-  - Use YJIT in local development
-  - Bundler patch version .11
-  - Removes appraisals
-- CI: Much better coverage
-  - Tests ruby 3.2 as well
-  - Upgrade to postgres 13.10 from 13.04
-  - Re-organize test-suite a bit
-- Support activerecord 7
-  - Drops support for activerecord 6, 5
-- Upgrade nokogiri to mitigate libxml CVEs
-- Version 0.6
+[Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.5.0...v0.6.0)
 
-## [v0.5.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.5.0) (2023-04)
+**Implemented enhancements:**
+
+- Bump nokogiri from 1.13.10 to 1.14.3 [\#211](https://github.com/mvgijssel/arel_toolkit/pull/211) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+**Fixed bugs:**
+
+- Make sure the appraisal gemfiles are up-to-date [\#118](https://github.com/mvgijssel/arel_toolkit/issues/118)
+
+**Closed issues:**
+
+- ActiveRecord 7 support [\#212](https://github.com/mvgijssel/arel_toolkit/issues/212)
+
+## [v0.5.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.5.0) (2023-03-30)
 
 [Full Changelog](https://github.com/mvgijssel/arel_toolkit/compare/v0.4.9...v0.5.0)
 
-- BREAKING: Increase minimum required ruby version from 2.7 to 3.0
-- Update of many dependencies
-- Housekeeping and preparation for activerecord 7 migration
+**Implemented enhancements:**
+
+- Use GitHub actions instead of TravisCI [\#137](https://github.com/mvgijssel/arel_toolkit/issues/137)
+- Bump activesupport from 6.1.7 to 6.1.7.3 [\#208](https://github.com/mvgijssel/arel_toolkit/pull/208) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+**Fixed bugs:**
+
+- Make sure the appraisal gemfiles are up-to-date [\#118](https://github.com/mvgijssel/arel_toolkit/issues/118)
 
 ## [v0.4.9](https://github.com/mvgijssel/arel_toolkit/tree/v0.4.9) (2023-01-16)
 
