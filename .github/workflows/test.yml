@@ -1,4 +1,4 @@
-name: Tests
+name: Test
 on:
   push:
     branches: 
@@ -40,6 +40,10 @@ jobs:
     - name: Install
       run: |
         bundle install -j $(nproc)
+    - name: Compile extension
+      run: |
+        bundle exec rake clean
+        bundle exec rake compile
     - name: RSpec
       run: |
         bundle exec rspec --force-color
