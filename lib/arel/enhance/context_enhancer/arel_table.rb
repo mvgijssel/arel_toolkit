@@ -90,7 +90,9 @@ module Arel
                 node.parent.parent.parent.object.is_a?(Arel::Nodes::With)
             context[:alias] = true
 
-          # TODO: Using Arel::Table as an "alias" for WITH <table> AS (SELECT 1) SELECT 1
+          # Resolves errors starting with "WITH" after an upgrade to activerecord 7:
+          # WITH RECURSIVE "a" AS [...]
+          # WITH "a" AS (SELECT 1) SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c")
           elsif parent_object.is_a?(Arel::Nodes::With)
             context[:alias] = true
 
