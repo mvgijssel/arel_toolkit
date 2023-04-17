@@ -90,6 +90,12 @@ module Arel
                 node.parent.parent.parent.object.is_a?(Arel::Nodes::With)
             context[:alias] = true
 
+          # Resolves errors starting with "WITH" after an upgrade to activerecord 7:
+          # WITH RECURSIVE "a" AS [...]
+          # WITH "a" AS (SELECT 1) SELECT * FROM (WITH RECURSIVE "c" AS (SELECT 1) SELECT * FROM "c")
+          elsif parent_object.is_a?(Arel::Nodes::With)
+            context[:alias] = true
+
           # Using Arel::Table as an "alias" for WITH RECURSIVE <table> AS (SELECT 1) SELECT 1
           elsif parent_object.is_a?(Arel::Nodes::As) &&
                 node.parent.parent.parent.object.is_a?(Arel::Nodes::WithRecursive)
@@ -100,6 +106,8 @@ module Arel
             context[:alias] = true
 
           else
+            # You can "binding.pry" here to debug why this might happen if you
+            # run into errors whilst upgrading
             raise "Unknown AST location for table #{node.inspect}, #{node.root_node.to_sql}"
           end
         end

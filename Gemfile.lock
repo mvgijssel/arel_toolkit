@@ -2,31 +2,26 @@ PATH
   remote: .
   specs:
     arel_toolkit (0.5.0)
-      activerecord (>= 6.1, < 7)
+      activerecord (>= 7.0, < 8)
       pg (>= 1.1.4)
       pg_query (~> 2.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.7.3)
-      activesupport (= 6.1.7.3)
-    activerecord (6.1.7.3)
-      activemodel (= 6.1.7.3)
-      activesupport (= 6.1.7.3)
-    activesupport (6.1.7.3)
+    activemodel (7.0.4.3)
+      activesupport (= 7.0.4.3)
+    activerecord (7.0.4.3)
+      activemodel (= 7.0.4.3)
+      activesupport (= 7.0.4.3)
+    activesupport (7.0.4.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
-      zeitwerk (~> 2.3)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
     ansi (1.5.0)
-    appraisal (2.4.1)
-      bundler
-      rake
-      thor (>= 0.14.0)
     approvals (0.0.26)
       json (~> 2.0)
       nokogiri (~> 1.8)
@@ -222,13 +217,11 @@ GEM
     webrick (1.7.0)
     yard (0.9.28)
       webrick (~> 1.7.0)
-    zeitwerk (2.6.7)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  appraisal (~> 2.4.1)
   approvals (~> 0.0.24)
   arel_toolkit!
   bundler (~> 2.0)
@@ -256,4 +249,4 @@ DEPENDENCIES
   stackprof (~> 0.2)
 
 BUNDLED WITH
-   2.4.10
+   2.4.11

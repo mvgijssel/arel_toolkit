@@ -70,8 +70,6 @@ module Arel
     class Dot
       module FunctionExtension
         def function(o)
-          super
-
           visit_edge o, 'orders'
           visit_edge o, 'filter'
           visit_edge o, 'within_group'

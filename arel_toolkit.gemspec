@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.extensions    = ['ext/pg_result_init/extconf.rb']
 
-  spec.add_dependency 'activerecord', '>= 6.1', '< 7'
+  spec.add_dependency 'activerecord', '>= 7.0', '< 8'
   spec.add_dependency 'pg', '>= 1.1.4'
   spec.add_dependency 'pg_query', '~> 2.2'
 
@@ -37,7 +37,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake-compiler', '~> 1.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'approvals', '~> 0.0.24'
-  spec.add_development_dependency 'appraisal', '~> 2.4.1'
   spec.add_development_dependency 'database_cleaner', '~> 1.7.0'
   spec.add_development_dependency 'simplecov', '~> 0.16.1'
   spec.add_development_dependency 'simplecov-console', '~> 0.4.2'

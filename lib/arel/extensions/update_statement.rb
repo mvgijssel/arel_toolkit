@@ -8,8 +8,8 @@ module Arel
         attr_accessor :with
         attr_accessor :froms, :returning
 
-        def initialize
-          super
+        def initialize(relation = nil)
+          super(relation)
 
           @froms = []
           @returning = []

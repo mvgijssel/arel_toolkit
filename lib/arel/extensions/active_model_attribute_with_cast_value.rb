@@ -10,8 +10,8 @@ module Arel
     end
 
     class ToSql
-      def visit_ActiveModel_Attribute_WithCastValue(_o, collector)
-        collector
+      def visit_ActiveModel_Attribute_WithCastValue(o, collector)
+        visit(o.value_for_database, collector)
       end
     end
   end

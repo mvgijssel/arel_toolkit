@@ -136,7 +136,7 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
   it 'works for a CTE table' do
     sql = 'WITH posts AS (SELECT 1) SELECT * FROM posts'
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
-    cte_node = tree.child_at_path(['ast', 'with', 'expr', 0, 'left'])
+    cte_node = tree.child_at_path(%w[ast with left])
 
     expect(cte_node.context).to eq(range_variable: false, column_reference: false, alias: true)
   end
@@ -144,7 +144,7 @@ describe Arel::Enhance::ContextEnhancer::ArelTable do
   it 'works for a recursive CTE table' do
     sql = 'WITH RECURSIVE posts AS (SELECT 1) SELECT * FROM posts'
     tree = Arel.enhance(Arel.sql_to_arel(sql).first)
-    cte_node = tree.child_at_path(['ast', 'with', 'expr', 0, 'left'])
+    cte_node = tree.child_at_path(%w[ast with left])
 
     expect(cte_node.context).to eq(range_variable: false, column_reference: false, alias: true)
   end

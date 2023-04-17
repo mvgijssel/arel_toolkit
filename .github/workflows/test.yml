@@ -1,4 +1,4 @@
-name: Test Ruby 3
+name: Test
 on:
   push:
     branches: 
@@ -9,6 +9,13 @@ jobs:
   rspec:
     name: RSpec
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        ruby-version:
+          - '3.0'
+          - '3.2'
+        postgres-version:
+          - '13.10'
     services:
       postgres:
         options: >-
@@ -16,7 +23,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        image: postgres:13.4
+        image: postgres:${{ matrix.postgres-version }}
         ports:
           - 5432:5432
         env:
@@ -25,46 +32,40 @@ jobs:
           POSTGRES_HOST_AUTH_METHOD: trust
     steps:
     - uses: actions/checkout@v3
-
-    # Based on https://github.com/paambaati/codeclimate-action/blob/0f8af43fca84b500025ca48b581bcff933244252/src/main.ts#L39-L57
-    - name: Set env for push event
-      run: |
-        GIT_BRANCH=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///g')
-        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
-        echo "GIT_COMMIT_SHA=${{ github.sha }}" >> $GITHUB_ENV
-      if: ${{ github.event_name == 'push' }}
-    - name: Set env for pull_request event
-      run: |
-        echo "GIT_BRANCH=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
-        echo "GIT_COMMIT_SHA=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-      if: ${{ github.event_name == 'pull_request' }}
-
-    # From https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#contexts
-    - env:
-        GITHUB: ${{ toJson(github) }}
-      run: |
-        env
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
         bundler: default
-    - run: bundle exec appraisal install
+        ruby-version: ${{ matrix.ruby-version }}
+    - name: Install
+      run: |
+        bundle install -j $(nproc)
     - name: Compile extension
       run: |
         bundle exec rake clean
         bundle exec rake compile
-    - name: Start coverage
-      run: |
-        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        chmod +x ./cc-test-reporter
-        ./cc-test-reporter before-build
     - name: RSpec
       run: |
         bundle exec rspec --force-color
-    - name: Appraisal RSpec
-      run: |
-        bundle exec appraisal rspec --force-color
-    - uses: actions/upload-artifact@v3
-      with:
-        name: rspec-coverage
-        path: ./coverage
+
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        ruby-version:
+          - '3.2'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          bundler: default
+          ruby-version: ${{ matrix.ruby-version }}
+      - name: Install
+        run: |
+          bundle install -j $(nproc)
+      - name: Lint
+        run: |
+          bundle exec rubocop
