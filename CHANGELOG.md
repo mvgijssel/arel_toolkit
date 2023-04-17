@@ -6,11 +6,16 @@
   - Ruby 3.2.x in docker container
   - Postgres 13.10
   - Use YJIT in local development
-  - Delete appraisals
-- Drop support for activerecord 5.x
-- Drop support for activerecord 6.x
-- Add support for activerecord 7.0
+  - Bundler patch version .11
+  - Removes appraisals
+- CI: Much better coverage
+  - Tests ruby 3.2 as well
+  - Upgrade to postgres 13.10 from 13.04
+  - Re-organize test-suite a bit
+- Support activerecord 7
+  - Drops support for activerecord 6, 5
 - Upgrade nokogiri to mitigate libxml CVEs
+- Version 0.6
 
 ## [v0.5.0](https://github.com/mvgijssel/arel_toolkit/tree/v0.5.0) (2023-04)
 
