@@ -115,6 +115,10 @@ module Arel
 
       private
 
+      def enhance_arel(sql, binds)
+        Arel.enhance(Arel.sql_to_arel(sql, binds: binds))
+      end
+
       def execute_with_middleware(sql, binds, execute_sql)
         check_middleware_recursion(sql)
 
@@ -124,8 +128,7 @@ module Arel
           cache_accessor: cache_accessor,
         )
 
-        arel = Arel.sql_to_arel(sql, binds: binds)
-        enhanced_arel = Arel.enhance(arel)
+        enhanced_arel = enhance_arel(arel)
 
         executor.run(enhanced_arel, updated_context, execute_sql)
       end
